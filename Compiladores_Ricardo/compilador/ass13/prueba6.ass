@@ -1,0 +1,226 @@
+		 CALL START
+		 STOP
+		 ;Se ha declarado una funcion
+f0:
+		 ;Comienzo de funcion
+		 STIX
+		 PUSH     ; salvar IX en la pila
+		 STSP
+		 ADD,i 1
+		 LDIX     ; pone IX en los parametros
+		 STSP
+		 SUB,i 4
+		 LDSP
+
+		 ;Se ha declarado una variable local
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA,i 10
+		 STA [-2]
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA,i 4089
+		 STA [-3]
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA,i 4095
+		 STA [-4]
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA,i 2
+		 STA [-5]
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 49
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 48
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 61
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRINT
+		 ;Carga un operando en el acumulador
+		 LDA [-2]
+		 WRINT
+		 WRITE,i '\n'
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 56
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 35
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 55
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 55
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 55
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 49
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 35
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 61
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRINT
+		 ;Carga un operando en el acumulador
+		 LDA [-3]
+		 WRINT
+		 WRITE,i '\n'
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 49
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 54
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 35
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 70
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 70
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 70
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 35
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 61
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRINT
+		 ;Carga un operando en el acumulador
+		 LDA [-4]
+		 WRINT
+		 WRITE,i '\n'
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 50
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 35
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 48
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 48
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 49
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 48
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 35
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 61
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRINT
+		 ;Carga un operando en el acumulador
+		 LDA [-5]
+		 WRINT
+		 WRITE,i '\n'
+		 ;Fin de funcion
+		 STSP
+		 ADD,i 4
+		 LDSP
+		 POP
+		 LDIX
+		 RET
+
+START:		 CALL f0
+		 RET
+RES:		 DC 0
+TEMP:		 DC 0
+AUX:		 DC 0
+		 END
+

@@ -1,0 +1,36 @@
+        LISTA DE ERRORES CONOCIDOS
+        --------------------------
+
+A continuaci¢n se comentan los errores detectados y que han sido 
+comunicados por alumnos de cursos anteriores.
+
+Se agradecer  que si alguien detecta nuevos errores o corrige alg£n 
+error en el fuente, se lo comunique al Webmaster de la p gina de 
+Compiladores (http://www-lt.ls.fi.upm.es/compiladores).
+
+
+1. Si se genera un salto a una etiqueta que no existe, al intentar
+ensamblarlo genera un "core dumped". Es decir, que el Ass no es capaz
+de detectar que se ha producido dicho error con las etiquetas. Este 
+error puede detectarse recompilando el Ass con la opci¢n -g (del gcc)
+y utilizando el dbg. As¡ se puede ver qu‚ etiqueta genera el "core
+dumped" y corregirlo.
+
+
+2. Existe un mal funcionamiento con los direccionamientos relativos.
+El manual indica que se pueden hacer direccionamientos relativos al 
+registro ¡ndice ix, se¤alando entre corchetes el salto o una etiqueta 
+que contenga dicho salto. El error consiste en que cuando lo que se
+pone entre corchetes es una etiqueta funciona incorrectamente. 
+Por ejemplo:
+
+        LDIX,i 3
+        LDA [sp1]
+
+Este ejemplo no funciona adecuadamente. En cambio, el siguiente 
+fragmento (equivalente al anterior), s¡ que funciona bien:
+
+        LDIX sp1
+        LDA [3]
+
+

@@ -1,0 +1,607 @@
+		 CALL START
+		 STOP
+		 ;Se ha declarado una funcion
+f0:
+		 ;Comienzo de funcion
+		 STIX
+		 PUSH     ; salvar IX en la pila
+		 STSP
+		 ADD,i 2
+		 LDIX     ; pone IX en los parametros
+		 STSP
+		 SUB,i 4
+		 LDSP
+
+		 ;Se ha declarado una variable local
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA,i 1
+		 STA [-3]
+
+E1:
+		 ;Mayor o igual
+		 ;Carga un operando en el acumulador
+		 LDA [-0]
+		 ;Opera un dato con el del acumulador
+		 SUB,i 1
+		 JNM UNO0
+		 LDA,i 0
+		 J DOS0
+UNO0:		 LDA,i 1
+DOS0:		 ;Se almacena el valor asociado a un terceto
+		 STA [-4]
+
+		 ;Salto condicional JZ
+		 ;Carga un operando en el acumulador
+		 LDA  [-4]
+		 JZ E0
+
+		 ;Multiplicacion
+		 ;Carga un operando en el acumulador
+		 LDA [-0]
+		 ;Opera un dato con el del acumulador
+		 MUL [-3]
+		 ;Se almacena el valor asociado a un terceto
+		 STA [-5]
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA  [-5]
+		 STA [-3]
+
+		 ;Menos
+		 ;Carga un operando en el acumulador
+		 LDA [-0]
+		 ;Opera un dato con el del acumulador
+		 SUB,i 1
+		 ;Se almacena el valor asociado a un terceto
+		 STA [-6]
+
+		 ;Asignacion normal
+		 ;Carga un operando en el acumulador
+		 LDA  [-6]
+		 STA [-0]
+
+		 ;Salto incondicional J
+		 J E1
+
+E0:
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 83
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 117
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 102
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 99
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 116
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 111
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 114
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 105
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 108
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 115
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRINT
+		 ;Carga un operando en el acumulador
+		 LDA [-3]
+		 WRINT
+		 WRITE,i '\n'
+		 ;Fin de funcion
+		 STSP
+		 ADD,i 4
+		 LDSP
+		 POP
+		 LDIX
+		 RET
+
+		 ;Se ha declarado una funcion
+f1:
+		 ;Comienzo de funcion
+		 STIX
+		 PUSH     ; salvar IX en la pila
+		 STSP
+		 ADD,i 1
+		 LDIX     ; pone IX en los parametros
+		 STSP
+		 SUB,i 4
+		 LDSP
+
+		 ;Se ha declarado una variable local
+
+E2:
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 84
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 99
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 108
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 117
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 110
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 110
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 117
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 109
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 114
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 111
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 58
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;RDINT
+		 ININT [-2]
+
+		 ;Carga un parametro de funcion en la pila
+		 ;Carga un operando en el acumulador
+		 LDA [-2]
+		 PUSH
+
+		 ; CALL a una funcion
+		 CALL f0
+		 STSP
+		 ADD,i 1
+		 LDSP
+		 LDA RES 
+		 ;Se almacena el valor asociado a un terceto
+		 STA [-3]
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 84
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 99
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 108
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 101
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 49
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 112
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 114
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 99
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 111
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 110
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 116
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 105
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 110
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 117
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 114
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 44
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 48
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 112
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 114
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 115
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 97
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 108
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 105
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 114
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 58
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+E3:
+		 ;RDINT
+		 ININT [-2]
+
+		 ;Igual
+		 ;Carga un operando en el acumulador
+		 LDA [-2]
+		 ;Opera un dato con el del acumulador
+		 SUB,i 1
+		 JZ UNO1
+		 LDA,i 0
+		 J DOS1
+UNO1:		 LDA,i 1
+DOS1:		 ;Se almacena el valor asociado a un terceto
+		 STA [-4]
+
+		 ;Salto condicional JZ
+		 ;Carga un operando en el acumulador
+		 LDA  [-4]
+		 JZ E5
+
+		 ;Salto incondicional J
+		 J E2
+
+		 ;Salto incondicional J
+		 J E4
+
+E5:
+		 ;Igual
+		 ;Carga un operando en el acumulador
+		 LDA [-2]
+		 ;Opera un dato con el del acumulador
+		 SUB,i 0
+		 JZ UNO2
+		 LDA,i 0
+		 J DOS2
+UNO2:		 LDA,i 1
+DOS2:		 ;Se almacena el valor asociado a un terceto
+		 STA [-5]
+
+		 ;Salto condicional JZ
+		 ;Carga un operando en el acumulador
+		 LDA  [-5]
+		 JZ E6
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 65
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 100
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 105
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 111
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 115
+		 WRITE
+
+		 ;Salto incondicional J
+		 J E4
+
+E6:
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 48
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 111
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 49
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 63
+		 WRITE
+
+		 ;WRITE
+		 ;Carga un operando en el acumulador
+		 LDA,i 32
+		 WRITE
+
+		 ;Salto incondicional J
+		 J E3
+
+E4:
+		 ;Fin de funcion
+		 STSP
+		 ADD,i 4
+		 LDSP
+		 POP
+		 LDIX
+		 RET
+
+START:		 CALL f1
+		 RET
+RES:		 DC 0
+TEMP:		 DC 0
+AUX:		 DC 0
+		 END
+

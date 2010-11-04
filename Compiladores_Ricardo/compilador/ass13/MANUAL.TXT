@@ -1,0 +1,526 @@
+                     PRACTICA DE COMPILADORES                     
+
+                       ENSAMBLADOR SIMBOLICO                      
+
+                          ass versión 1.3                         
+
+
+
+
+En el  presente  documento  se  suministra  información  sobre  el 
+ensamblador  simbólico  que  se  usar   para  verificar  el   buen 
+funcionamiento del  código  generado  por  el  compilador  que  se 
+desarrolle  como  práctica  de  la  asignatura  de   Compiladores.
+Dado  que  se  trata  de  la   primera  versión  que  circula  del
+ensamblador, podría contener todavía algunos errores de diseño. En
+cualquier caso, se  ruega  hacer llegar cualquier sugerencia sobre 
+el funcionamiento y utilización  del programa a cualquiera  de los
+profesores de la asignatura de Compiladores.
+
+-----------------------------------------------------------------
+
+                       ENSAMBLADOR SIMBOLICO                      
+                         (ass versión 1.3)                        
+
+
+Estructura de la máquina virtual:
+
+
+Consta de una CPU y una memoria.
+
+La memoria se compone de sucesivas posiciones, en cada una de  las 
+cuales se puede almacenar un entero con signo de 16 bits (rango de 
+-32768 a 32767). Las direcciones de memoria son enteros de 15 bits 
+(rango  de  0  a  32767),  aunque  el  ensamblador  podrá  manejar 
+etiquetas. El código ejecutable se almacenará al principio  de  la 
+memoria, mientras que el final se reserva para una pila que  crece 
+hacia atrás, destinada a almacenar las direcciones de  retorno  de 
+llamadas.  El  tamaño  de  la  memoria  disponible  es  de   16384 
+posiciones.
+
+La CPU dispone de cinco registros:
+
+- Acumulador (Acum), capaz de almacenar enteros con  signo  de  16 
+  bits.
+
+- Contador de Operación (CO), que señala la posición de memoria de 
+  donde se extrae la siguiente instrucción a ejecutar.
+
+- Puntero de Pila (SP), que señala a la cabeza de la pila. 
+
+- Registro especial (R) para controlar resultados  de  operaciones 
+  aritméticas. Tras una división, R almacena el resto de la misma. 
+  En los demás casos contiene los 16 bits altos de  la  diferencia 
+  entre el resultado correcto y el  obtenido,  interpretados  como 
+  entero con signo de 32 bits  (R=0  significaría  que  no  se  ha 
+  producido sobrepasamiento).
+
+- Registro  de  índice  (IX)  para   facilitar   direccionamientos 
+  relativos.
+
+
+Funcionamiento del ensamblador:
+
+
+El ensamblador lee el programa fuente de un archivo  de  texto  en 
+disco, y lo  traduce  a  un  código  máquina  consistente  en  una 
+sucesión de números enteros de 16 bits que se suponen  almacenados 
+en la memoria de la máquina virtual a partir de su posición  cero. 
+A continuación dicho código es interpretado emulando su  ejecución 
+por la máquina virtual arriba descrita. Los datos  se  interpretan 
+como enteros con signo de 16 bits, y las direcciones como  enteros 
+sin signo de 15 bits (despreciendo el bit alto).
+
+La sintaxis a seguir es la siguiente:
+
+> ass [opciones] nombarch [opciones]
+
+donde "nombarch" el mombre del archivo que  contiene  el  programa 
+fuente en ensamblador, y las posibles opciones son las siguientes:
+
+/c   Emisión de código máquina: el  código  máquina  producido  se 
+     almacena en un archivo  de  nombre  "codmaq".  Al  final  del 
+     ensamblado se guarda una tabla de etiquetas en otro  archivo, 
+     llamado "tabetq".
+
+/d   Modo de depuración: la ejecución del código se realiza paso a 
+     paso, mostrando el contenido  de  los  registros  de  la  CPU 
+     virtual.
+
+El  ensamblador  es  "case  sensitive"  (distingue  mayúsculas  de 
+minúsculas), pero reconocerá las instrucciones en cualquier caso.
+
+Pasadas: El ensamblado se realizará en una sola pasada si al final 
+de la misma no quedan  etiquetas  o  expresiones  indefinidas  (se 
+utiliza  la  técnica  de  "relleno  por  retroceso",  lo  que   en 
+condiciones normales permitirá definir todas las etiquetas en  una 
+sola pasada). En caso  contrario  se  realizarán  nuevas  pasadas, 
+hasta que no se puedan definir más etiquetas o expresiones.
+
+Errores: Cuando hacen falta  varias  pasadas,  en  la  primera  se 
+muestran todos los errores que pudiera haber en el programa, salvo 
+los de etiquetas indefinidas o evaluación de expresiones,  que  se 
+dan en la última.
+
+
+Estructura de un programa:
+
+
+Un programa consta de una sucesión de líneas, y  termina  con  END 
+(no es una instrucción,  sino  una  marca  del  final  físico  del 
+programa fuente).
+
+Cada línea  tiene  los  siguientes  campos  (donde  los  corchetes 
+indican que el campo es opcional):
+
+  [ Etiqueta ':' ] [ Instrucción ] [ ';' Comentario ] Nueva_línea 
+
+donde Instrucción tiene el siguiente formato:
+
+                      Mnemónico [ Operador ]                      
+
+o bien, para las instrucciones sin operador:
+
+                             Mnemónico                            
+
+Una línea puede estar vacía, en el sentido  de  contener  sólo  un 
+código de Nueva_línea.
+
+Los comentarios empiezan con punto y coma ';' y  llegan  hasta  el 
+final de la línea. Sin embargo un punto y  coma  entre  apóstrofos 
+(';') se interpretará como definición de carácter (ver más abajo), 
+y no como principio de comentario.
+
+Una etiqueta es un identificador que empieza con una letra y sigue 
+con letras, dígitos o el carácter de subrayado '_'.
+
+
+Repertorio de instrucciones:
+
+
+Las instrucciones con operando son las que llevan Op.
+
+
+- Grupo de NOP:
+
+NOP                 Sin operación; no se hace nada.
+
+- Grupo de movimientos:
+
+LDA Op              (Op)  ->  Acum
+STA Op              (Acum)  ->  Op
+LDSP Op             (Op)  ->  SP
+STSP Op             (SP)  ->  Op
+LDR Op              (Op)  ->  R
+STR Op              (R)  ->  Op
+LDIX Op             (Op)  ->  IX
+STIX Op             (IX)  ->  Op
+
+- Grupo de operaciones aritméticas:
+
+ADD Op              (Acum) + (Op)  ->  Acum
+SUB Op              (Acum) - (Op)  ->  Acum
+MUL Op              (Acum) * (Op)  ->  Acum
+DIV Op              (Acum) / (Op)  ->  Acum
+INC Op              (Op) + 1  ->  Op
+DEC Op              (Op) - 1  ->  Op
+NEG Op              -(Op)  ->  Op
+
+Véase arriba la forma en que las operaciones  aritméticas  alteran 
+el contenido del registro R.
+
+Una división por cero produce un error de ejecución, al igual  que 
+una cuyo cociente caiga fuera del rango de entero con signo de  16 
+bits.
+
+- Grupo de operaciones lógicas:
+
+AND Op              Acum AND (Op)  ->  Acum
+
+OR Op               Acum OR (Op)  ->  Acum
+
+NOT Op              NOT (Op)  ->  Op
+
+Se toma false = 0 y true = 1. Un  operando  distinto  de  cero  se 
+tomará como "true".
+
+- Grupo de manejo de pila:
+
+PUSH Op             Apilar (Op), es decir:
+                    (SP) - 1 -> SP, (Op) -> (SP)
+
+POP Op              Desapilar Op, es decir:
+                    ((SP)) -> Op, (SP) + 1 -> SP
+
+- Grupo de saltos:
+
+J Op                Salto a la dirección Op, es decir: Op -> CO
+JZ Op               Salto a Op si (Acum) = 0
+JNZ Op              Salto a Op si (Acum) # 0
+JP Op               Salto a Op si (Acum) > 0
+JNP Op              Salto a Op si (Acum) =< 0
+JM Op               Salto a Op si (Acum) < 0
+JNM Op              Salto a Op si (Acum) >= 0
+
+- Grupo de llamadas y retornos:
+
+CALL Op        Llamada a la dirección Op:
+               (SP) - 1 -> SP, (CO) -> (SP), (Op) -> CO
+
+RET            Retorno desde la última llamada:
+               ((SP)) -> CO, (SP) + 1 -> SP
+
+STOP           Retorno al sistema operativo
+
+- Grupo de entrada-salida:
+
+INPUT Op       Cargar  en  Op  el  código   ASCII   del   carácter 
+               introducido por teclado
+
+WRITE Op       Escribir en pantalla el carácter cuyo código  ASCII 
+               viene dado por los 8 bits bajos de (Op)
+
+ININT Op       Cargar en Op un entero introducido por teclado
+
+WRINT Op       Escribir en pantalla el entero (Op)
+
+WRSTR Op       Escribir en pantalla la cadena que empieza en
+               la dirección Op, y termina con un código nulo
+               (se visualizan caracteres cuyos códigos ASCII
+               viene dados por los 8 bits bajos de cada posición)
+
+
+En todos los casos Op puede ser un número entero o una etiqueta.
+
+Advertencia: la instrucción WRSTR utiliza  el  acumulador  y,  por 
+tanto, el contenido de éste será modificado en general.
+
+
+- Modos de direccionamiento:
+
+  - Inmediato: Op se interpreta como el dato propiamente dicho. Se 
+    expresa  poniendo  ',i'  a  continuación  del  nemónico.  Ej.: 
+    LDA,it76, cargar el número  76  en  el  acumulador.
+
+  - Directo: Op se interpreta como la dirección donde se encuentra 
+    el dato, o a donde debe  efectuarse  el  salto.  Ej.:  LDA 76, 
+    cargará en el acumulador el contenido de la posición de memoria 
+    nº 76; LDA LB, cargar en el  acumulador  el  contenido  de  la 
+    posición indicada  por  la  etiqueta  LB;  J 76,  salto  a  la 
+    dirección 76.
+
+  - Indirecto: Op se interpreta como una dirección donde se  halla 
+    la dirección del dato o del  destino  del  salto.  Se  expresa 
+    poniendo Op entre paréntesis: (Op). Ej.:  LDA (76),  tomar  el 
+    contenido  de  la  posición  76  e  interpretarlo   como   una 
+    dirección, luego tomar el contenido de ésta y cargarlo  en  el 
+    acumulador. J (76), salto a  la  dirección  almacenada  en  la 
+    posición 76.
+
+  - Relativo: La dirección del dato o de destino del salto se toma 
+    igual al resultado de  sumar  el  contenido  del  registro  de 
+    índice (IX) más Op. Se expresa poniendo  Op  entre  corchetes: 
+    [Op]. Ej: LDA [76], cargar en el acumulador el contenido de la 
+    posición de memoria (IX)+76. J [76],  salta  a  la  dirección 
+    (IX)+76. STA [LB], pone el contenido  del  acumulador  en  la 
+    posición de memoria (IX)+LB.
+
+Aunque gramaticalmente admisible, provocará un error semántico  el 
+uso de direccionamiento inmediato en las instrucciones STA,  STSP, 
+STR, STIX, INC, DEC, NEG,  NOT,  POP,  INPUT,  ININT,  WRSTR,  los 
+saltos y las llamadas.
+
+Cuando se omite el operando, se toma como tal el acumulador;  ej.: 
+ADD  (sin  operando)  equivale  a  duplicar   el   contenido   del 
+acumulador; STSP significa poner el contenido del puntero de  pila 
+en  el  acumulador.  Para  omitir   el   operando   en   modo   de 
+direccionamiento indirecto, se  escriben  los  paréntesis  vacíos; 
+ej.:  Jt()  significa  saltar  a  la  dirección  expresada  en  el 
+acumulador. No se  puede  omitir  el  operando  en  los  modos  de 
+direccionamiento inmediato y relativo. Tampoco se puede omitir  el 
+operando en modo de  direccionamiento  directo  en  los  saltos  y 
+llamadas y en la instrucción WRSTR.
+
+
+- Pseudoinstrucciones:
+
+Las pseudoinstrucciones son ejecutadas por el ensamblador, no  por 
+la máquina. Son las siguientes:
+
+L: EQU Exp          Asigna a la etiqueta L el valor de Exp
+
+DC N                Define la constante N
+
+DS N                Reserva N posiciones de memoria
+                    y las llena con códigos nulos
+
+DFSTR Cd            Pone la cadena Cd en memoria,
+                    finalizándola con un código nulo
+
+END                 Señala el final del programa
+
+donde N es un entero, Exp una expresión aritmética  y  Cd  es  una 
+cadena entrecomillada.  Advertencia:  la  instrucción  DFSTR  sólo 
+sirve para definir cadenas de longitud limitada, dado que DFSTRtCd 
+debe caber en el espacio de  una  sola  línea  de  programa.  Para 
+cadenas más largas, utilícese reiteradamente la  pseudoinstrucción 
+DC.
+
+El argumento de EQU es una expresión aritmética, que puede incluir 
+enteros,  etiquetas,   los   cuatro   operadores   aritméticos   y 
+paréntesis. Como con Cd, la longitud de Exp está limitada  por  el 
+hecho de que L: EQU Exp debe entrar en longitud de una sola  línea 
+de programa.
+
+La pseudoinstrucción END no puede llevar etiqueta.
+
+
+Representación de enteros y caracteres:
+
+
+Los enteros se representan en forma decimal o hexadecimal. En este 
+último caso irán precedidos por el símbolo $, por ej.: $A4 =  164. 
+Un número expresado en base 10 podrá ir  precedido  por  un  signo 
++ ó -. El rango de valores aceptables para un número en base 10 es 
+de -32768 a 32767, y en base 16 es de $0  a  $FFFF  (el  rango  de 
+$8000 a $FFFF se corresponde con los valores  negativos  -32768  a 
+-1).
+
+Los caracteres se representarán por sus códigos ASCII. Un carácter 
+entrecomillado (con comillas simples) representa el  código  ASCII 
+de dicho carácter, por ej,: 'g' = 103.
+
+En la representación de caracteres se pueden  seguir  convenciones 
+similares a las del lenguaje C, por ej.: '\n' es  un  carácter  de 
+nueva línea, '\t' representa un tabulador, '\\' significa carácter 
+de barra invertida, etc. Así, por ej., la instrucción WRITE,it'\n' 
+servirá  para  pasar  a  nueva  línea  en   la   pantalla.   Estas 
+convenciones no rigen  para  los  caracteres  que  sean  parte  de 
+cadenas entrecomilladas; por ej.: "\n" no es un carácter de  nueva 
+línea, sino una una cadena formada por los caracteres '\\' y  'n'. 
+El  carácter  de  inicio  de  comentario  (el  punto  y  coma)  se 
+interpretará  como  carácter  ordinario  cuando   aparezca   entre 
+comillas simples (';'), o como parte de una cadena ("...;...").
+
+
+Ejemplos:
+
+
+- Posible ensamblado del siguiente programa:
+
+main()
+{
+     int k, s=0;
+
+     for (k=1; k<=100; ++k)
+     {
+          s+=k*k;
+     };
+}
+
+
+START:    LDA,i 1   ; Inicialización de k al principio del bucle
+          STA V1
+
+L1:       LDA V1    ; Se carga k en el acumulador
+          SUB,i 100
+          JNP L2    ; Test de final del bucle
+          STOP
+
+L2:       LDA V1    ; Se carga k en el acumulador
+          MUL       ; Cuadrado del acumulador
+          ADD V2    ; Se suma s
+          STA V2    ; El resultado se almacena en s
+          INC V1    ; se incrementa k
+          J L1      ; Salto al principio del bucle
+
+V1:       DC 0      ; V1 es k
+
+V2:       DC 0      ; V2 es s, inicializada a cero
+
+          END       ; Fin del programa
+
+
+- Definir un array de 100 elementos y sumarlos (sin usar IX):
+
+
+BUCLE:    LDA IND
+          SUB,i 100
+          JM SIGUE       ; Test de final del bucle
+          STOP
+
+SIGUE:    LDA IND
+          ADD AR
+          STA DIR
+          LDA SU
+          ADD (DIR)      ; Acumulación de la suma
+          STA SU         ; de los elementos
+          INC IND
+          J BUCLE
+
+IND:      DC 0           ; Indice del array inicializado a cero
+DIR:      DC 0           ; Dirección de un elemento del array
+AR:       DS 100         ; Array
+SU:       DC 0           ; Suma inicializada a 0
+
+          END            ; Fin del programa
+
+
+
+- Definir un array de 100 elementos y sumarlos (usando IX):
+
+
+START:    LDIX,i AR      ; Se carga dirección del array en IX
+
+BUCLE:    LDA IND
+          SUB,i 100
+          JM SIGUE       ; Test de final del bucle
+          STOP
+
+SIGUE:    LDA SU
+          ADD [IND]      ; Acumulación de la suma
+          STA SU         ; de los elementos
+          INC IND
+          J BUCLE
+
+IND:      DC 0           ; Indice del array inicializado a cero
+AR:       DS 100         ; Array
+SU:       DC 0           ; Suma inicializada a 0
+
+          END            ; Fin del programa
+
+
+
+- Escribir la palabra "mensaje" en pantalla (sin usar WRSTR):
+
+
+START:    LDA,i M        ; Se almacena en D la dirección
+          STA D          ; del primer carácter a visualizar
+
+BUCLE:    LDA (D)        ; Se carga el carácter en el acumulador
+          JNZ SIGUE      ; Test de final de cadena (código nulo)
+          STOP
+
+SIGUE:    WRITE          ; Se visualiza el carácter
+          INC D          ; Se pasa al siguiente carácter
+          J BUCLE
+
+D:        DC 0           ; Dirección del carácter a visualizar
+
+M:        DFSTR "mensaje"     ; Mensaje a visualizar
+
+          END            ; Final del programa
+
+
+- Escribir la palabra "mensaje" en pantalla (usando WRSTR):
+
+
+START:    WRSTR S        ; Escribir la cadena que empieza en S
+          STOP
+S:        DFSTR "mensaje"
+
+          END
+
+
+
+Gramática del lenguaje ensamblador:
+
+
+
+Programa  ->  Linea   END
+
+Linea  ->  Campo_etiqueta  Campo_instruccion  Nueva_linea
+
+Campo_etiqueta  ->  Identificador  ':'  |  l
+
+Campo_instruccion  ->    Instruccion_con_operando  Operando  |
+                         Instruccion_sin_operando  |
+                         Pseudoinstruccion  |
+                         l
+
+Instruccion_con_operando  ->  (ver repertorio de instrucciones)
+
+Instruccion_sin_operando  ->  (ver repertorio de instrucciones)
+
+Pseudoinstruccion  ->  (ver repertorio de instrucciones)
+
+Operando -> Op_inmediato | Op_directo | Op_indirecto | Op_relativo
+
+Op_inmediato  ->  ',i'  Op_directo1
+
+Op_directo1  ->  Entero  |  Identificador
+
+Op_directo  ->  Op_directo1  |  l
+
+Op_indirecto  ->  '('  Op_directo  ')'
+
+Op_relativo  ->  '['  Op_directo  ']'
+
+Entero  ->  E_decimal  |  E_hexadecimal
+
+E_decimal  ->  ['+'|'-']  digito
+
+E_hexadecimal  ->  '$'  digito_hexadecimal
+
+Caracter  ->   (un símbolo entre comillas simples, ver arriba
+               "representación de enteros y caracteres")
+
+Identificador  ->  (letra|'_')  (letra|'_'|digito)
+
+letra  ->  A | ... | Z | a | ... | z
+
+digito  ->  0   ..  |  9
+
+digito_hexadecimal  ->  digito | A | ... | F | a | ... | f
+
+
+
+- Limitaciones (máximos valores de...):
+
+
+Longitud de un identificador: 24 caracteres
+
+Longitud de una línea de programa: 80 caracteres
+
+Número de etiquetas: 256
+

@@ -1,0 +1,22 @@
+===========================
+Para ejecutar el compilador
+===========================
+
+(Se recomienda copiar el compilador entero a disco duro antes de
+ejecutarlo para que funcione correctamente)
+
+1. Primero hace falta compilar el ensamblador. Vaya a la carpeta
+`ass13' y ejecute:
+
+	make
+
+2. Para poder ejecutar el compilador hace falta tener instalado
+una versión reciente de Python (2.5 ó 2.6) y ejecutarlo desde
+Linux, Mac OSX u otra versión de UNIX.
+
+3. Vaya al directorio `codigo' y ejecute el siguiente mandato
+para lanzar el compilador. Se generará un fichero `.ens' en el
+mismo directorio en el que se encuentre el fichero de código
+BASIC-R:
+
+	python compilador.py <fichero_fuente>
