@@ -1,11 +1,24 @@
 //Gramatica a sucio.
-S = /C | +M | -N | =I | &L
-C = /X | = | *X
-X = *O | /B |
+S = /C | +M | -N | =I | &L | : | . | (0..9)D | "W | ( | ) | letra(MAy_Min+_)A
+C = /B | = | *U |
 -- comentarios
-O = letraO | *U
 U = letraU | *F
-F = letraU | /S	-- fin comentatio /*
-B = letraB | /W
-W = letraB | finlineaS	--fincomentario //
-
+F = letraU | /S	-- fin comentatio /* no se envia Token
+B = letraB | finlineaS -- fin comentario // no se envia Token
+-- Operadores
+M = del | = | +Y	-- Operador +=, +
+Y = del		-- Operador ++
+N = del | = | -T	-- Operador -=, -
+T = del		-- Operador --
+I = del | =R	-- Operador =
+R = del		-- Operador ==
+-- Operador lógico
+L = &E
+E = del		-- Operador &&
+-- Entero
+D = (0..9)D | del	-- Enteros
+-- Octal y hexadeciaml por aqu
+-- Octal y hexadeciaml por aquíí
+W = letraW | " -- Cadena, no se tiene en cuenta los escapes i\
+-- Identificador
+A = letra(Min_May_Digito+_)A 	-- Identificador
