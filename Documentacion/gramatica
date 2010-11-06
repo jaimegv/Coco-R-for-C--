@@ -1,0 +1,11 @@
+//Gramatica a sucio.
+S = /C | +M | -N | =I | &L
+C = /X | = | *X
+X = *O | /B |
+-- comentarios
+O = letraO | *U
+U = letraU | *F
+F = letraU | /S	-- fin comentatio /*
+B = letraB | /W
+W = letraB | finlineaS	--fincomentario //
+
