@@ -22,3 +22,4 @@ D = (0..9)D | del	-- Enteros
 W = letraW | " -- Cadena, no se tiene en cuenta los escapes i\
 -- Identificador
 A = letra(Min_May_Digito+_)A 	-- Identificador
+
