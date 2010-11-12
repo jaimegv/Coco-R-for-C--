@@ -26,7 +26,7 @@ import antlr.LexerSharedInputState;
 import antlr.collections.impl.BitSet;
 import antlr.SemanticException;
 
-public class analizador extends antlr.CharScanner implements LeLiLexerVocabTokenTypes, TokenStream
+public class analizador extends antlr.CharScanner implements CompLexerVocabTokenTypes, TokenStream
  {
 public analizador(InputStream in) {
 	this(new ByteBuffer(in));
@@ -57,6 +57,12 @@ tryAgain:
 				case '<':
 				{
 					mOP_ASIG(true);
+					theRetToken=_returnToken;
+					break;
+				}
+				case '=':
+				{
+					mOP_IGUAL(true);
 					theRetToken=_returnToken;
 					break;
 				}
@@ -98,6 +104,19 @@ tryAgain:
 		int _saveIndex;
 		
 		match('<');
+		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
+			_token = makeToken(_ttype);
+			_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
+		}
+		_returnToken = _token;
+	}
+	
+	public final void mOP_IGUAL(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+		int _ttype; Token _token=null; int _begin=text.length();
+		_ttype = OP_IGUAL;
+		int _saveIndex;
+		
+		match('=');
 		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
 			_token = makeToken(_ttype);
 			_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));

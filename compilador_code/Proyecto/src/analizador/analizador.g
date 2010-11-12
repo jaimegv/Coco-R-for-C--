@@ -9,10 +9,11 @@ class analizador extends Lexer ;
 
 options{
 	charVocabulary = '\3'..'\377';	// Caracteres que podemos leer
-	exportVocab=LeLiLexerVocab;
+	exportVocab = CompLexerVocab;
 	testLiterals=false;
-	k=2;	// Tamano del lexema
+	k=2;	 // Tamano del lexema
 }
 
 OP_ASIG : '<' ;
+OP_IGUAL : '=' ;
 OP_MENOR : '>' ;
