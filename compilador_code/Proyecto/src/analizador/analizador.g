@@ -11,7 +11,7 @@ options{
 	charVocabulary = '\3'..'\377';	// Caracteres que podemos leer
 	exportVocab = CompLexerVocab;
 	testLiterals=false;
-	k=2;	 // Tamano del lexema
+	k=3;	 // Tamano del lexema
 }
 
 tokens {
@@ -19,16 +19,16 @@ tokens {
 	LIT_ENTERO;
 }
 
-{ // Comienza la zona de código
-	protected Token makeToken(int type)	{
-		// Usamos la implementación de la superclase...
-		Token result = super.makeToken(type);
-		// ...y añadimos información del nombre de fichero
-		result.setFilename(inputState.filename);
-		// y devolvemos el token
-		return result;
-	}
-}
+//{ // Comienza la zona de código
+//	protected Token makeToken(int type)	{
+//		// Usamos la implementación de la superclase...
+//		Token result = super.makeToken(type);
+//		// ...y añadimos información del nombre de fichero
+//		result.setFilename(inputState.filename);
+//		// y devolvemos el token
+//		return result;
+//	}
+//}
 
 /** Esta regla permite ignorar los blancos.*/
 protected BLANCO : ( ' '
