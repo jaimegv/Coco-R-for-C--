@@ -1,0 +1,4 @@
+// $ANTLR : analizador.g -> LeLiLexerVocabTokenTypes.txt$
+LeLiLexerVocab    // output token vocab name
+OP_ASIG=4
+OP_MENOR=5

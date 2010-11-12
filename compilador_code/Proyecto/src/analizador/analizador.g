@@ -13,3 +13,6 @@ options{
 	testLiterals=false;
 	k=2;	// Tamano del lexema
 }
+
+OP_ASIG : '<' ;
+OP_MENOR : '>' ;
