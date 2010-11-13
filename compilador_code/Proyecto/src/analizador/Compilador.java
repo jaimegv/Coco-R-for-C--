@@ -11,7 +11,7 @@ public class Compilador {
 	public static void main (String args[]) throws TokenStreamException {
 		try {
 	        System.out.println("Empieza a dar tokens:");
-			FileInputStream fis = new FileInputStream("/home/pirois/Documentos/compiladores/practica_compilador/compilador_code/Proyecto/src/analizador/cod_fuente1");
+			FileInputStream fis = new FileInputStream("/home/vickop/Escritorio/Facultad/Compiladores/Repositorio subversion/compilador_code/ejemplo_fichero/Fact.cpp");
 			analizador Analizador = new analizador(fis);
 			Token  token = Analizador.nextToken();
 			while(token.getType() != Token.EOF_TYPE) {

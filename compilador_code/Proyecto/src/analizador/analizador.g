@@ -133,7 +133,7 @@ OP_ASIG_DIVISION : "/=" ;
 OP_ASIG_MODULO : "%=" ;
 // Separadores
 PUNTO_COMA : ';' ;
-//COMA : ',' ;
+COMA : ',' ;
 CORCHETE_AB : '[' ;
 CORCHETE_CE : ']' ;
 LLAVE_AB : '{' ;
@@ -142,3 +142,4 @@ PUNTO : '.' ;//operador de acceso a clase
 PARENT_AB : '(' ;
 PARENT_CE : ')' ;
 BARRA_VERT : '|';
+REFERENCIA : '&';
