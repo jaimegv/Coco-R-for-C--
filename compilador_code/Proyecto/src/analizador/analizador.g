@@ -138,7 +138,7 @@ CORCHETE_AB : '[' ;
 CORCHETE_CE : ']' ;
 LLAVE_AB : '{' ;
 LLAVE_CE : '}' ;
-PUNTO : '.' ;
+PUNTO : '.' ;//operador de acceso a clase
 PARENT_AB : '(' ;
 PARENT_CE : ')' ;
 BARRA_VERT : '|';
