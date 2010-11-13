@@ -11,36 +11,47 @@ options{
 	charVocabulary = '\3'..'\377';	// Caracteres que podemos leer
 	exportVocab = CompLexerVocab;
 	testLiterals=false;
-	k=3;	 // Tamano del lexema
+	k=2;	 // Tamano del lexema
 }
 
 tokens {
-	LIT_REAL; 
-	LIT_ENTERO;
+	// Palabras Reservadas
+	// TIPO_ALGO = "algo";
+	
+	CTE_LOGTRUE = "true";
+	CTE_LOGFALSE = "false";
+	
+	// Literales cadena
+	LIT_NL = "nl"; LIT_TAB = "tab" ; LIT_COM = "com";
+	 
+	
+	LIT_ENTERO_OCTAL;
+	LIT_ENTERO_DECIMAL;
 }
 
-//{ // Comienza la zona de código
-//	protected Token makeToken(int type)	{
-//		// Usamos la implementación de la superclase...
-//		Token result = super.makeToken(type);
-//		// ...y añadimos información del nombre de fichero
-//		result.setFilename(inputState.filename);
-//		// y devolvemos el token
-//		return result;
-//	}
-//}
+{ // Comienza la zona de código
+	protected Token makeToken(int type)	{
+		// Usamos la implementación de la superclase...
+		Token result = super.makeToken(type);
+		// ...y añadimos información del nombre de fichero
+		//result.setFilename(inputState.filename);
+		// y devolvemos el token
+		return result;
+	}
+}
 
 /** Esta regla permite ignorar los blancos.*/
-protected BLANCO : ( ' '
-					| '\t'
-					| NL
-			) { $setType(Token.SKIP); }; // La accion del blanco: ignorar
+BLANCO : ( ' '
+		| '\t'
+		| NL
+	) { $setType(Token.SKIP); }; // La accion del blanco: ignorar
 
 /**Los tres tipos de retorno de carro.*/
 protected NL : (("\r\n") => "\r\n" // MS-DOS
-				| '\r'	// MACINTOSH
-				| '\n'	// UNIX
-			)	{ newline();};
+		| '\r'	// MACINTOSH
+		| '\n'	// UNIX
+	)	{ newline();};
+				
 			
 /** Letras españolas. */
 protected LETRA: 'a'..'z'
@@ -52,17 +63,40 @@ protected LETRA: 'a'..'z'
 				
 /** Dígitos usuales */
 protected DIGITO : '0'..'9';
+protected DIGIT_O : '1'..'9';
 
 /** Regla que permite reconocer los literales (y palabras reservadas).*/
 IDENT options {testLiterals=true;} // Comprobar palabras reservadas
 			: (LETRA|'_') (LETRA|DIGITO|'_')*; 	// Empieza por Letra o _
 												// _a3 a_3_4 qweWEQ...
+
+// COMENTARIOS
+COMENTARIO1 // Este tipo de commentario //
+	: "//" (~('\n'|'\r'))*
+		{ $setType(Token.SKIP); }
+	;
+
+COMENTARIO2 : "/*" ( ('*' NL) => '*' NL
+		| ('*' ~('/'|'\n'|'\r')) => '*' ~('/'|'\n'|'\r') // Modificada
+		| NL
+		| ~( '\n' | '\r' | '*' )
+		)* "*/"
+	{ $setType(Token.SKIP); } ;
+
+
 												
 // CONSTANTES
-LIT_NUMERO : (( DIGITO )+ '.' ) =>
-				( DIGITO )+ '.' ( DIGITO )* { $setType (LIT_REAL); }
-				| ( DIGITO )+ { $setType (LIT_ENTERO); }
+LIT_NUMERO : ( '0' ( DIGIT_O )+ ( DIGITO )*) { $setType (LIT_ENTERO_OCTAL);}
+			|	 ( DIGITO )+ { $setType (LIT_ENTERO_DECIMAL);}
 ;
+
+// CADENA
+LIT_CADENA :
+'"' !
+( ~('"'|'\n'|'\r') )*
+'"' !
+;
+
 												
 // OPERADORES
 // OP_Artimeticos
@@ -108,6 +142,3 @@ PUNTO : '.' ;
 PARENT_AB : '(' ;
 PARENT_CE : ')' ;
 BARRA_VERT : '|';
-
-
-
