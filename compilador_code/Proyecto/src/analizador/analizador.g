@@ -17,13 +17,28 @@ options{
 tokens {
 	// Palabras Reservadas
 	// TIPO_ALGO = "algo";
-
-	
-	
 	
 	CTE_LOGTRUE = "true";
 	CTE_LOGFALSE = "false";
-	
+	CHAR = "char";
+	INT = "int";
+	BOOL = "bool";
+	IF = "if";
+	ELSE = "else";
+	RETURN = "return";
+	DO = "do";
+	WHILE = "while";
+	FOR = "for";
+	VOID = "void";
+	CLASS = "class";
+	PUBLIC = "public";
+	PRIVATE = "private";
+	SWITCH = "switch";
+	CASE = "case";
+	BREAK = "break";
+	DEFAULT = "default";
+	CIN = "cin";
+	COUT = "cout";
 	// Literales cadena
 	LIT_NL = "nl"; LIT_TAB = "tab" ; LIT_COM = "com";
 	 
@@ -50,7 +65,7 @@ BLANCO : ( ' '
 	) { $setType(Token.SKIP); }; // La accion del blanco: ignorar
 
 /**Los tres tipos de retorno de carro.*/
-NL : (("\r\n") => "\r\n" // MS-DOS
+protected NL : (("\r\n") => "\r\n" // MS-DOS
 		| '\r'	// MACINTOSH
 		| '\n'	// UNIX
 	)	{ newline();};
@@ -119,6 +134,8 @@ OP_MAYOR_IGUAL : ">=" ;
 OP_AND : "&&" ;
 OP_OR : "||" ;
 OP_NOT : '!' ;
+//REFERENCIA
+REFERENCIA : '&' ;
 // OP_AUTO_[INCR|DECR]emento
 // tanto delanto como detrás
 OP_MASMAS : "++" ;
@@ -145,4 +162,6 @@ PUNTO : '.' ;//operador de acceso a clase
 PARENT_AB : '(' ;
 PARENT_CE : ')' ;
 BARRA_VERT : '|';
-REFERENCIA : '&';
+MENOR_MENOR: "<<" ;
+MAYOR_MAYOR: ">>" ; 
+DOSPUNTOS_DOS : "::" ;

@@ -1,8 +1,8 @@
 package analizador;
 import java.io.*;
 //import org.antlr.runtime.CommonTokenStream;
-import antlr.collections.AST;
-import antlr.ANTLRException;
+//import antlr.collections.AST;
+//import antlr.ANTLRException;
 import antlr.Token;
 import antlr.TokenStreamException;
 
