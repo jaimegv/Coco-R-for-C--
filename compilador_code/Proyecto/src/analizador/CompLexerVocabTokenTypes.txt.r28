@@ -1,0 +1,5 @@
+// $ANTLR : analizador.g -> CompLexerVocabTokenTypes.txt$
+CompLexerVocab    // output token vocab name
+OP_ASIG=4
+OP_IGUAL=5
+OP_MENOR=6
