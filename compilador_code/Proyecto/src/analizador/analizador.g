@@ -17,6 +17,9 @@ options{
 tokens {
 	// Palabras Reservadas
 	// TIPO_ALGO = "algo";
+
+	
+	
 	
 	CTE_LOGTRUE = "true";
 	CTE_LOGFALSE = "false";
@@ -47,7 +50,7 @@ BLANCO : ( ' '
 	) { $setType(Token.SKIP); }; // La accion del blanco: ignorar
 
 /**Los tres tipos de retorno de carro.*/
-protected NL : (("\r\n") => "\r\n" // MS-DOS
+NL : (("\r\n") => "\r\n" // MS-DOS
 		| '\r'	// MACINTOSH
 		| '\n'	// UNIX
 	)	{ newline();};
