@@ -1,0 +1,48 @@
+Memoria Compiladores Luis:
+1.1. Lenguaje a reconocer.
+El analizador léxico debe reconocer un conjunto del lenguaje C++, de este subconjunto habrá que hacer especial incapie en una parte del mismo, ya que, no todo lo especificado en el guión de la práctica es requesito obligatorio.
+
+De esta manera el lenguaje que el analizador léxico reconoce es:
+- Los elementos que componen una estructura de un programa típico en C++, como es por ejemplo la función main.
+- Comentarios, tanto // como /* ... */
+- Constantes enteras,  cadenas de caracteres y lógicas.
+- Operadores:
+	Artiméticos:
+	Relacionales:
+	Lógicos:
+	[Auto][In|de]crementales
+- Operador de asignación y asignación con operación.
+- Operado de clase.
+- Operador condicional.
+- Identificadores.
+
+Además y como parte específica de nuestro compilador, tendremos:
+- Tipo de datos:
+	Vectores.
+- Sentencia:
+	Condicional simple y compuesta.
+	Asignación
+- Instrucciones de Entrada/Salida:
+	cin
+	cout
+
+
+Por otra parte tenemos las palabras reservadas del mismo lenguaje C++:
+-> Copiar de analizador.g <-
+
+
+1.2. Implementación del analizadori léxico.
+el analizador léxico es el primer módulo que nos encontramos en el diseño del compilador, tiene la característica de que
+ningún otro módulo volverá a acceder dde forma alguna al código fuente, por lo que toda la información que nos pueda
+resultar necesaria en los módulos siguiente deberá ser recogida por dicho módulo.
+
+	Para ser más exactos, el analizador léxico leerá caracter a caracter y gracias a la gramática generada por nuestra herramienta podrá llegar a alguno estado final. En este caso, se devolverá un Token con toda la información que pueda obtener del mismo; este módulo es el encargado de filtrar ciertos elementos que no son necesarios para la compilación, como por ejemplo los comentarios, tabulaciones, espacios en blanco, nulos... De igual manera y cómo hemos dicho anteriormente habrá que recabar la información necesaria para en caso de error en el código fuente poder informar al cliente del lugar de dicho problema.
+
+	Por último, añadiremos que el analizador léxico ha sido diseñado utilizando una herramienta para Java conocida como ANTlr.
+
+
+
+2.Tabla de símbolos:
+2.1  Diseño:
+La tabla de símbolos es creada al principio de la compilación y sobre la cuál se irán creando espacios y actualizando la información de los mismos según se vayan pasando los diferentes módulos de compilación. Gracias a la herramienta usada enpara el desarrollo de la práctica (ANTlr para Java) el almacenamiento nos ha sido transparentes y sólo hemos tenido que obtener la información del mismo gracias a los métodos y funciones de acceso.
+
