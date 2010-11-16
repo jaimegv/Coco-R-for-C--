@@ -3,7 +3,7 @@ S = /C | +M | -N | =I | &L | : | . | (0..9)D | "W | ( | ) | letra(MAy_Min+_)A
 C = /B | = | *U |
 -- comentarios
 U = letraU | *F
-F = letraU | /S	-- fin comentatio /* no se envia Token
+F = letraU | /S	-- fin comentatio // no se envia Token
 B = letraB | finlineaS -- fin comentario // no se envia Token
 -- Operadores
 M = del | = | +Y	-- Operador +=, +
