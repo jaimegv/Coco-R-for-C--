@@ -7,11 +7,11 @@ De esta manera el lenguaje que el analizador léxico reconoce es:
 - Comentarios, tanto // como /* ... */
 - Constantes enteras,  cadenas de caracteres y lógicas.
 - Operadores:
-	Artiméticos:
-	Relacionales:
-	Lógicos:
-	[Auto][In|de]crementales
-- Operador de asignación y asignación con operación.
+	Artiméticos: + | - | * | / | %
+	Relacionales: == | != | < | > | <= | >=
+	Lógicos: && | || | !
+	[Auto][In|de]crementales: ++ | --
+- Operador de asignación y asignación con operación: [op]=
 - Operado de clase.
 - Operador condicional.
 - Identificadores.
@@ -21,10 +21,9 @@ Además y como parte específica de nuestro compilador, tendremos:
 	Vectores.
 - Sentencia:
 	Condicional simple y compuesta.
-	Asignación
+	Asignación.
 - Instrucciones de Entrada/Salida:
-	cin
-	cout
+	cin, cout.
 
 
 Por otra parte tenemos las palabras reservadas del mismo lenguaje C++:
@@ -44,5 +43,14 @@ resultar necesaria en los módulos siguiente deberá ser recogida por dicho mód
 
 2.Tabla de símbolos:
 2.1  Diseño:
-La tabla de símbolos es creada al principio de la compilación y sobre la cuál se irán creando espacios y actualizando la información de los mismos según se vayan pasando los diferentes módulos de compilación. Gracias a la herramienta usada enpara el desarrollo de la práctica (ANTlr para Java) el almacenamiento nos ha sido transparentes y sólo hemos tenido que obtener la información del mismo gracias a los métodos y funciones de acceso.
+La tabla de símbolos es creada por el primero de los componenetes del proceso de compilación, el analizador léxico. En esta tabla se irán creando espacios y actualizando la información de los mismos según se vayan pasando por los diferentes módulos del proceso de compilación.
+
+Más en concreto la tabla de símbolos servirá para almacenar la información dada en el fichero fuente, ya sea de manera global o local (en diferentes tablas) puesto que podemos encontrarnos con varios nombres de variables locales que sean iguales y no debería provocar fallo alguno. 
+Gracias a la herramienta usada para el desarrollo de la práctica (ANTlr, escrita en Java) el método de almacenamiento ha sido en una tabla hash, lo que nos procurará una mayor velocidad de acceso y agilidad es su uso. 
+La tabla de símbolos principal contendrá los nombres y la información de las variables globales; de los subprogramas almacenaremos los argumentos que recibe y su tipo, junto con una dirección de otra tabla de símbolos creada para dicho subprograma que alamacenará la información específica de dicho subprograma.
+
+Con la información almacenada en la tabla de símbolos el compilador podrá generar el código final, ya que, conoce toda la información necesaria para ello.
+
+
+
 
