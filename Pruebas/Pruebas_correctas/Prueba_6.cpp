@@ -1,29 +1,34 @@
-#include <iostream>
+//Prueba 6
+//Palabras reservadas int, for, cout, while, main
+//Tokens ( ) { } += << -- > = 
 
-using namespace std;
+int coco(int toto)
+{
+ int a;
+ for (a = 50; a >0; a--)
+	{
+	toto += 2;
+	cout << toto
+	cout << a
+	}
+}
 
-class B {
-  public: int x;
-};
-
--struct ST : public B {
-  int fun();
-};
-  
-int ST:: fun() { return x; }
-
-class CL: public ST {
-  public: int y;
-};
+int cece(int toto)
+{
+ int a;
+ for (a = 50; a >0; a--)
+	{
+	toto += 2;
+	cout << toto
+	cout << a
+	}
+}
 
 int main((void) {     // ===============
-  ST s;
-  s..x = 10;
-  cout << "s.x == " << s.fun() << endl;
-  CL c;
-  c.x = 20;
-  c.y = 30;
-  cout << "c.x == " << c.fun() << endl;
-  cout << "c.y == " << c.y << endl;
-  return 0;
+  int i;
+  while (i > 0)
+	{
+	cout << "hola";
+	i--;
+	}
 }

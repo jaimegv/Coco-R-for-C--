@@ -1,24 +1,25 @@
-#include<math.h>
-#include<iostream>
-using namespace std;
- 
-#definee PI 3.14159265 // nuNcA cAmbieZz we!!
+//Prueba 4
+// Palabras reservadas 
+
 int main()
 {
-    floatt a, b, c, A, B, C;
+    int a, b, c, A, B, C;
+
     cout << "Introduce lado a: "; cin >> a;
     cout << "Introduce lado b: "; cin >> b;
     cout << "Introduce lado c: "; cin >> c;
-    A = acos((b*b+c*c-a*a)/(2*b*c))*180/PI;
-    B = acos((a*a+c*c-b*b)/(2*a*c))*180/PI;
-    C = acos((a*a+b*b-c*c)/(2*a*b))*180/PI;
+
+    A = a * 2;
+    B = b / 4;
+    C = c % 3;
+    A += 3;
+    B -= 1;
+    C *= 2
+
     if(A == 90 || B == 90 || C == 90)
-        cout << "El triangulo es rectangulo. ";
+        cout << "coquito";
     if(A < 90 && B < 90 && C < 90)
-        cout << "El triangulo es acutangulo. ";
+        cout << "Los 3 son menores que 90";
     if(A > 90 || B > 90 || C > 90)
-        cout << "El triangulo es obtusangulo. ";
-    cout << "\nY sus angulos son: A:" << A << " , B:" << B << " y C:" << C;
- 
-    cin.get();cin.get();
+        cout << "Hay alguno mayor que 90";
 }
