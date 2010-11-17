@@ -18,6 +18,7 @@ tokens {
 	// Palabras Reservadas
 	// TIPO_ALGO = "algo";
 	
+	MAIN = "main";
 	CTE_LOGTRUE = "true";
 	CTE_LOGFALSE = "false";
 	CHAR = "char";
