@@ -1,7 +1,8 @@
-#includes <iostream>
-using namespace std:
+//Prueba 1 errónea.
+//Declarando una variable de tipo cadena de forma errónea
 
 int main(int argc, char *argv[]) {
-            std::cout << "Hola mundo" << endl;
-            return 0;
+	char* hola[5];
+	hola = "lango ;
+}
 

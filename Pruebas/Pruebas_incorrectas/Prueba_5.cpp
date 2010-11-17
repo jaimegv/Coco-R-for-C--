@@ -1,41 +1,30 @@
-// Programa OPP01.CPP
-#include <iostream>
- 
-using std::cout;
-using std::endl;
- 
- 
-// Esto crea la clase CRender
-class CRender {
-public:
-    char buffer[256];
-    void m_Renderear(const char *cadena);
+//Prueba 5. Prueba de errores a nivel sintáctico. Intento de poner un identificador que es palabra reservada (línea 25)
+//Palabras reservadas class, private, public, char, void, cout, int, return
+//Tokens { } * ( ) :: : ; << .
+//Identificadores Empleado, m_nombre, ImprimirInfo, main, 
+
+class Empleado {
+    private:
+        char* m_nombre;
+
+    public:
+        void ImprimirInfo();
 };
- 
- 
-/* implementar m_Renderear() para la c;*/
-void CRender::m_Renderear(const char *cadena)
+
+
+
+void Empleado::ImprimirInfo( )
 {
-    strcpy(buffer, cadena);//copia la cadena
-    return;
-}
- 
- 
-int main (int argc, char **argv)
-{
-    // crear 2 objetos CRender
-    CRender render1, render2;
- 
-    render1.m_Renderear("Inicializando el objeto render1");
-    render2.m_Renderear("Inicializando el objeto render2");	
- 
-    cout << "buffer en render1: ";
-    cout << render1.buffer << endl;   // tenemos acceso a buffer ya que es publico.
- 
-    cout << "buffer en render2: ";
-    cout << render2.buffer << endl;
- 
-return (0);
+   cout << "Nombre: " << m_nombre;
 }
 
 
+int main()
+{
+    //creacion de un objeto de la clase Empleado
+    Empleado if;
+
+    //impresion de los datos
+    empleado12.ImprimirInfo();
+    return 0;
+}

@@ -1,27 +1,25 @@
-//----CUENTA ALUMNOS CON NOTAS NOTABLES----//
+//Prueba 4. Prueba de errores a nivel sintáctico. Falta el ; en C*= 2
+// Palabras reservadas 
 
-#include <math.h>
-#include <iostream.h>
-#include <stdlib.h>
-#include <conio.h>
+int main()
+{
+    int a, b, c, A, B, C;
 
-void main(void)
-{int id_nota, cantidad_notas=0, nota=0, cuenta_notables=0;
-clrscr();
+    cout << "Introduce lado a: "; cin >> a;
+    cout << "Introduce lado b: "; cin >> b;
+    cout << "Introduce lado c: "; cin >> c;
 
-cout <<"CONTAR CANTIDAD DE ALUMNOS CON NOTAS NOTABLES (ENTRE 15 Y 20)";
-cout <<"\n\n\Indique la cantidad de notas que ingresara: " ; cin>>cantidad_notas;
+    A = a * 2;
+    B = b / 4;
+    C = c % 3
+    A += 3;
+    B -= 1;
+    C *= 2
 
-for (id_nota=1; id_nota<=cantidad_notas; id_nota++)
-	{
-		cout <<"\n\Nota N� " <<id_nota<<" : "; cin>>nota;
-		if (nota>=15) 
-			{
-			if (nota<=20) cuenta_notables=cuenta_notables+1;
-			}
-	}
-cout <<"\n\La cantidad de alumnos con notas notables: "<<cuenta_notables;
-getch();
+    if(A == 90 || B == 90 || C == 90)
+        cout << "coquito";
+    if(A < 90 && B < 90 && C < 90)
+        cout << "Los 3 son menores que 90";
+    if(A > 90 || B > 90 || C > 90)
+        cout << "Hay alguno mayor que 90";
 }
-
-
