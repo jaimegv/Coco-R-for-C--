@@ -1,11 +1,10 @@
-//Prueba 3. Incorrecta. Prueba errores del nivel sintáctico (Falta el inicio de paréntesis en la función pedir
+//Prueba 3. Incorrecta. Prueba errores del nivel léxico (En la función pedir el parámetro tiene un nombre mal formado)
 //Palabras reservadas void, int, for, cout, cin, return,
 //Tokens ( ) [ ] <= = ++ << + ;
 
 // 
 
-
-void pedir int matriz[3], int len)
+void pedir (int 123foo[3], int len)
 {
     for(int i=0; i<=len; i++)
     {
