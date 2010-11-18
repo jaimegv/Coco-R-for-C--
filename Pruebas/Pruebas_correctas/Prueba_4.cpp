@@ -10,16 +10,19 @@ int main()
     cout << "Introduce lado c: "; cin >> c;
 
     A = a * 2;
-    B = b / 4;
-    C = c % 3;
+    B = b / 0434;
+    C = c % 1233;
     A += 3;
     B -= 1;
-    C *= 2
+    C /= 2;
+    C *= 2;
 
-    if(A == 90 || B == 90 || C == 90)
+    if(A != 90 || B == 90 || C == 90)
         cout << "coquito";
     if(A < 90 && B < 90 && C < 90)
         cout << "Los 3 son menores que 90";
-    if(A > 90 || B > 90 || C > 90)
+    else (A > 90 || B > 90 || C > 90)
         cout << "Hay alguno mayor que 90";
+    // condicional!	
+    A = (B > C) ? A : D;
 }

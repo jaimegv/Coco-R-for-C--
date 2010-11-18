@@ -7,7 +7,8 @@ int coco(int toto)
  int a;
  for (a = 50; a >0; a--)
 	{
-	toto += 2;
+	toto += 2; /* Comentario sin ningún
+			sentido */
 	cout << toto
 	cout << a
 	}

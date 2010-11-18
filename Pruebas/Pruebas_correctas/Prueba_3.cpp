@@ -25,7 +25,7 @@ void mostrar(int matriz[3], int len)
         cout << matriz[i] << " ";
 }
  
-int main()
-
+int main() {
     return 0;
+}
 
