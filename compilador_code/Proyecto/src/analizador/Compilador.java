@@ -12,20 +12,26 @@ public class Compilador {
 	public static void main (String args[])   {
 		try {
 			if (args.length>=1) {
-		        String ext = args[0].substring(args[0].indexOf("."));
+				int longitud = args[0].length();
+		        String ext = args[0].substring(longitud - 4);
 		        if(ext.equalsIgnoreCase(".cpp")) {
-			        System.out.println("Escribiendo tokens fichero:");
-					FileInputStream fis = new FileInputStream(args[0]);
-					analizador Analizador = new analizador(fis);
-					try {
-						Token token = Analizador.nextToken();
-						while(token.getType() != Token.EOF_TYPE) {
-							System.out.println(token);
-							token = Analizador.nextToken();
+		        	if (args.length < 2) {
+			        		System.err.println("Introduzca fichero destino");
+		        	}
+		        	else{
+			        	PrintStream fichero = new PrintStream(new File(args[1]));
+						FileInputStream fis = new FileInputStream(args[0]);
+						analizador Analizador = new analizador(fis);
+						try {
+							Token token = Analizador.nextToken();
+							while(token.getType() != Token.EOF_TYPE) {
+								fichero.println(token);
+								token = Analizador.nextToken();
+							}
+						} catch (ANTLRException Ex) {				
+								fichero.println("Error en token desconocido.");
+								fichero.println(Ex.getMessage());
 						}
-					} catch (ANTLRException Ex) {				
-							System.err.println("Error en token desconocido.");
-							System.err.println(Ex.getMessage());
 					}
 		        } else {
 					System.err.println("No es un fichero con extensión correcta .cpp");
