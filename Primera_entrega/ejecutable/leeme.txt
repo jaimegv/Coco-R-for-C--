@@ -1,3 +1,22 @@
-Para ejecutar la prueba simplemente hacer:
+**********************************************************************************************
+********************MANUAL DE USO DEL ANALIZADOR LÉXICO***************************************
+**********************************************************************************************
 
-java -jar analizador_lexico.jar [Fichero.cpp] [Salida]
+Para ejecutar el analizador léxico siga los siguientes pasos:
+
+- Abra una consola y dirígase al directorio dónde esté contenido el fichero "analizador_lexico.jar"
+
+- Teclee el siguiente mandato:
+
+# java -jar an_lexico.jar ruta_fichero_fuente ruta_fichero_destino
+
+Tenga en cuenta que el fichero fuente debe tener extensión .cpp
+
+**********************************REQUISITOS**************************************************
+
+- Sistemas operativos soportados: Windows XP, Windows VISTA, Windows 7 y GNU/Linux.
+
+- Máquina virtual de java.
+
+
+
