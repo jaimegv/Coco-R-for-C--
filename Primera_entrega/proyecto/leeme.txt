@@ -1,0 +1,3 @@
+Para usar el proyecto simplemente deberemos abrirlo con Eclipse (o cualquier IDE).
+
+Nota: para la comodidad añadimos el léxico que hemos creado para nuestro proyecto.

@@ -1,0 +1,3 @@
+Para ejecutar la prueba simplemente hacer:
+
+java -jar analizador_lexico.jar [Fichero.cpp] [Salida]
