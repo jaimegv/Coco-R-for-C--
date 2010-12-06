@@ -6,6 +6,7 @@ import antlr.ANTLRException;
 import antlr.RecognitionException;
 import antlr.Token;
 import antlr.TokenStreamException;
+import antlr.*;
 
 public class Compilador {
 	
@@ -22,6 +23,10 @@ public class Compilador {
 			        	PrintStream fichero = new PrintStream(new File(args[1]));
 						FileInputStream fis = new FileInputStream(args[0]);
 						analizador Analizador = new analizador(fis);
+						Analizador.setTokenObjectClass(args[1]);
+						
+						CompParser Parser = new CompParser(Analizador);
+						
 						try {
 							Token token = Analizador.nextToken();
 							while(token.getType() != Token.EOF_TYPE) {
@@ -44,3 +49,4 @@ public class Compilador {
 		}
 	}
 }
+ 
