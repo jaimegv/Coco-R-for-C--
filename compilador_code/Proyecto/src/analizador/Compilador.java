@@ -27,13 +27,13 @@ public class Compilador {
 						analizador Analizador = new analizador(fis);
 						Analizador.setFilename(args[0]);
 						//Analizador.setTokenObjectClass("antlr.CommonToken");
+						// Para el analizador Sintáctico
 						// para el constructor
 						AST ast = null;
 						CompParser Parser = new CompParser(Analizador);
 						Parser.setFilename(args[0]);
-						Parser.expsuma();
+						Parser.entero();
 						ast = Parser.getAST();
-						
 						BaseAST.setVerboseStringConversion(true,Parser._tokenNames);
 						
 						System.out.println("lalala"+ast.toStringList());
