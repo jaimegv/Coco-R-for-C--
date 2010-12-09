@@ -32,13 +32,13 @@ public class Compilador {
 						AST ast = null;
 						CompParser Parser = new CompParser(Analizador);
 						Parser.setFilename(args[0]);
-						Parser.entero();
+						Parser.dec_entero();
 						ast = Parser.getAST();
 						BaseAST.setVerboseStringConversion(true,Parser._tokenNames);
 						
-						System.out.println("lalala"+ast.toStringList());
+						System.out.println(ast.toStringList());
 						
-						try {
+						/*try {
 							Token token = Analizador.nextToken();
 							while(token.getType() != Token.EOF_TYPE) {
 //								fichero.println(token);
@@ -51,6 +51,7 @@ public class Compilador {
 								System.out.println("Error en token desconocido.");
 								System.out.println(Ex.getMessage());
 						}
+*/
 /*					}*/
 		        } else {
 					System.err.println("No es un fichero con extensión correcta .cpp");
