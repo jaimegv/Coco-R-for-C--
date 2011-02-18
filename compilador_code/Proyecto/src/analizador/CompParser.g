@@ -10,7 +10,7 @@ options {
 	// LookAhead.
 	// cuantos caracteres cogerá para concluir
 	k = 2;
-	// Activando la construccion del build
+	// Activando la construccion del build para el semántico
 	buildAST = true;
 	// traigo los token generados por el lexico
 	importVocab = CompLexerVocab ;
@@ -20,51 +20,90 @@ options {
 tokens {
 	/* tokens */
 	// En el caso del analizador sintactico los usaremos para
-	// saber de que nos estan hablando (desde el lexico)
-	
+	// saber de que nos estan hablando (desde el lexico)	
 	// DECLARACION DE VARS
 	DEC_ENTERO ;
 	
-	FUNCION ;
+	SUBPROGRAMA ;
 	
 }
 
 /* Reglas de generación*/
-
-// FUNCIONES C++
-funcion : tipo IDENT PARENT_AB! arg_entrada PARENT_CE!
-			LLAVE_AB!
-				// Declaraciones de variables
-				
-				// declaracion de ops
-			
-			LLAVE_CE!;
+// FUNCIONES-SUBPROGRAMAS C++
+subprograma : ttipo IDENT^ PARENT_AB! lista_argumento PARENT_CE!
+				LLAVE_AB! 
+					cuerpo_sp 
+				LLAVE_CE!;
 
 // Argumentos de entrada de las funciones
-// por ejemplo: (int s, char *s, int w)
-arg_entrada : tipo_arg arg_sig_entrada
-			| /* nada */ ;
-			
-arg_sig_entrada : COMA tipo_arg arg_sig_entrada 
+// por ejemplo: int s, char *s, int w ó vacio
+lista_argumento : ttipo IDENT^ siguiente_arg
+				| /* nada */ ;
+sig_arg_tipo : ttipo
+			| /*nada*/ ;
+siguiente_arg : COMA sig_arg_tipo IDENT^ siguiente_arg
 			| /* nada */ ;
 
+
+// Cuerpo de un subprograma o programa general
+cuerpo_sp : declaracion_local cuerpo_sp
+		| sentencia cuerpo_sp 
+		| /* nada */ ;
+
+// Declaracion de variables
+// p.e. int qwe , jarl = 123 , HOLA , _asd , jarl = asd , ere [ 23 ] ;
+declaracion_local : ttipo dec_var;
+
+dec_var : IDENT^ dec_asig siguiente_dec
+		| e_vector dec_asig siguiente_dec;
+dec_arg : IDENT^ dec_asig
+		| e_vector;
+// quizas haya que poner otra regla				
+siguiente_dec :	COMA dec_arg siguiente_dec
+				| PUNTO_COMA ;
+				
+dec_asig : OP_ASIG q_argumento
+			| /* nada */ ;
+				
+// Diferentes tipos de sentencias
+sentencia :	sentencia_llam_met
+			/*| sentencia_asig 
+			| sentencia_cond_simple
+			| sentencia_llam_func*/
+			;
+			
+// Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl()
+sentencia_llam_met : IDENT PUNTO IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA;
+// la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
+lista_valores : q_argumento
+			| COMA lista_valores;
+				
+// Tipo de argumento que se asignan a variables y demás
+// serán: 34, "hola", funcionJARL(23), algo.algo()
+q_argumento : LIT_CADENA
+			| LIT_ENTERO_OCTAL
+			| LIT_ENTERO_DECIMAL
+			| IDENT PARENT_AB! q_argumento PARENT_CE!
+			| IDENT
+			| /* nada */ ;
+
+// declaracion de un elem de un vector (elem_vector)
+// afirmamos que solo puede ir un entero dentro del corchete
+e_vector : IDENT^ CORCHETE_AB! LIT_ENTERO_DECIMAL CORCHETE_CE! ;
+
 // tipos genericos que reconoce nuestro lenguaje
-tipo : INT 
+ttipo : INT 
 	| BOOL
 	| VOID
 	| CHAR
-	| CHAR OP_PRODUCTO;
+	| CHAR OP_PRODUCTO	// Puntero a cadena, char *
+	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
 	
-// Tipos de argumentos
-tipo_arg : INT IDENT cadena	// int s ó int e[20]
-	| BOOL IDENT
-	| CHAR IDENT
-	| CHAR OP_PRODUCTO IDENT;
-
 cadena : vector
 	| /* NADA (para el -> int IDENT*/;
 	
 vector : CORCHETE_AB LIT_ENTERO_DECIMAL CORCHETE_CE; // int e[20]
+
 
 // DECLARACIONES DE VARIABLES
 // sin asignacion.

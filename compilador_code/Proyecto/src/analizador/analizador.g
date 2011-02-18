@@ -42,8 +42,8 @@ tokens {
 	COUT = "cout";
 	// Literales cadena
 	LIT_NL = "nl"; LIT_TAB = "tab" ; LIT_COM = "com";
-	 
-	
+
+
 	LIT_ENTERO_OCTAL;
 	LIT_ENTERO_DECIMAL;
 }
