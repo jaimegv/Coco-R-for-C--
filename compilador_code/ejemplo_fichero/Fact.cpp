@@ -35,7 +35,7 @@ int FactorialFor (int n)
 	return factorial;
 }
 
-void imprime (char *msg, int f)	/* función que recibe una cadena y un entero, pero no devuelve nada */
+void imprime (char *msg,  f)	/* función que recibe una cadena y un entero, pero no devuelve nada */
 {
 	cout << s << msg << f;
 	cout << "\n";	// imprime un salto de línea */
