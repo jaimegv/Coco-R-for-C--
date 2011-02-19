@@ -26,18 +26,16 @@ public class Compilador {
 						FileInputStream fis = new FileInputStream(args[0]);
 						analizador Analizador = new analizador(fis);
 						Analizador.setFilename(args[0]);
-						//Analizador.setTokenObjectClass("antlr.CommonToken");
+						Analizador.setTokenObjectClass("antlr.CommonToken");
 						// Para el analizador Sintáctico
 						// para el constructor
-						AST ast = null;
+						//CommoTokenStream tokens = new CommonTokenStream(Analizador);
 						CompParser Parser = new CompParser(Analizador);
 						Parser.setFilename(args[0]);
-						Parser.dec_entero();
-						ast = Parser.getAST();
-						BaseAST.setVerboseStringConversion(true,Parser._tokenNames);
-						
-						System.out.println(ast.toStringList());
-						
+						Parser.subprograma();
+						AST ast = Parser.getAST();
+
+						System.out.println(ast.toStringList());						
 						/*try {
 							Token token = Analizador.nextToken();
 							while(token.getType() != Token.EOF_TYPE) {
