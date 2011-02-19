@@ -25,8 +25,31 @@ tokens {
 	DEC_ENTERO ;
 	
 	SUBPROGRAMA ;
-	
+	PROGRAMA ; // El punto de entrada del programa
 }
+/* NOTAS:
+* - Significado de las almohadillas en la pagina 64 del manual ANTLR
+* - El símbolo ! detras de un elementos significa que dicho elemento se consume pero no 
+* se envía al sig modulo
+* - ^ significa que a partir de ahi se empezará a enraizar el arbol
+* - en la zona de tokens la cosa va en MAYUS, en la declaracion un terminal esMAYUS y
+* un no terminal es minus
+**/
+
+
+// Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
+programa :  (subprograma/*| decClase | metodos*/)*	// aqui irá la decClase, programas, metodos... 
+			main 
+				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
+			;
+
+
+// aqui se entra al main->raiz del arbol
+main: ttipo MAIN^ PARENT_AB! lista_argumento PARENT_CE!
+		LLAVE_AB! 
+			cuerpo_sp 
+		LLAVE_CE!;
+
 
 /* Reglas de generación*/
 // FUNCIONES-SUBPROGRAMAS C++
@@ -38,11 +61,12 @@ subprograma : ttipo IDENT^ PARENT_AB! lista_argumento PARENT_CE!
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char *s, int w ó vacio
 lista_argumento : ttipo IDENT^ siguiente_arg
+				| ttipo	// puede ser una funcion del tipo: void hola (int)
 				| /* nada */ ;
-sig_arg_tipo : ttipo
-			| /*nada*/ ;
 siguiente_arg : COMA sig_arg_tipo IDENT^ siguiente_arg
 			| /* nada */ ;
+sig_arg_tipo : ttipo
+			| /*nada*/ ;
 
 
 // Cuerpo de un subprograma o programa general
@@ -96,7 +120,7 @@ ttipo : INT
 	| BOOL
 	| VOID
 	| CHAR
-	| CHAR OP_PRODUCTO	// Puntero a cadena, char *
+//	| CHAR OP_PRODUCTO // en caso de puntero a cadena, SOLO TENEMOS PARAM POR VALOR
 	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
 	
 cadena : vector
