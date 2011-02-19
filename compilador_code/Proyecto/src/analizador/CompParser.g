@@ -23,7 +23,9 @@ tokens {
 	// saber de que nos estan hablando (desde el lexico)	
 	// DECLARACION DE VARS
 	DEC_ENTERO ;
-	
+	RES_PARAMETRO ;
+	INTS_DEC_VAR ;
+	EXPRESION ;
 	SUBPROGRAMA ;
 	PROGRAMA ; // El punto de entrada del programa
 }
@@ -38,7 +40,8 @@ tokens {
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-programa :  (subprograma/*| decClase | metodos*/)*	// aqui irá la decClase, programas, metodos... 
+programa ://  (listaDeParams
+		  //		/*| subprograma/*| decClase | metodos*/)	// aqui irá la decClase, programas, metodos... 
 			main 
 				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
 			;
@@ -48,7 +51,8 @@ programa :  (subprograma/*| decClase | metodos*/)*	// aqui irá la decClase, pro
 main: ttipo MAIN^ PARENT_AB! lista_argumento PARENT_CE!
 		LLAVE_AB! 
 			cuerpo_sp 
-		LLAVE_CE!;
+		LLAVE_CE!
+		;
 
 
 /* Reglas de generación*/
@@ -56,10 +60,12 @@ main: ttipo MAIN^ PARENT_AB! lista_argumento PARENT_CE!
 subprograma : ttipo IDENT^ PARENT_AB! lista_argumento PARENT_CE!
 				LLAVE_AB! 
 					cuerpo_sp 
-				LLAVE_CE!;
+				LLAVE_CE!
+			{ ## = #( #[SUBPROGRAMA, "SUBPROGRAMA"], ##);}
+			;
 
 // Argumentos de entrada de las funciones
-// por ejemplo: int s, char *s, int w ó vacio
+// por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
 lista_argumento : ttipo IDENT^ siguiente_arg
 				| ttipo	// puede ser una funcion del tipo: void hola (int)
 				| /* nada */ ;
@@ -70,11 +76,48 @@ sig_arg_tipo : ttipo
 
 
 // Cuerpo de un subprograma o programa general
-cuerpo_sp : declaracion_local cuerpo_sp
-		| sentencia cuerpo_sp 
-		| /* nada */ ;
+cuerpo_sp : instDecVar //instruccion de declaracion
+//		| sentencia cuerpo_sp 
+		;
 
-// Declaracion de variables
+// Instruccion de declaracion de variables
+instDecVar { final AST raiz = #[INTS_DEC_VAR, "variable"]; } 
+		:	(listaDeclaraciones[raiz, true] PUNTO_COMA!)*
+		;
+listaDeclaraciones [AST raiz, boolean inicializacion] : 
+		t: ttipo! declaracion[raiz, #t, inicializacion]
+				(COMA! declaracion[raiz, #t, inicializacion])*
+		;
+declaracion !	// desactivamos el AST contructor por defecto
+		[AST r, AST t, boolean inicializacion]	// parametros de la gen gramtrica
+		{	
+			AST raiz = astFactory.dupTree(r);	// copiamos el arbol
+			raiz.addChild(astFactory.dupTree(t));	// copia del arbol
+		}
+		: i1: IDENT	// CASO en que es: int var
+			{
+				raiz.addChild(#i1);
+				## = raiz;
+			}
+		| { inicializacion }? // pred semantico
+			// si tiene un true se puede asignar cosas
+		  i2: IDENT OP_ASIG valor:q_argumento	// CASO: int var=23
+		  { 
+				raiz.addChild(#i2);
+				//raiz.addChild(#valor);
+				## = raiz;
+		  }
+/*		| { inicializacion }? // pred semantico
+		  i3: IDENT PARENT_AB li:listaExpreisones PARENT_CE	// CASO: int jarl[]
+		  { raiz.addChild(#i3);
+		  	raiz.addChild(#li);
+		  	## = raiz;
+		  }
+		  */
+;
+
+expresion : r1:q_argumento { ## = #(#[EXPRESION], #r1); } ;
+
 // p.e. int qwe , jarl = 123 , HOLA , _asd , jarl = asd , ere [ 23 ] ;
 declaracion_local : ttipo dec_var;
 
@@ -109,6 +152,8 @@ q_argumento : LIT_CADENA
 			| LIT_ENTERO_DECIMAL
 			| IDENT PARENT_AB! q_argumento PARENT_CE!
 			| IDENT
+			| CTE_LOGTRUE
+			| CTE_LOGFALSE
 			| /* nada */ ;
 
 // declaracion de un elem de un vector (elem_vector)
@@ -119,13 +164,13 @@ e_vector : IDENT^ CORCHETE_AB! LIT_ENTERO_DECIMAL CORCHETE_CE! ;
 ttipo : INT 
 	| BOOL
 	| VOID
-	| CHAR
+	| CHAR;
 //	| CHAR OP_PRODUCTO // en caso de puntero a cadena, SOLO TENEMOS PARAM POR VALOR
-	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
-	
+//	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
+
 cadena : vector
 	| /* NADA (para el -> int IDENT*/;
-	
+
 vector : CORCHETE_AB LIT_ENTERO_DECIMAL CORCHETE_CE; // int e[20]
 
 
