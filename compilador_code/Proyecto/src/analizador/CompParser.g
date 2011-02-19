@@ -40,15 +40,15 @@ tokens {
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-programa ://  (listaDeParams
-		  //		/*| subprograma/*| decClase | metodos*/)	// aqui irá la decClase, programas, metodos... 
+programa : (instDecVar
+		  		/*| subprograma/*| decClase | metodos*/)	// aqui irá la decClase, programas, metodos... 
 			main 
 				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
 			;
 
 
 // aqui se entra al main->raiz del arbol
-main: ttipo MAIN^ PARENT_AB! lista_argumento PARENT_CE!
+main: ttipo MAIN^ PARENT_AB! listaDecParams PARENT_CE!
 		LLAVE_AB! 
 			cuerpo_sp 
 		LLAVE_CE!
@@ -57,7 +57,7 @@ main: ttipo MAIN^ PARENT_AB! lista_argumento PARENT_CE!
 
 /* Reglas de generación*/
 // FUNCIONES-SUBPROGRAMAS C++
-subprograma : ttipo IDENT^ PARENT_AB! lista_argumento PARENT_CE!
+subprograma : ttipo IDENT^ PARENT_AB! listaDecParams PARENT_CE!
 				LLAVE_AB! 
 					cuerpo_sp 
 				LLAVE_CE!
@@ -66,13 +66,12 @@ subprograma : ttipo IDENT^ PARENT_AB! lista_argumento PARENT_CE!
 
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
-lista_argumento : ttipo IDENT^ siguiente_arg
-				| ttipo	// puede ser una funcion del tipo: void hola (int)
-				| /* nada */ ;
-siguiente_arg : COMA sig_arg_tipo IDENT^ siguiente_arg
-			| /* nada */ ;
-sig_arg_tipo : ttipo
-			| /*nada*/ ;
+listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; } 
+		:	ttipo
+			| (listaDeclaraciones[raiz, false] 
+				(COMA! listaDeclaraciones[raiz, false])*
+			)?
+		;
 
 
 // Cuerpo de un subprograma o programa general
@@ -107,13 +106,13 @@ declaracion !	// desactivamos el AST contructor por defecto
 				//raiz.addChild(#valor);
 				## = raiz;
 		  }
-/*		| { inicializacion }? // pred semantico
-		  i3: IDENT PARENT_AB li:listaExpreisones PARENT_CE	// CASO: int jarl[]
+		| { inicializacion }? // pred semantico
+			// si tiene un true se puede asignar cosas
+		  i3: IDENT PARENT_AB li:q_argumento PARENT_CE	// CASO: int jarl[]
 		  { raiz.addChild(#i3);
 		  	raiz.addChild(#li);
 		  	## = raiz;
 		  }
-		  */
 ;
 
 expresion : r1:q_argumento { ## = #(#[EXPRESION], #r1); } ;
@@ -164,9 +163,9 @@ e_vector : IDENT^ CORCHETE_AB! LIT_ENTERO_DECIMAL CORCHETE_CE! ;
 ttipo : INT 
 	| BOOL
 	| VOID
-	| CHAR;
+	| CHAR
 //	| CHAR OP_PRODUCTO // en caso de puntero a cadena, SOLO TENEMOS PARAM POR VALOR
-//	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
+	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
 
 cadena : vector
 	| /* NADA (para el -> int IDENT*/;
