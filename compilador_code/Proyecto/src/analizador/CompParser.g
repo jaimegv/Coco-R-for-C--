@@ -8,8 +8,8 @@ class CompParser extends Parser ;
 options {
 	/* opciones del analizador*/
 	// LookAhead.
-	// cuantos caracteres cogerá para concluir
-	k = 2;
+	// cuantos caracteres cogerá para concluir Y DETERMINAR la regla
+	k = 3;	// ya que normalmente siempre empieza con: ttipo IDENT
 	// Activando la construccion del build para el semántico
 	buildAST = true;
 	// traigo los token generados por el lexico
@@ -26,7 +26,12 @@ tokens {
 	RES_PARAMETRO ;
 	INTS_DEC_VAR ;
 	EXPRESION ;
-	SUBPROGRAMA ;
+	CLASE ;			// declracion de una clase
+	DEC_METODO ; 	// declaracion de metodo de una clase
+	CALL_METODO ; 	// llamada a un metodo
+	LISTA_INSTRUCCIONES ; // lista de intrucciones que pertenecen al cuerpo
+	ARGUMENTOS_ENTRADA ; 	// LISTA DE ARGUMENTOS DE ENTRADA
+	SUBPROGRAMA ;	// declaracion de una funcion
 	PROGRAMA ; // El punto de entrada del programa
 }
 /* NOTAS:
@@ -40,8 +45,10 @@ tokens {
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-programa : (instDecVar
-		  		/*| subprograma/*| decClase | metodos*/)	// aqui irá la decClase, programas, metodos... 
+programa :  instDecVar
+			( decMetodo
+		  		| subprograma 
+		  			| decClase /**/)*	// aqui irá la decClase, programas, metodos... 
 			main 
 				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
 			;
@@ -64,6 +71,23 @@ subprograma : ttipo IDENT^ PARENT_AB! listaDecParams PARENT_CE!
 			{ ## = #( #[SUBPROGRAMA, "SUBPROGRAMA"], ##);}
 			;
 
+// Declaracion de Clase
+// ejemplo: class Persona {};
+decClase : CLASS! IDENT^ LLAVE_AB! 
+					cuerpo_sp 
+			LLAVE_CE!
+			{ ## = #( #[CLASE, "CLASE"], ##);}
+			;
+
+// Declaracion de metodos de una clase
+// ejemplo: int Fecha::daDia (void)
+decMetodo : ttipo IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_CE!
+				LLAVE_AB! 
+					cuerpo_sp 
+				LLAVE_CE!
+			{ ## = #( #[DEC_METODO, "decMetodo"], ##);}
+			;
+
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
 listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; } 
@@ -75,13 +99,14 @@ listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; }
 
 
 // Cuerpo de un subprograma o programa general
-cuerpo_sp : instDecVar //instruccion de declaracion
-//		| sentencia cuerpo_sp 
+// lista declaracion de instrucciones
+cuerpo_sp : ( instruccion )*
+			{ ## = #( #[LISTA_INSTRUCCIONES, "LISTA_INSTRUCCIONES"], ##);}  
 		;
 
 // Instruccion de declaracion de variables
 instDecVar { final AST raiz = #[INTS_DEC_VAR, "variable"]; } 
-		:	(listaDeclaraciones[raiz, true] PUNTO_COMA!)*
+		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
 		;
 listaDeclaraciones [AST raiz, boolean inicializacion] : 
 		t: ttipo! declaracion[raiz, #t, inicializacion]
@@ -98,7 +123,7 @@ declaracion !	// desactivamos el AST contructor por defecto
 				raiz.addChild(#i1);
 				## = raiz;
 			}
-		| { inicializacion }? // pred semantico
+		| { inicializacion }? // pred semantico, caso int var=23
 			// si tiene un true se puede asignar cosas
 		  i2: IDENT OP_ASIG valor:q_argumento	// CASO: int var=23
 		  { 
@@ -106,44 +131,48 @@ declaracion !	// desactivamos el AST contructor por defecto
 				//raiz.addChild(#valor);
 				## = raiz;
 		  }
-		| { inicializacion }? // pred semantico
+		| { inicializacion }? // pred semantico, caso int var(algo)
 			// si tiene un true se puede asignar cosas
-		  i3: IDENT PARENT_AB li:q_argumento PARENT_CE	// CASO: int jarl[]
+		  i3: IDENT PARENT_AB li:q_argumento PARENT_CE	// CASO: int jarl(hola)
 		  { raiz.addChild(#i3);
 		  	raiz.addChild(#li);
+		  	## = raiz;
+		  }
+		| { inicializacion }? // pred semantico, caso int vector[30]
+			// si tiene un true se puede asignar cosas
+		  i4: IDENT CORCHETE_AB (LIT_ENTERO_OCTAL|LIT_ENTERO_DECIMAL) CORCHETE_CE	// CASO: int jarl[23]
+		  { raiz.addChild(#i4);
+		  	//raiz.addChild(#li);
 		  	## = raiz;
 		  }
 ;
 
 expresion : r1:q_argumento { ## = #(#[EXPRESION], #r1); } ;
 
-// p.e. int qwe , jarl = 123 , HOLA , _asd , jarl = asd , ere [ 23 ] ;
-declaracion_local : ttipo dec_var;
-
-dec_var : IDENT^ dec_asig siguiente_dec
-		| e_vector dec_asig siguiente_dec;
-dec_arg : IDENT^ dec_asig
-		| e_vector;
-// quizas haya que poner otra regla				
-siguiente_dec :	COMA dec_arg siguiente_dec
-				| PUNTO_COMA ;
-				
-dec_asig : OP_ASIG q_argumento
-			| /* nada */ ;
 				
 // Diferentes tipos de sentencias
-sentencia :	sentencia_llam_met
-			/*| sentencia_asig 
-			| sentencia_cond_simple
+// El llamante ya ha puesto el instruccion*
+instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
+			| sentencia_llam_met
+			/*| sentencia_cond_simple
 			| sentencia_llam_func*/
+			| instNula
+//			| /* nada */ // SE TENDRA QUE ELIMINAR
 			;
+
+// instruccion NULA
+instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
 			
 // Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl()
-sentencia_llam_met : IDENT PUNTO IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA;
+sentencia_llam_met : IDENT PUNTO! IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA!
+						{ ## = #( #[CALL_METODO, "CALL_METODO"], ##);};
 // la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
-lista_valores : q_argumento
-			| COMA lista_valores;
-				
+lista_valores : q_argumento (COMA! q_argumento)*
+						{ ## = #( #[ARGUMENTOS_ENTRADA, "ARGUMENTOS_ENTRADA"], ##);};
+
+
+sentencia_asig : PUNTO_COMA!;
+	
 // Tipo de argumento que se asignan a variables y demás
 // serán: 34, "hola", funcionJARL(23), algo.algo()
 q_argumento : LIT_CADENA
@@ -172,26 +201,3 @@ cadena : vector
 
 vector : CORCHETE_AB LIT_ENTERO_DECIMAL CORCHETE_CE; // int e[20]
 
-
-// DECLARACIONES DE VARIABLES
-// sin asignacion.
-dec_entero : INT int_var ;
-int_var : IDENT asig 
-		| IDENT vector dec_entero_cad;
-dec_entero_cad : COMA int_var
-		| OP_ASIG IDENT dec_entero_cad_fin
-		| PUNTO_COMA;
-dec_entero_cad_fin : COMA int_var
-		| PUNTO_COMA;
-asig : OP_ASIG numero
-		| OP_ASIG asig_iden
-		| COMA int_var
-		| PUNTO_COMA ;
-		exception catch [RecognitionException ex]
-				{	 }
-asig_iden : IDENT COMA int_var 
-		| IDENT PUNTO_COMA ;
-numero : LIT_ENTERO_DECIMAL COMA int_var
-		| LIT_ENTERO_OCTAL COMA int_var
-		| LIT_ENTERO_DECIMAL PUNTO_COMA
-		| LIT_ENTERO_OCTAL PUNTO_COMA ;
