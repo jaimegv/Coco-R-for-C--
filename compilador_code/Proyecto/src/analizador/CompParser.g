@@ -125,17 +125,24 @@ declaracion !	// desactivamos el AST contructor por defecto
 			}
 		| { inicializacion }? // pred semantico, caso int var=23
 			// si tiene un true se puede asignar cosas
-		  i2: IDENT OP_ASIG valor:q_argumento	// CASO: int var=23
+		  i2: IDENT OP_ASIG q_argumento	// CASO: int var=23
 		  { 
 				raiz.addChild(#i2);
 				//raiz.addChild(#valor);
 				## = raiz;
 		  }
+/*		| { inicializacion }? // pred semantico, caso: hola.hola =234
+		  i5: IDENT PUNTO! IDENT OP_ASIG q_argumento
+		  { 
+				raiz.addChild(#i5);
+				## = raiz;
+		  }
+*/
 		| { inicializacion }? // pred semantico, caso int var(algo)
 			// si tiene un true se puede asignar cosas
-		  i3: IDENT PARENT_AB li:q_argumento PARENT_CE	// CASO: int jarl(hola)
+		  i3: IDENT PARENT_AB! valor:q_argumento PARENT_CE! 
 		  { raiz.addChild(#i3);
-		  	raiz.addChild(#li);
+		  	raiz.addChild(#valor);
 		  	## = raiz;
 		  }
 		| { inicializacion }? // pred semantico, caso int vector[30]
@@ -157,7 +164,6 @@ instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
 			/*| sentencia_cond_simple
 			| sentencia_llam_func*/
 			| instNula
-//			| /* nada */ // SE TENDRA QUE ELIMINAR
 			;
 
 // instruccion NULA
