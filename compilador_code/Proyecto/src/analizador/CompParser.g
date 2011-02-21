@@ -27,6 +27,8 @@ tokens {
 	INTS_DEC_VAR ;
 	INST_EXPRESION ;
 	EXPRESION ;
+	OP_MENOS_UNARIO ;
+	ACCESO ;
 	CLASE ;			// declracion de una clase
 	DEC_METODO ; 	// declaracion de metodo de una clase
 	CALL_METODO ; 	// llamada a un metodo
@@ -186,7 +188,7 @@ expAsignacion : expOLogico (OP_ASIG^ expOLogico)?;
 
 expOLogico: expYLogico (OP_OR^ expYLogico)?;
 
-expYLogico : expComparacion (OP_AND^ expComparacion);
+expYLogico : expComparacion (OP_AND^ expComparacion)?;
 
 expComparacion : expAritmetica 
 		(
@@ -243,13 +245,9 @@ literal : LIT_ENTERO_OCTAL
 instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
 			
 // Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl() ó hola.jar=234;
-instDecMet :
+instDecMet :	// declarar metodo
 		d : IDENT PUNTO! IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA!
-		{   AST raiz = ##; 
-			raiz.addChild(#asignacion);
-			## = raiz;
-			## = #(#[CALL_METODO, "CALL_METODO"], ##);
-		};
+		{	## = #(#[CALL_METODO, "CALL_METODO"], ##); };
 
 // la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
 lista_valores : q_argumento (COMA! q_argumento)*
