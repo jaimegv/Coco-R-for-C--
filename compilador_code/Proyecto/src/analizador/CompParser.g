@@ -29,6 +29,8 @@ tokens {
 	EXPRESION ;
 	OP_MENOS_UNARIO ;
 	ACCESO ;
+	LISTA_EXPRESIONES ;
+	LLAMADA ;
 	CLASE ;			// declracion de una clase
 	DEC_METODO ; 	// declaracion de metodo de una clase
 	CALL_METODO ; 	// llamada a un metodo
@@ -169,7 +171,7 @@ declaracion !	// desactivamos el AST contructor por defecto
 // Diferentes tipos de sentencias
 // El llamante ya ha puesto el instruccion*
 instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
-			| instDecMet
+//			| instDecMet
 			| instExpresion					// asig, suma...
 			/*| sentencia_cond_simple
 			| sentencia_llam_func*/
@@ -224,21 +226,34 @@ acceso :  r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
 /* Raiz de los accesos que no son llamadas a un metodos de la clase*/
 raizAcceso : IDENT
 			| literal
-			//| llamada
-			//| conversion
+			| llamada
+			//| conversion	// conversion de tipos, NO!
 			| PARENT_AB! expresion PARENT_CE! // volver a mirar el tutorial
 			;
 			
 raizAccesoConSubAccesos : OP_MAS;
 
-subAcceso : IDENT; // falta! mirar tutorial 
+subAcceso : IDENT
+			| llamada; // falta! mirar tutorial 
+
+// Representa:
+// llamada a un metodo
+// subacceso en forma de llamada
+// llamada a un constructor
+// subacceso en forma de constructor
+llamada : IDENT PARENT_AB! listaExpresiones PARENT_CE!
+		{ ## = #(#[LLAMADA, "LLAMADA"], ##);}
+		;
+listaExpresiones : (expresion (COMA! expresion)*)?
+		{ ## = #(#[LISTA_EXPRESIONES, "LISTA_EXPRESIONES"], ##);}
+		;
 
 literal : LIT_ENTERO_OCTAL
 		| LIT_ENTERO_DECIMAL
 		| LIT_CADENA
 		| CTE_LOGTRUE
 		| CTE_LOGFALSE
-		// FALTA! mirar tutorial
+		// Creo que es todo
 		;
 
 // instruccion NULA

@@ -35,8 +35,13 @@ void main (char er, int qqwe, int qwe)	// función principal
 	int lista(asd);
 	
 	// instruccion nula	
-	;
+;
+
+// aSIGNACIONES
+s = "El factorial ";
 hola = adios + 2;
+For = FactorialFor (num);
+ella.numero = 4321;	/* pongo su número de DNI con el atributo, pues es público */
 
 	// llamadas a metodos
 	yo.imprime ();
