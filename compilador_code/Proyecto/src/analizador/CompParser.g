@@ -1,4 +1,4 @@
-// Definimos el paquete al que pertenece nuestro analizador
+ // Definimos el paquete al que pertenece nuestro analizador
 header {
 	package analizador;
 }
@@ -109,11 +109,11 @@ instDecVar { final AST raiz = #[INTS_DEC_VAR, "variable"]; }
 		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
 		;
 listaDeclaraciones [AST raiz, boolean inicializacion] : 
-		t: ttipo! declaracion[raiz, #t, inicializacion]
-				(COMA! declaracion[raiz, #t, inicializacion])*
+		t: ttipo! declaracion[raiz, #t, inicializacion, false]
+				(COMA! declaracion[raiz, #t, inicializacion, false])*
 		;
 declaracion !	// desactivamos el AST contructor por defecto
-		[AST r, AST t, boolean inicializacion]	// parametros de la gen gramtrica
+		[AST r, AST t, boolean inicializacion, boolean decmetodo]	// parametros de la gen gramtrica
 		{	
 			AST raiz = astFactory.dupTree(r);	// copiamos el arbol
 			raiz.addChild(astFactory.dupTree(t));	// copia del arbol
@@ -131,17 +131,26 @@ declaracion !	// desactivamos el AST contructor por defecto
 				//raiz.addChild(#valor);
 				## = raiz;
 		  }
-/*		| { inicializacion }? // pred semantico, caso: hola.hola =234
+/*		| { decmetodo }? // pred semantico, caso: hola.hola =234
 		  i5: IDENT PUNTO! IDENT OP_ASIG q_argumento
 		  { 
 				raiz.addChild(#i5);
 				## = raiz;
 		  }
-*/
-		| { inicializacion }? // pred semantico, caso int var(algo)
+
+		| { decmetodo }? // pred semantico, caso saludo.hola(); ó saludo.hola(23);
 			// si tiene un true se puede asignar cosas
-		  i3: IDENT PARENT_AB! valor:q_argumento PARENT_CE! 
+		  i3: IDENT PUNTO! IDENT PARENT_AB! arg:q_argumento PARENT_CE! (OP_ASIG asignado:q_argumento)? PUNTO_COMA! 
 		  { raiz.addChild(#i3);
+		  	raiz.addChild(#arg);
+		  	raiz.addChild(#asignado);
+		  	## = raiz;
+		  }
+*/
+		| { inicializacion }? // pred semantico, caso saludo.hola(); ó saludo.hola(23);
+			// si tiene un true se puede asignar cosas
+		  i6: IDENT PARENT_AB! valor:q_argumento PARENT_CE! 
+		  { raiz.addChild(#i6);
 		  	raiz.addChild(#valor);
 		  	## = raiz;
 		  }
@@ -160,7 +169,7 @@ expresion : r1:q_argumento { ## = #(#[EXPRESION], #r1); } ;
 // Diferentes tipos de sentencias
 // El llamante ya ha puesto el instruccion*
 instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
-			| sentencia_llam_met
+			| instDecMet
 			/*| sentencia_cond_simple
 			| sentencia_llam_func*/
 			| instNula
@@ -169,15 +178,22 @@ instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
 // instruccion NULA
 instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
 			
-// Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl()
-sentencia_llam_met : IDENT PUNTO! IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA!
-						{ ## = #( #[CALL_METODO, "CALL_METODO"], ##);};
+// Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl() ó hola.jar=234;
+instDecMet :
+		d : IDENT PUNTO! IDENT (PARENT_AB! lista_valores PARENT_CE!)? (asignacion:detIgual[#d])? PUNTO_COMA!
+		{   AST raiz = ##; 
+			raiz.addChild(#asignacion);
+			## = raiz;
+			## = #(#[CALL_METODO, "CALL_METODO"], ##);
+		};
+
 // la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
 lista_valores : q_argumento (COMA! q_argumento)*
 						{ ## = #( #[ARGUMENTOS_ENTRADA, "ARGUMENTOS_ENTRADA"], ##);};
 
 
-sentencia_asig : PUNTO_COMA!;
+detIgual [AST raiz] : 
+		t: OP_ASIG (declaracion[raiz, #t, false, true]|q_argumento);
 	
 // Tipo de argumento que se asignan a variables y demás
 // serán: 34, "hola", funcionJARL(23), algo.algo()
