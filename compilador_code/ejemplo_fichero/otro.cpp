@@ -42,9 +42,12 @@ s = "El factorial ";
 hola = adios + 2;
 For = FactorialFor (num);
 ella.numero = 4321;	/* pongo su número de DNI con el atributo, pues es público */
+v[0] = (v[2] < v[3]) ? v[2]: v[3];	/* si v[2]<v[3], v[0]=v[2]; en otro caso v[0]=v[3] */
+
 
 	// llamadas a metodos
 	yo.imprime ();
+	yo.ponSexo (true);	// pongo el sexo
 	yo.ponNumero (1234);	// pongo mi número de DNI con el método
 	yo.ponNombre ("Pepe");	// pongo los nombres con el método
 	fecha.ponFecha (11, 2, 1972);	 // creo mi fecha de nacimiento
