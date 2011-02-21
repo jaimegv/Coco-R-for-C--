@@ -201,7 +201,43 @@ expAritmetica : expProducto ((OP_MAS^|OP_MENOS^) expProducto)*;
 expProducto : expCambioSigno
 		((OP_PRODUCTO^ | OP_DIVISION^) expCambioSigno)*;
 
+expCambioSigno : 
+			( OP_MENOS! expPostIncremento
+				{ ## = #(#[OP_MENOS_UNARIO,"OP_MENOS_UNARIO"], ##); }
+			) | (OP_MAS!)? expPostIncremento;
 
+expPostIncremento : expNegacion (OP_MASMAS | OP_MENOSMENOS)?;
+
+// seria esto: expEsUn; pero no gastamos esta expresion
+expNegacion : (OP_NO^)* acceso;
+
+//expEsUn : acceso (RES_ESUN^ tipo ); no tenemos de esto
+
+acceso :  r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
+			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )*
+		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
+			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+		
+		;
+		
+/* Raiz de los accesos que no son llamadas a un metodos de la clase*/
+raizAcceso : IDENT
+			| literal
+			//| llamada
+			//| conversion
+			| PARENT_AB! expresion PARENT_CE! // volver a mirar el tutorial
+			;
+			
+raizAccesoConSubAccesos : OP_MAS;
+
+subAcceso : IDENT; // falta! mirar tutorial 
+
+literal : LIT_ENTERO_OCTAL
+		| LIT_ENTERO_DECIMAL
+		| LIT_CADENA
+		| CTE_LOGTRUE
+		| CTE_LOGFALSE
+		// FALTA! mirar tutorial
+		;
 
 // instruccion NULA
 instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
@@ -232,7 +268,8 @@ q_argumento : LIT_CADENA
 			| IDENT
 			| CTE_LOGTRUE
 			| CTE_LOGFALSE
-			| /* nada */ ;
+			| /* nada */ 
+;
 
 // declaracion de un elem de un vector (elem_vector)
 // afirmamos que solo puede ir un entero dentro del corchete
