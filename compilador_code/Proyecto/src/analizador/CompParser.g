@@ -25,6 +25,7 @@ tokens {
 	DEC_ENTERO ;
 	RES_PARAMETRO ;
 	INTS_DEC_VAR ;
+	INST_EXPRESION ;
 	EXPRESION ;
 	CLASE ;			// declracion de una clase
 	DEC_METODO ; 	// declaracion de metodo de una clase
@@ -162,25 +163,52 @@ declaracion !	// desactivamos el AST contructor por defecto
 		  	## = raiz;
 		  }
 ;
-
-expresion : r1:q_argumento { ## = #(#[EXPRESION], #r1); } ;
-
 				
 // Diferentes tipos de sentencias
 // El llamante ya ha puesto el instruccion*
 instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
 			| instDecMet
+			| instExpresion					// asig, suma...
 			/*| sentencia_cond_simple
 			| sentencia_llam_func*/
-			| instNula
+			| instNula						// Simplemente: -> ; <-
 			;
+
+// instExpresion
+// lleva el peso de todo: cond(simple|comleja), asig...
+instExpresion : expresion PUNTO_COMA!
+			{ ## = #( #[INST_EXPRESION, "INST_EXPRESION"], ##); };
+
+// EMPIEZA LAS DIFERENTES EXPRESION
+expresion : expAsignacion;
+
+expAsignacion : expOLogico (OP_ASIG^ expOLogico)?;
+
+expOLogico: expYLogico (OP_OR^ expYLogico)?;
+
+expYLogico : expComparacion (OP_AND^ expComparacion);
+
+expComparacion : expAritmetica 
+		(
+			(OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
+				OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^
+			)
+			expAritmetica
+		)*;
+
+expAritmetica : expProducto ((OP_MAS^|OP_MENOS^) expProducto)*;
+
+expProducto : expCambioSigno
+		((OP_PRODUCTO^ | OP_DIVISION^) expCambioSigno)*;
+
+
 
 // instruccion NULA
 instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
 			
 // Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl() ó hola.jar=234;
 instDecMet :
-		d : IDENT PUNTO! IDENT (PARENT_AB! lista_valores PARENT_CE!)? (asignacion:detIgual[#d])? PUNTO_COMA!
+		d : IDENT PUNTO! IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA!
 		{   AST raiz = ##; 
 			raiz.addChild(#asignacion);
 			## = raiz;
@@ -193,7 +221,7 @@ lista_valores : q_argumento (COMA! q_argumento)*
 
 
 detIgual [AST raiz] : 
-		t: OP_ASIG (declaracion[raiz, #t, false, true]|q_argumento);
+		t: OP_ASIG 	;
 	
 // Tipo de argumento que se asignan a variables y demás
 // serán: 34, "hola", funcionJARL(23), algo.algo()
