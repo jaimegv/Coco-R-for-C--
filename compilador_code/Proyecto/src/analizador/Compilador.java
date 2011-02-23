@@ -32,7 +32,7 @@ public class Compilador {
 						//CommoTokenStream tokens = new CommonTokenStream(Analizador);
 						CompParser Parser = new CompParser(Analizador);
 						Parser.setFilename(args[0]);
-						Parser.subprograma();
+						Parser.programa();
 						AST ast = Parser.getAST();
 
 						System.out.println(ast.toStringList());						
