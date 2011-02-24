@@ -38,6 +38,7 @@ tokens {
 	ARGUMENTOS_ENTRADA ; 	// LISTA DE ARGUMENTOS DE ENTRADA
 	SUBPROGRAMA ;	// declaracion de una funcion
 	PROGRAMA ; // El punto de entrada del programa
+	INST_RETURN ; // instruccion de RETURN
 }
 /* NOTAS:
 * - Significado de las almohadillas en la pagina 64 del manual ANTLR
@@ -105,8 +106,15 @@ listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; }
 
 // Cuerpo de un subprograma o programa general
 // lista declaracion de instrucciones
-cuerpo_sp : ( instruccion )*
+cuerpo_sp : ( instruccion )* (instReturn)?
 			{ ## = #( #[LISTA_INSTRUCCIONES, "LISTA_INSTRUCCIONES"], ##);}  
+		;
+
+// Instruccion return
+// puede o no estar, y devolver un valor o una var...
+instReturn : RETURN! (instExpresion 
+						| PUNTO_COMA! /*nada*/)
+			{ ## = #( #[INST_RETURN, "INST_RETURN"], ##);}
 		;
 
 // Instruccion de declaracion de variables
@@ -176,7 +184,7 @@ instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
 			/*| sentencia_cond_simple
 			| sentencia_llam_func*/
 			| instNula						// Simplemente: -> ; <-
-			;
+			; // No se añade la insReturn aqui!
 
 // instExpresion
 // lleva el peso de todo: cond(simple|comleja), asig...

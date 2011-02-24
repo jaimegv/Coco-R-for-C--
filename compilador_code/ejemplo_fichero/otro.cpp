@@ -11,6 +11,7 @@ int variable_global=10;
 
 int Fecha::daDia (void)
 {
+//	return !masculino;
 
 }
 
@@ -65,4 +66,12 @@ v[0] = (v[2] < v[3]) ? v[2]: v[3];	/* si v[2]<v[3], v[0]=v[2]; en otro caso v[0]
 		cout << s;
 	k=4;
 */
+
+// ENTIENDE TODOS ESTOS RETURNS!!
+//	return 1;
+//	return n * FactorialRecursivo (n - 1);	// llamada recursiva
+//	return factorial;	// devuelve el valor de la variable factorial
+//	return;	// finaliza la ejecuci�n de la funci�n (en este caso, se podr�a omitir)
+//	return d;
+//	return 2001-nacimiento.daAnno ();
 }
