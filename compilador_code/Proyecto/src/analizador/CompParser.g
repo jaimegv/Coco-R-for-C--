@@ -167,9 +167,8 @@ declaracion !	// desactivamos el AST contructor por defecto
 		  	raiz.addChild(#valor);
 		  	## = raiz;
 		  }
-		| { inicializacion }? // pred semantico, caso int vector[30]
-			// si tiene un true se puede asignar cosas
-		  i4: IDENT CORCHETE_AB (LIT_ENTERO_OCTAL|LIT_ENTERO_DECIMAL) CORCHETE_CE	// CASO: int jarl[23]
+		| // si tiene un true se puede asignar cosas
+		  i4: IDENT CORCHETE_AB (LIT_ENTERO_OCTAL|LIT_ENTERO_DECIMAL)? CORCHETE_CE	// CASO: int jarl[23]
 		  { raiz.addChild(#i4);
 		  	//raiz.addChild(#li);
 		  	## = raiz;
@@ -181,10 +180,16 @@ declaracion !	// desactivamos el AST contructor por defecto
 instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
 //			| instDecMet
 			| instExpresion					// asig, suma...
-			/*| sentencia_cond_simple
-			| sentencia_llam_func*/
+			//| instConSimple
+			//| sentencia_llam_func
 			| instNula						// Simplemente: -> ; <-
 			; // No se añade la insReturn aqui!
+
+// instConSimple
+// del tipo (v[2] < v[3]) ? v[2]: v[3]
+//sentCondSimple
+sentCondSimple : PARENT_AB! acceso (PARENT_CE!)? DOSPUNTOS literal INTER literal
+		;
 
 // instExpresion
 // lleva el peso de todo: cond(simple|comleja), asig...
@@ -221,25 +226,28 @@ expCambioSigno :
 expPostIncremento : expNegacion (OP_MASMAS | OP_MENOSMENOS)?;
 
 // seria esto: expEsUn; pero no gastamos esta expresion
-expNegacion : (OP_NO^)* acceso;
+expNegacion : (OP_NOT^)* acceso;
 
 //expEsUn : acceso (RES_ESUN^ tipo ); no tenemos de esto
 
-acceso :  r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
+acceso : r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
 			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )*
 		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
-			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+		
+			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+
+		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
+//			( PUNTO! sub3:subAcceso! { ##.addChild(#sub3); } )*
 		;
-		
 /* Raiz de los accesos que no son llamadas a un metodos de la clase*/
 raizAcceso : IDENT
 			| literal
-			| llamada
+			//| llamada
 			//| conversion	// conversion de tipos, NO!
 			| PARENT_AB! expresion PARENT_CE! // volver a mirar el tutorial
 			;
 			
 raizAccesoConSubAccesos : OP_MAS;
+
+raizAccesoSinAccesos: llamada;
 
 subAcceso : IDENT
 			| llamada; // falta! mirar tutorial 
@@ -252,7 +260,7 @@ subAcceso : IDENT
 llamada : IDENT PARENT_AB! listaExpresiones PARENT_CE!
 		{ ## = #(#[LLAMADA, "LLAMADA"], ##);}
 		;
-listaExpresiones : (expresion (COMA! expresion)*)?
+listaExpresiones : ((IDENT | literal) (COMA! (IDENT | literal))*)?
 		{ ## = #(#[LISTA_EXPRESIONES, "LISTA_EXPRESIONES"], ##);}
 		;
 
