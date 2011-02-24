@@ -113,7 +113,7 @@ cuerpo_sp : ( instruccion )* (instReturn)?
 // Instruccion return
 // puede o no estar, y devolver un valor o una var...
 instReturn : RETURN! (instExpresion 
-						| PUNTO_COMA! /*nada*/)
+						| PUNTO_COMA! /*nada*/)	// return; se puede omitir
 			{ ## = #( #[INST_RETURN, "INST_RETURN"], ##);}
 		;
 
@@ -262,6 +262,7 @@ literal : LIT_ENTERO_OCTAL
 		| CTE_LOGTRUE
 		| CTE_LOGFALSE
 		// Creo que es todo
+		// añadido tras ver el condicional simple
 		;
 
 // instruccion NULA
