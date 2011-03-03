@@ -1,4 +1,4 @@
- // Definimos el paquete al que pertenece nuestro analizador
+// Definimos el paquete al que pertenece nuestro analizador
 header {
 	package analizador;
 }
@@ -39,6 +39,8 @@ tokens {
 	SUBPROGRAMA ;	// declaracion de una funcion
 	PROGRAMA ; // El punto de entrada del programa
 	INST_RETURN ; // instruccion de RETURN
+	CONDSIMPLE ; // Condicional simple
+	LITERAL ; // numero enteros, cadenas...
 }
 /* NOTAS:
 * - Significado de las almohadillas en la pagina 64 del manual ANTLR
@@ -125,6 +127,7 @@ listaDeclaraciones [AST raiz, boolean inicializacion] :
 		t: ttipo! declaracion[raiz, #t, inicializacion, false]
 				(COMA! declaracion[raiz, #t, inicializacion, false])*
 		;
+
 declaracion !	// desactivamos el AST contructor por defecto
 		[AST r, AST t, boolean inicializacion, boolean decmetodo]	// parametros de la gen gramtrica
 		{	
@@ -180,16 +183,10 @@ declaracion !	// desactivamos el AST contructor por defecto
 instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
 //			| instDecMet
 			| instExpresion					// asig, suma...
-			//| instConSimple
+			| instCond
 			//| sentencia_llam_func
 			| instNula						// Simplemente: -> ; <-
 			; // No se añade la insReturn aqui!
-
-// instConSimple
-// del tipo (v[2] < v[3]) ? v[2]: v[3]
-//sentCondSimple
-sentCondSimple : PARENT_AB! acceso (PARENT_CE!)? DOSPUNTOS literal INTER literal
-		;
 
 // instExpresion
 // lleva el peso de todo: cond(simple|comleja), asig...
@@ -199,7 +196,17 @@ instExpresion : expresion PUNTO_COMA!
 // EMPIEZA LAS DIFERENTES EXPRESION
 expresion : expAsignacion;
 
-expAsignacion : expOLogico (OP_ASIG^ expOLogico)?;
+expAsignacion : expOLogico (OP_ASIG^ ( instCondSimple | expOLogico ) )?;
+
+// instConSimple
+// del tipo (v[2] < v[3]) ? v[2]: v[3]
+//sentCondSimple
+instCondSimple : PARENT_AB! acceso (OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
+										OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^)
+							acceso
+				 PARENT_CE! INTER acceso DOSPUNTOS acceso
+				 { ## = #( #[CONDSIMPLE, "CONDSIMPLE"], ##); }
+		;	// tambien la meto en la regla: expresion o una mas adelante, jejeje
 
 expOLogico: expYLogico (OP_OR^ expYLogico)?;
 
@@ -210,7 +217,7 @@ expComparacion : expAritmetica
 			(OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
 				OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^
 			)
-			expAritmetica
+			expAritmetica 
 		)*;
 
 expAritmetica : expProducto ((OP_MAS^|OP_MENOS^) expProducto)*;
@@ -230,28 +237,34 @@ expNegacion : (OP_NOT^)* acceso;
 
 //expEsUn : acceso (RES_ESUN^ tipo ); no tenemos de esto
 
-acceso : r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
+acceso 	: r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
 			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )*
-		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
+/*		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
 			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+
-		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
+*/
+		//| r4: literal
+//		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
 //			( PUNTO! sub3:subAcceso! { ##.addChild(#sub3); } )*
 		;
 /* Raiz de los accesos que no son llamadas a un metodos de la clase*/
-raizAcceso : IDENT
-			| literal
-			//| llamada
+raizAcceso : IDENT 
+			| llamada
+			| l1:literal
 			//| conversion	// conversion de tipos, NO!
-			| PARENT_AB! expresion PARENT_CE! // volver a mirar el tutorial
+			| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
+													##.addChild(#e1); }
 			;
-			
+
 raizAccesoConSubAccesos : OP_MAS;
 
-raizAccesoSinAccesos: llamada;
+raizAccesoSinAccesos: llamada 
+//			| PARENT_AB! expresion PARENT_CE!;
+;
 
 subAcceso : IDENT
-			| llamada; // falta! mirar tutorial 
-
+			| llamada
+;
+ 
 // Representa:
 // llamada a un metodo
 // subacceso en forma de llamada
@@ -263,23 +276,46 @@ llamada : IDENT PARENT_AB! listaExpresiones PARENT_CE!
 listaExpresiones : ((IDENT | literal) (COMA! (IDENT | literal))*)?
 		{ ## = #(#[LISTA_EXPRESIONES, "LISTA_EXPRESIONES"], ##);}
 		;
-
-literal : LIT_ENTERO_OCTAL
-		| LIT_ENTERO_DECIMAL
-		| LIT_CADENA
-		| CTE_LOGTRUE
-		| CTE_LOGFALSE
+literal : LIT_ENTERO_OCTAL { ## = #(#[LITERAL, "ent_OCTAL"], ##);}
+		| LIT_ENTERO_DECIMAL { ## = #(#[LITERAL, "ENT_DECIMAL"], ##);}
+		| LIT_CADENA { ## = #(#[LITERAL, "LIT_CADENA"], ##);}
+		| CTE_LOGTRUE { ## = #(#[LITERAL, "LIT_TRUE"], ##);}
+		| CTE_LOGFALSE { ## = #(#[LITERAL, "LIT_FALSE"], ##);}
 		// Creo que es todo
 		// añadido tras ver el condicional simple
 		;
 
 // instruccion NULA
 instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
-			
+
 // Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl() ó hola.jar=234;
 instDecMet :	// declarar metodo
 		d : IDENT PUNTO! IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA!
 		{	## = #(#[CALL_METODO, "CALL_METODO"], ##); };
+
+// Intruccion Condicional grande!
+// if (juanito=9) {} ...
+instCond : 	IF^ PARENT_AB! expresion PARENT_CE!
+			LLAVE_AB! cuerpo_sp LLAVE_CE!
+			sino 
+;
+
+// if (pascual)... 
+sino : sinosi sino
+		| sinofin
+		| /*nada*/
+;
+
+// else if (lalala) 
+// 	{hagase mi voluntad}		
+sinosi : ELSE^ IF PARENT_AB! expresion PARENT_CE!
+			LLAVE_AB! cuerpo_sp LLAVE_CE!
+;
+
+// else {hagase mi voluntad}
+sinofin: ELSE^
+			LLAVE_AB! cuerpo_sp LLAVE_CE!
+;
 
 // la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
 lista_valores : q_argumento (COMA! q_argumento)*

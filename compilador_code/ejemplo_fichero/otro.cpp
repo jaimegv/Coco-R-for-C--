@@ -11,11 +11,28 @@ int variable_global=10;
 
 int Fecha::daDia (void)
 {
-int v[10], zv[10];
-int hola;
-
-34.hola =34."hola";
+/*	nacimiento.imprime();
+	yo.ponNumero (1234);	// pongo mi n�mero de DNI con el m�todo
+	ella.numero = 4321;	// pongo su n�mero de DNI con el atributo, pues es p�blico
+	yo.ponNombre ("Pepe");	// pongo los nombres con el m�todo
+	fecha.ponFecha (11, 2, 1972);	 // creo mi fecha de nacimiento
+	yo.ponFechaNacimiento (fecha);	 // pongo mi fecha de nacimiento
+	fecha.ponFecha (13, 10, 1975);	 // creo su fecha de nacimiento
+	ella.ponFechaNacimiento (fecha); // pongo su fecha de nacimiento
+	yo.ponSexo (true);	// pongo el sexo
 //	return !masculino;
+*/
+//vlu = (primero.pru < segundo.sre) ? terce : cuatri;	/* si v[2]<v[3], v[0]=v[2]; en otro caso v[0]=v[3] */
+
+ella.numero = (23 < 4321);	// pongo su n�mero de DNI con el atributo, pues es p�blico
+
+if (num < 0)
+{	yo.ponSexo (true);}	// pongo el sexo
+else
+{juan;}
+
+
+return 2001-nacimiento.daAnno ();
 
 }
 
