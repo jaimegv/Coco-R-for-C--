@@ -1,13 +1,4 @@
-// hola
-/*asfdsdf
-Adasd
-void hola (char er, int qqwe, int qwe) {
-	int qwe, jarl = 123, HOLA, _asd, jarl=asd, ere[23];
-	yo.imprime ();
-	ella.imprime (as);
-}
-*/
-int variable_global=10;
+int variable_global;
 
 int Fecha::daDia (void)
 {
@@ -24,16 +15,14 @@ int Fecha::daDia (void)
 */
 //vlu = (primero.pru < segundo.sre) ? terce : cuatri;	/* si v[2]<v[3], v[0]=v[2]; en otro caso v[0]=v[3] */
 
-ella.numero = (23 < 4321);	// pongo su n�mero de DNI con el atributo, pues es p�blico
+ella = (jarl + pepe);	// pongo su n�mero de DNI con el atributo, pues es p�blico
 
 if (num < 0)
 {	yo.ponSexo (true);}	// pongo el sexo
 else
 {juan;}
 
-
 return 2001-nacimiento.daAnno ();
-
 }
 
 void demo ()	// función sin argumentos que no devuelve nada 

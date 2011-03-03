@@ -53,17 +53,17 @@ tokens {
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-programa :  instDecVar
+programa : (instDecVar)*
 			( decMetodo
-		  		| subprograma 
-		  			| decClase /**/)*	// aqui irá la decClase, programas, metodos... 
-			main 
+		  		| subprograma
+		  			| decClase )*	// aqui irá la decClase, programas, metodos... 
+			main
 				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
 			;
 
 
 // aqui se entra al main->raiz del arbol
-main: ttipo MAIN^ PARENT_AB! listaDecParams PARENT_CE!
+main: ttipo[false] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
 		LLAVE_AB! 
 			cuerpo_sp 
 		LLAVE_CE!
@@ -72,7 +72,7 @@ main: ttipo MAIN^ PARENT_AB! listaDecParams PARENT_CE!
 
 /* Reglas de generación*/
 // FUNCIONES-SUBPROGRAMAS C++
-subprograma : ttipo IDENT^ PARENT_AB! listaDecParams PARENT_CE!
+subprograma : ttipo[false] IDENT^ PARENT_AB! listaDecParams PARENT_CE!
 				LLAVE_AB! 
 					cuerpo_sp 
 				LLAVE_CE!
@@ -89,7 +89,7 @@ decClase : CLASS! IDENT^ LLAVE_AB!
 
 // Declaracion de metodos de una clase
 // ejemplo: int Fecha::daDia (void)
-decMetodo : ttipo IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_CE!
+decMetodo : ttipo[false] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_CE!
 				LLAVE_AB! 
 					cuerpo_sp 
 				LLAVE_CE!
@@ -99,7 +99,7 @@ decMetodo : ttipo IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_C
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
 listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; } 
-		:	ttipo
+		:	ttipo[true]
 			| (listaDeclaraciones[raiz, false] 
 				(COMA! listaDeclaraciones[raiz, false])*
 			)?
@@ -120,11 +120,11 @@ instReturn : RETURN! (instExpresion
 		;
 
 // Instruccion de declaracion de variables
-instDecVar { final AST raiz = #[INTS_DEC_VAR, "variable"]; } 
+instDecVar { final AST raiz = #[INTS_DEC_VAR, "VARIABLE"]; } 
 		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
 		;
 listaDeclaraciones [AST raiz, boolean inicializacion] : 
-		t: ttipo! declaracion[raiz, #t, inicializacion, false]
+		t: ttipo[true]! declaracion[raiz, #t, inicializacion, false]
 				(COMA! declaracion[raiz, #t, inicializacion, false])*
 		;
 
@@ -141,10 +141,10 @@ declaracion !	// desactivamos el AST contructor por defecto
 			}
 		| { inicializacion }? // pred semantico, caso int var=23
 			// si tiene un true se puede asignar cosas
-		  i2: IDENT OP_ASIG q_argumento	// CASO: int var=23
+		  i2: IDENT OP_ASIG arg:q_argumento	// CASO: int var=23
 		  { 
 				raiz.addChild(#i2);
-				//raiz.addChild(#valor);
+				raiz.addChild(#arg);
 				## = raiz;
 		  }
 /*		| { decmetodo }? // pred semantico, caso: hola.hola =234
@@ -180,7 +180,7 @@ declaracion !	// desactivamos el AST contructor por defecto
 				
 // Diferentes tipos de sentencias
 // El llamante ya ha puesto el instruccion*
-instruccion : (ttipo IDENT)=> instDecVar	// declaracion de var
+instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var
 //			| instDecMet
 			| instExpresion					// asig, suma...
 			| instCond
@@ -196,7 +196,7 @@ instExpresion : expresion PUNTO_COMA!
 // EMPIEZA LAS DIFERENTES EXPRESION
 expresion : expAsignacion;
 
-expAsignacion : expOLogico (OP_ASIG^ ( instCondSimple | expOLogico ) )?;
+expAsignacion : expOLogico (OP_ASIG^ (/* instCondSimple | */expOLogico ) )?;
 
 // instConSimple
 // del tipo (v[2] < v[3]) ? v[2]: v[3]
@@ -342,12 +342,14 @@ q_argumento : LIT_CADENA
 e_vector : IDENT^ CORCHETE_AB! LIT_ENTERO_DECIMAL CORCHETE_CE! ;
 
 // tipos genericos que reconoce nuestro lenguaje
-ttipo : INT 
+ttipo [boolean variable] : 
+	INT
 	| BOOL
 	| VOID
 	| CHAR
 //	| CHAR OP_PRODUCTO // en caso de puntero a cadena, SOLO TENEMOS PARAM POR VALOR
-	| IDENT;	// puedo declarar una var del tipo de un objeto, p.e: Persona yo; 
+	| { variable }? // si es un ttipo de variable puede ser IDENT, e.o.c. NO
+		IDENT; 
 
 cadena : vector
 	| /* NADA (para el -> int IDENT*/;
