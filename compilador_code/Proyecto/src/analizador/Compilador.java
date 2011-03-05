@@ -29,10 +29,12 @@ public class Compilador {
 							Token token = Analizador.nextToken();
 							while(token.getType() != Token.EOF_TYPE) {
 								fichero.println(token);
-								// System.out.println("Léxico:"+token);
+								 System.out.println("Léxico:"+token);
 								token = Analizador.nextToken();
 							}
-							
+							fis = new FileInputStream(args[0]);
+							Analizador = new analizador(fis);
+
 							// Del analizador sintáctico
 							Analizador.setFilename(args[0]);
 							Analizador.setTokenObjectClass("antlr.CommonToken");
