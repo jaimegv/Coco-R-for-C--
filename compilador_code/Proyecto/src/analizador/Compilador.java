@@ -48,6 +48,7 @@ public class Compilador {
 //							System.out.println(ast.toStringList());
 
 							CompTreeParser Tree = new CompTreeParser();
+							((CompTreeParser) Tree).programa(ast);
 							System.out.println(ast.toStringList());
 
 //							float result = Tree.programa(ast);
