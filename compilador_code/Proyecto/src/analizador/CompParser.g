@@ -34,6 +34,7 @@ tokens {
 	CLASE ;			// declracion de una clase
 	DEC_METODO ; 	// declaracion de metodo de una clase
 	CALL_METODO ; 	// llamada a un metodo
+	DEC_MAIN ;
 	LISTA_INSTRUCCIONES ; // lista de intrucciones que pertenecen al cuerpo
 	ARGUMENTOS_ENTRADA ; 	// LISTA DE ARGUMENTOS DE ENTRADA
 	SUBPROGRAMA ;	// declaracion de una funcion
@@ -64,9 +65,10 @@ programa : (instDecVar)*
 
 // aqui se entra al main->raiz del arbol
 main: ttipo[false] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
-		LLAVE_AB! 
+		LLAVE_AB!
 			cuerpo_sp 
 		LLAVE_CE!
+		{ ## = #( #[DEC_MAIN, "DEC_MAIN"], ##);}
 		;
 
 
@@ -108,7 +110,7 @@ listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; }
 
 // Cuerpo de un subprograma o programa general
 // lista declaracion de instrucciones
-cuerpo_sp : ( instruccion )* (instReturn)?
+cuerpo_sp : ( instruccion )*
 			{ ## = #( #[LISTA_INSTRUCCIONES, "LISTA_INSTRUCCIONES"], ##);}  
 		;
 
@@ -186,6 +188,7 @@ instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var
 			| instCond
 			//| sentencia_llam_func
 			| instNula						// Simplemente: -> ; <-
+			| instReturn
 			; // No se añade la insReturn aqui!
 
 // instExpresion
@@ -251,8 +254,8 @@ raizAcceso : IDENT
 			| llamada
 			| l1:literal
 			//| conversion	// conversion de tipos, NO!
-			| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
-													##.addChild(#e1); }
+			//| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
+			//										##.addChild(#e1); }
 			;
 
 raizAccesoConSubAccesos : OP_MAS;
