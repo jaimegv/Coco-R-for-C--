@@ -42,6 +42,7 @@ tokens {
 	INST_RETURN ; // instruccion de RETURN
 	CONDSIMPLE ; // Condicional simple
 	LITERAL ; // numero enteros, cadenas...
+	VARSGLOBAL ;
 }
 /* NOTAS:
 * - Significado de las almohadillas en la pagina 64 del manual ANTLR
@@ -54,7 +55,7 @@ tokens {
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-programa : (instDecVar)*
+programa : listaVarGlobal
 			( decMetodo
 		  		| subprograma
 		  			| decClase )*	// aqui irá la decClase, programas, metodos... 
@@ -62,6 +63,9 @@ programa : (instDecVar)*
 				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
 			;
 
+listaVarGlobal : (instDecVar)*
+				{ ## = #( #[VARSGLOBAL, "VARSGLOBAL"], ##);}
+			;				
 
 // aqui se entra al main->raiz del arbol
 main: ttipo[false] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
@@ -95,12 +99,12 @@ decMetodo : ttipo[false] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams P
 				LLAVE_AB! 
 					cuerpo_sp 
 				LLAVE_CE!
-			{ ## = #( #[DEC_METODO, "decMetodo"], ##);}
+			{ ## = #( #[DEC_METODO, "DEC_METODO"], ##);}
 			;
 
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
-listaDecParams { final AST raiz = #[RES_PARAMETRO, "parametro"]; } 
+listaDecParams { final AST raiz = #[RES_PARAMETRO, "PARAMETRO"]; } 
 		:	ttipo[true]
 			| (listaDeclaraciones[raiz, false] 
 				(COMA! listaDeclaraciones[raiz, false])*
@@ -122,7 +126,7 @@ instReturn : RETURN! (instExpresion
 		;
 
 // Instruccion de declaracion de variables
-instDecVar { final AST raiz = #[INTS_DEC_VAR, "VARIABLE"]; } 
+instDecVar { final AST raiz = #[INTS_DEC_VAR, "INTS_DEC_VAR"]; } 
 		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
 		;
 listaDeclaraciones [AST raiz, boolean inicializacion] : 
@@ -199,7 +203,8 @@ instExpresion : expresion PUNTO_COMA!
 // EMPIEZA LAS DIFERENTES EXPRESION
 expresion : expAsignacion;
 
-expAsignacion : expOLogico (OP_ASIG^ (/* instCondSimple | */expOLogico ) )?;
+expAsignacion : expOLogico ( (OP_ASIG^ (/* instCondSimple | */expOLogico ))
+								|	(OP_ASIG_MAS^ (/* instCondSimple | */expOLogico )) )?;
 
 // instConSimple
 // del tipo (v[2] < v[3]) ? v[2]: v[3]

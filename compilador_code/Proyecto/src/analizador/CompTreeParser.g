@@ -8,21 +8,17 @@ header {
 class CompTreeParser extends TreeParser;
  
 options {
+	k=1;
 	importVocab=CompParserVocab;
 	buildAST = false; // Por defecto no construimos un AST nuevo
 }
 
 
 /// Permite recorrer el nodo principal, llamado "programa"
-programa : #(PROGRAMA main)
+programa : #(PROGRAMA VARSGLOBAL 
+				(SUBPROGRAMA
+					| CLASE
+						| DEC_METODO)* DEC_MAIN)
  		;
- 		
-// aqui se entra al main->raiz del arbol
-main: #(DEC_MAIN VOID MAIN^ PARENT_AB! INT IDENT PARENT_CE!
-		LLAVE_AB!
-			RETURN PUNTO_COMA
-		LLAVE_CE!)
-		;
 
- 
  
