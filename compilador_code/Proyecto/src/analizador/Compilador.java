@@ -45,7 +45,21 @@ public class Compilador {
 							Parser.setFilename(args[0]);
 							Parser.programa();
 							AST ast = Parser.getAST();
-							System.out.println(ast.toStringList());	
+//							System.out.println(ast.toStringList());
+
+							CompTreeParser Tree = new CompTreeParser();
+							System.out.println(ast.toStringList());
+
+//							float result = Tree.programa(ast);
+							//System.out.println(Tree.programa(ast));
+//		// PASO 6. Crear el analizador semántico
+//		MicroCalcTreeParser treeParser = new MicroCalcTreeParser();
+//		// PASO 7. Recorrer el AST
+//		float result = treeParser.expresion(ast);
+//		// Imprimimos el resultado
+//		System.out.println("Resultado: " + result);
+
+							
 						} catch (ANTLRException Ex) {				
 								//fichero.println("Error en token desconocido.");
 								//fichero.println(Ex.getMessage());
