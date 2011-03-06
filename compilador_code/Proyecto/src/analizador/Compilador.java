@@ -28,8 +28,8 @@ public class Compilador {
 						try {	// del analizador lexico
 							Token token = Analizador.nextToken();
 							while(token.getType() != Token.EOF_TYPE) {
-								fichero.println(token);
-								 System.out.println("Léxico:"+token);
+								//fichero.println(token);
+								//System.out.println("Léxico:"+token);
 								token = Analizador.nextToken();
 							}
 							fis = new FileInputStream(args[0]);
@@ -44,7 +44,7 @@ public class Compilador {
 							CompParser Parser = new CompParser(Analizador);
 							Parser.setFilename(args[0]);
 							Parser.programa();
-							AST ast = Parser.getAST();					
+							AST ast = Parser.getAST();
 							System.out.println(ast.toStringList());	
 						} catch (ANTLRException Ex) {				
 								//fichero.println("Error en token desconocido.");
