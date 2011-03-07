@@ -214,10 +214,20 @@ instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var no global! 
 //			| instDecMet
 			| instExpresion					// asig, suma...
 			| instCond
+			| instCout
+			| instCin
 			//| sentencia_llam_func
 			| instNula						// Simplemente: -> ; <-
 			| instReturn
 			; // No se añade la insReturn aqui!
+
+// Instrucicon de E/S
+// cout << s << msg << f;
+instCout : COUT^ (MENOR_MENOR arg_io)+ PUNTO_COMA!; 
+// cin >> num;	// se lee un nmero del teclado
+instCin : CIN^ MAYOR_MAYOR arg_io PUNTO_COMA!;
+// argumentos que pueden recibir las expresiones
+arg_io: IDENT | LIT_CADENA;
 
 // instExpresion
 // lleva el peso de todo: cond(simple|comleja), asig...
@@ -329,25 +339,28 @@ instDecMet :	// declarar metodo
 // Intruccion Condicional grande!
 // if (juanito=9) {} ...
 instCond : 	IF^ PARENT_AB! expresion PARENT_CE!
-			LLAVE_AB! cuerpo_sp LLAVE_CE!
+			( LLAVE_AB! cuerpo_sp LLAVE_CE!
+				| instruccion )
 			sino 
 ;
 
 // if (pascual)... 
-sino : sinosi sino
-		| sinofin
+sino : sinosi sino	//else if...
+		| sinofin	//else...
 		| /*nada*/
 ;
 
 // else if (lalala) 
 // 	{hagase mi voluntad}		
 sinosi : ELSE^ IF PARENT_AB! expresion PARENT_CE!
-			LLAVE_AB! cuerpo_sp LLAVE_CE!
+			( LLAVE_AB! cuerpo_sp LLAVE_CE!
+				| instruccion )
 ;
 
 // else {hagase mi voluntad}
 sinofin: ELSE^
-			LLAVE_AB! cuerpo_sp LLAVE_CE!
+			( LLAVE_AB! cuerpo_sp LLAVE_CE!
+				| instruccion )
 ;
 
 // la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
