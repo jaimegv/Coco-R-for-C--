@@ -55,7 +55,7 @@ tokens {
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-programa : listaVarGlobal
+programa : ((ttipo[false] IDENT (COMA | OP_ASIG | PUNTO_COMA)) => instDecVar)*
 			( decMetodo
 		  		| subprograma
 		  			| decClase )*	// aqui irá la decClase, programas, metodos... 
@@ -63,12 +63,13 @@ programa : listaVarGlobal
 				{ ## = #( #[PROGRAMA, "PROGRAMA"], ##);}
 			;
 
-listaVarGlobal : (instDecVar)*
+/*listaVarGlobal : (instDecVar)* 	// declaracion de variable globla (de ahi el true)
 				{ ## = #( #[VARSGLOBAL, "VARSGLOBAL"], ##);}
-			;				
+			;
+*/
 
 // aqui se entra al main->raiz del arbol
-main: ttipo[false] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
+main: ttipo[true] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
 		LLAVE_AB!
 			cuerpo_sp 
 		LLAVE_CE!
@@ -78,7 +79,7 @@ main: ttipo[false] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
 
 /* Reglas de generación*/
 // FUNCIONES-SUBPROGRAMAS C++
-subprograma : ttipo[false] IDENT^ PARENT_AB! listaDecParams PARENT_CE!
+subprograma : ttipo[true] IDENT^ PARENT_AB! listaDecParams PARENT_CE!
 				LLAVE_AB! 
 					cuerpo_sp 
 				LLAVE_CE!
@@ -87,15 +88,37 @@ subprograma : ttipo[false] IDENT^ PARENT_AB! listaDecParams PARENT_CE!
 
 // Declaracion de Clase
 // ejemplo: class Persona {};
-decClase : CLASS! IDENT^ LLAVE_AB! 
-					cuerpo_sp 
-			LLAVE_CE!
-			{ ## = #( #[CLASE, "CLASE"], ##);}
-			;
+decClase : 	CLASS! IDENT^ LLAVE_AB!
+	// ejemplo: 
+	//	public : void imprime (void);	// método que no recibe ni devuelve nada
+	//  private: int d,m,a;	// tres enteros privados
+	// Se puede declarar la parte privada sincabecera PRIVATE al ppio:
+	((ttipo[false] IDENT 
+		( (COMA! IDENT)+
+			| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
+		)?
+	PUNTO_COMA!)+ )?
+	// Parte publica de la clase
+	(PUBLIC DOSPUNTOS!
+			(ttipo[false] IDENT 
+				( (COMA! IDENT)+
+					| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
+				)?
+			PUNTO_COMA!)+ )?
+	// Parte Privada de la Clase
+	(PRIVATE DOSPUNTOS!
+			(ttipo[false] IDENT 
+				( (COMA! IDENT)+
+					| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
+				)?
+			PUNTO_COMA!)+ )?
+LLAVE_CE! PUNTO_COMA!
+{ ## = #( #[CLASE, "CLASE"], ##);}
+;
 
 // Declaracion de metodos de una clase
 // ejemplo: int Fecha::daDia (void)
-decMetodo : ttipo[false] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_CE!
+decMetodo : ttipo[true] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_CE!
 				LLAVE_AB! 
 					cuerpo_sp 
 				LLAVE_CE!
@@ -126,16 +149,17 @@ instReturn : RETURN! (instExpresion
 		;
 
 // Instruccion de declaracion de variables
-instDecVar { final AST raiz = #[INTS_DEC_VAR, "INTS_DEC_VAR"]; } 
+instDecVar
+			{ final AST raiz = #[INTS_DEC_VAR, "INTS_DEC_VAR"]; } 
 		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
 		;
 listaDeclaraciones [AST raiz, boolean inicializacion] : 
-		t: ttipo[true]! declaracion[raiz, #t, inicializacion, false]
-				(COMA! declaracion[raiz, #t, inicializacion, false])*
+		t: ttipo[true]! declaracion[raiz, #t, inicializacion]
+				(COMA! declaracion[raiz, #t, inicializacion])*
 		;
 
 declaracion !	// desactivamos el AST contructor por defecto
-		[AST r, AST t, boolean inicializacion, boolean decmetodo]	// parametros de la gen gramtrica
+		[AST r, AST t, boolean inicializacion]	// parametros de la gen gramtrica
 		{	
 			AST raiz = astFactory.dupTree(r);	// copiamos el arbol
 			raiz.addChild(astFactory.dupTree(t));	// copia del arbol
@@ -186,7 +210,7 @@ declaracion !	// desactivamos el AST contructor por defecto
 				
 // Diferentes tipos de sentencias
 // El llamante ya ha puesto el instruccion*
-instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var
+instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var no global! (de ahi el false)
 //			| instDecMet
 			| instExpresion					// asig, suma...
 			| instCond
@@ -206,15 +230,16 @@ expresion : expAsignacion;
 expAsignacion : expOLogico ( (OP_ASIG^ (/* instCondSimple | */expOLogico ))
 								|	(OP_ASIG_MAS^ (/* instCondSimple | */expOLogico )) )?;
 
-// instConSimple
+// instConSimple <- NO NOS TOCA!!
 // del tipo (v[2] < v[3]) ? v[2]: v[3]
 //sentCondSimple
-instCondSimple : PARENT_AB! acceso (OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
+/*instCondSimple : PARENT_AB! acceso (OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
 										OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^)
 							acceso
 				 PARENT_CE! INTER acceso DOSPUNTOS acceso
 				 { ## = #( #[CONDSIMPLE, "CONDSIMPLE"], ##); }
 		;	// tambien la meto en la regla: expresion o una mas adelante, jejeje
+*/
 
 expOLogico: expYLogico (OP_OR^ expYLogico)?;
 
@@ -350,12 +375,11 @@ q_argumento : LIT_CADENA
 e_vector : IDENT^ CORCHETE_AB! LIT_ENTERO_DECIMAL CORCHETE_CE! ;
 
 // tipos genericos que reconoce nuestro lenguaje
-ttipo [boolean variable] : 
-	INT
+ttipo [boolean variable] : 	// Booleano necesario para eliminar
+	INT						// errores con declaracion de globales
 	| BOOL
 	| VOID
-	| CHAR
-//	| CHAR OP_PRODUCTO // en caso de puntero a cadena, SOLO TENEMOS PARAM POR VALOR
+	| CHAR OP_PRODUCTO	// cadena de caracteres
 	| { variable }? // si es un ttipo de variable puede ser IDENT, e.o.c. NO
 		IDENT; 
 
