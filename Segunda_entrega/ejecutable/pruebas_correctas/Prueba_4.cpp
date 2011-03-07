@@ -6,12 +6,9 @@ bool main (int n, int m)
 	/* Declaracion de variables
 	 - algunas inicializadas - */
 	bool variable = true;
-
-	// Condicional Simple
-	variable =(n < m) ? true : false;	 
 	
 	// Condicional Complejo
-	if variable	// cierto
+	if (variable)	// cierto
 		variable = false;
 	else
 		varible = true;

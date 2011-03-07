@@ -11,10 +11,10 @@ void main (void) {
 	int num = 30;
 	int algo =40, otro;	
 
-	if (num < 0) {	
+	if (num == 0) {	
 		otro += algo;
 	}
-	else if ((algo == 0) || (algo != 0)) {
+	else if (algo == 0 || otro == 0) {
 		otro += algo;
 	}
 
