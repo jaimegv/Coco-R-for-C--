@@ -274,13 +274,12 @@ acceso 	: r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
 /*		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
 			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+
 */
-		//| r4: literal
+		| r4: llamada { ## = #(#[ACCESO, "ACCESO"], #r4);}
 //		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
 //			( PUNTO! sub3:subAcceso! { ##.addChild(#sub3); } )*
 		;
 /* Raiz de los accesos que no son llamadas a un metodos de la clase*/
-raizAcceso : IDENT 
-			| llamada
+raizAcceso : IDENT
 			| l1:literal
 			//| conversion	// conversion de tipos, NO!
 			//| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
