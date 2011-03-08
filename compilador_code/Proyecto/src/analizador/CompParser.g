@@ -132,7 +132,7 @@ cuerpo_sp : ( instruccion )*
 
 // Instruccion return
 // puede o no estar, y devolver un valor o una var...
-instReturn : RETURN! (instExpresion 
+instReturn : RETURN! (instExpresion // esta tiene PUNTO_COMA!
 						| PUNTO_COMA! /*nada*/)	// return; se puede omitir
 			{ ## = #( #[INST_RETURN, "INST_RETURN"], ##);}
 		;
@@ -293,8 +293,7 @@ raizAccesoSinAccesos: llamada
 //			| PARENT_AB! expresion PARENT_CE!;
 ;
 
-subAcceso : IDENT
-			| llamada
+subAcceso : llamada
 ;
  
 // Representa:
