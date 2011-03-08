@@ -2,10 +2,7 @@ package analizador;
 import java.io.*;
 //import org.antlr.runtime.CommonTokenStream;
 import antlr.collections.AST;
-import antlr.ANTLRException;
-import antlr.RecognitionException;
-import antlr.Token;
-import antlr.TokenStreamException;
+import antlr.debug.misc.ASTFrame;
 import antlr.*;
 
 
@@ -47,8 +44,12 @@ public class Compilador {
 							AST ast = Parser.getAST();
 //							System.out.println(ast.toStringList());
 
-							CompTreeParser Tree = new CompTreeParser();
-							((CompTreeParser) Tree).programa(ast);
+							//CompTreeParser Tree = new CompTreeParser();
+							//((CompTreeParser) Tree).programa(ast);
+							
+							ASTFrame frame = new ASTFrame(args[0], ast);
+							frame.setVisible(true);
+
 							System.out.println(ast.toStringList());
 
 //							float result = Tree.programa(ast);
