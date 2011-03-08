@@ -227,8 +227,8 @@ instExpresion : expresion PUNTO_COMA!
 // EMPIEZA LAS DIFERENTES EXPRESION
 expresion : expAsignacion;
 
-expAsignacion : expOLogico ( (OP_ASIG^ (/* instCondSimple | */expOLogico ))
-								|	(OP_ASIG_MAS^ (/* instCondSimple | */expOLogico )) )?;
+expAsignacion : expOLogico ( (OP_ASIG^ ( instCondSimple | expOLogico ))
+								|	(OP_ASIG_MAS^ ( instCondSimple | expOLogico )) )?;
 
 // instConSimple <- NO NOS TOCA!!
 // del tipo (v[2] < v[3]) ? v[2]: v[3]
@@ -270,25 +270,26 @@ expNegacion : (OP_NOT^)* acceso;
 //expEsUn : acceso (RES_ESUN^ tipo ); no tenemos de esto
 
 acceso 	: r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
-			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )*
+			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )+
 /*		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
 			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+
 */
+		| r3: literal { ## = #(#[ACCESO, "ACCESO"], #r3);}
 		| r4: llamada { ## = #(#[ACCESO, "ACCESO"], #r4);}
+		| r5: IDENT { ## = #(#[ACCESO, "ACCESO"], #r5);}
 //		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
 //			( PUNTO! sub3:subAcceso! { ##.addChild(#sub3); } )*
 		;
 /* Raiz de los accesos que no son llamadas a un metodos de la clase*/
-raizAcceso : IDENT
-			| l1:literal
+raizAcceso : IDENT //instruccion
+//			| l1:literal
 			//| conversion	// conversion de tipos, NO!
 			//| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
 			//										##.addChild(#e1); }
 			;
-
 raizAccesoConSubAccesos : OP_MAS;
 
-raizAccesoSinAccesos: llamada 
+raizAccesoSinAccesos: llamada
 //			| PARENT_AB! expresion PARENT_CE!;
 ;
 
