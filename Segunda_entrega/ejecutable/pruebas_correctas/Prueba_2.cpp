@@ -4,11 +4,7 @@
 //Declaración de la clase Fecha:
 class Fecha {
 public: int a, b, c;
-void ponFecha (int, int, int);	/* método que recibe tres enteros y no devuelve nada */
 	int daDia (void);	// método que devuelve un entero
-	int daMes (void);	// método que devuelve un entero
-	int daAnno (void);	// método que devuelve un entero
-	void imprime (void);	// método que no recibe ni devuelve nada
 private:
 	int d,m,a;	// tres enteros privados
 };

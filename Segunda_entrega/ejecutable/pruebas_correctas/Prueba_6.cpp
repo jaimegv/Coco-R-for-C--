@@ -15,6 +15,6 @@ void imprime (char *msg,  f) {
 void main (void) {
 	char* s="hola Mundo!";
 	cout << s;
-
+	cin >> s;
 	return;
 }
