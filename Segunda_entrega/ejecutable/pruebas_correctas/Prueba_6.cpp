@@ -6,7 +6,7 @@ de la declaracion de programas/funciones. Así
 como las operaciones de cin y cout
 */
 
-void imprime (char *msg,  f) {
+void imprime (char *msg, int f) {
 	cout << s << msg << f;
 	cout << "\n";	// imprime un salto de línea */
 	return;

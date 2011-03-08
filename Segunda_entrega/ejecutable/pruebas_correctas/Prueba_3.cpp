@@ -15,7 +15,7 @@ int funcionAnodina (int n) {
 int main (int n) {
 	int variable;
 	// Asignacion de valor cierto ó falso
-	variable = n * funcionAnodina(n);
+	variable = n * funcionAnodina;
 
 	return variable;
 }
