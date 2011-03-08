@@ -93,28 +93,20 @@ decClase : 	CLASS! IDENT^ LLAVE_AB!
 	//	public : void imprime (void);	// método que no recibe ni devuelve nada
 	//  private: int d,m,a;	// tres enteros privados
 	// Se puede declarar la parte privada sincabecera PRIVATE al ppio:
-	((ttipo[false] IDENT 
-		( (COMA! IDENT)+
-			| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
-		)?
-	PUNTO_COMA!)+ )?
+	(decCabMet)?
 	// Parte publica de la clase
-	(PUBLIC DOSPUNTOS!
-			(ttipo[false] IDENT 
-				( (COMA! IDENT)+
-					| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
-				)?
-			PUNTO_COMA!)+ )?
+	(PUBLIC DOSPUNTOS! decCabMet)?
 	// Parte Privada de la Clase
-	(PRIVATE DOSPUNTOS!
-			(ttipo[false] IDENT 
-				( (COMA! IDENT)+
-					| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
-				)?
-			PUNTO_COMA!)+ )?
+	(PRIVATE DOSPUNTOS! decCabMet)?
 LLAVE_CE! PUNTO_COMA!
 { ## = #( #[CLASE, "CLASE"], ##);}
 ;
+
+decCabMet : (ttipo[false] IDENT 
+				( (COMA! IDENT)+
+					| (PARENT_AB! ttipo[false] (COMA! ttipo[false])* PARENT_CE!) 
+				)?
+			PUNTO_COMA!)+;
 
 // Declaracion de metodos de una clase
 // ejemplo: int Fecha::daDia (void)
@@ -128,10 +120,7 @@ decMetodo : ttipo[true] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PA
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
 listaDecParams { final AST raiz = #[RES_PARAMETRO, "PARAMETRO"]; } 
-		:	ttipo[true]
-			| (listaDeclaraciones[raiz, false] 
-				(COMA! listaDeclaraciones[raiz, false])*
-			)?
+		:	(ttipo[true] (IDENT (COMA! ttipo[true] IDENT)*)?)?
 		;
 
 
@@ -214,6 +203,7 @@ instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var no global! 
 //			| instDecMet
 			| instExpresion					// asig, suma...
 			| instCond
+			| instCondSimple
 			| instCout
 			| instCin
 			//| sentencia_llam_func
@@ -243,13 +233,12 @@ expAsignacion : expOLogico ( (OP_ASIG^ (/* instCondSimple | */expOLogico ))
 // instConSimple <- NO NOS TOCA!!
 // del tipo (v[2] < v[3]) ? v[2]: v[3]
 //sentCondSimple
-/*instCondSimple : PARENT_AB! acceso (OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
+instCondSimple : PARENT_AB! acceso (OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
 										OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^)
 							acceso
 				 PARENT_CE! INTER acceso DOSPUNTOS acceso
 				 { ## = #( #[CONDSIMPLE, "CONDSIMPLE"], ##); }
 		;	// tambien la meto en la regla: expresion o una mas adelante, jejeje
-*/
 
 expOLogico: expYLogico (OP_OR^ expYLogico)?;
 
