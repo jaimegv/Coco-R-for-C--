@@ -1,0 +1,4 @@
+Leeme:
+Con el objetivo de adjuntar el codigo y que sea fácilmente ejecutado hemos añadido una compresión
+del proyecto en un fichero ZIP. El proyecto se puede importar al IDE Eclipse sin mayores difucultades
+que yendo a inicio - importar y seleccionar el fichero aquí presentado.
