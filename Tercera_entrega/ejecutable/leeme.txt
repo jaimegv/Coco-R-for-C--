@@ -1,0 +1,19 @@
+**********************************************************************************************
+***************************MANUAL DE USO DEL COMPILADOR***************************************
+**********************************************************************************************
+
+Para ejecutar el Compilador siga los siguientes pasos:
+
+- Abra una consola y dirígase al directorio dónde esté contenido el fichero con extensión .jar,
+en este caso es "compilador.java".
+
+- Teclee el siguiente mandato:
+$ java -jar compilador.jar ruta_fichero_fuente ruta_fichero_destino
+
+
+**********************************REQUISITOS**************************************************
+
+- Máquina virtual de java.
+
+
+
