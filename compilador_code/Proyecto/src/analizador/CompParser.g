@@ -81,7 +81,7 @@ main: ttipo[true] MAIN^ PARENT_AB! listaDecParams PARENT_CE!
 // FUNCIONES-SUBPROGRAMAS C++
 subprograma : ttipo[true] IDENT^ PARENT_AB! listaDecParams PARENT_CE!
 				LLAVE_AB! 
-					cuerpo_sp 
+					cuerpo_sp
 				LLAVE_CE!
 			{ ## = #( #[SUBPROGRAMA, "SUBPROGRAMA"], ##);}
 			;
@@ -120,7 +120,7 @@ decMetodo : ttipo[true] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PA
 // Argumentos de entrada de las funciones
 // por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
 listaDecParams { final AST raiz = #[RES_PARAMETRO, "PARAMETRO"]; } 
-		:	(ttipo[true] (IDENT (COMA! ttipo[true] IDENT)*)?)?
+		:	(ttipo[true] (IDENT (COMA! (ttipo[true] IDENT | IDENT)?)*)?)?
 		;
 
 
@@ -138,10 +138,16 @@ instReturn : RETURN! (instExpresion // esta tiene PUNTO_COMA!
 		;
 
 // Instruccion de declaracion de variables
-instDecVar
-			{ final AST raiz = #[INTS_DEC_VAR, "INTS_DEC_VAR"]; } 
+instDecVar	{ final AST raiz = #[INTS_DEC_VAR, "INTS_DEC_VAR"]; } 
 		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
 		;
+		exception catch [RecognitionException ex]
+		{	reportError("hola caracola");
+			consume();
+			// 3. Consumir tokens
+			consumeUntil($FOLLOW(instDecVar));
+		}
+
 listaDeclaraciones [AST raiz, boolean inicializacion] : 
 		t: ttipo[true]! declaracion[raiz, #t, inicializacion]
 				(COMA! declaracion[raiz, #t, inicializacion])*
@@ -269,14 +275,14 @@ expNegacion : (OP_NOT^)* acceso;
 
 //expEsUn : acceso (RES_ESUN^ tipo ); no tenemos de esto
 
-acceso 	: r1: raizAcceso { ## = #(#[ACCESO, "ACCESO"], #r1);}
-			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )+
+acceso 	: r1: IDENT { ## = #(#[ACCESO, "ACCESO"], #r1);}
+			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )
 /*		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
 			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+
 */
 		| r3: literal { ## = #(#[ACCESO, "ACCESO"], #r3);}
 		| r4: llamada { ## = #(#[ACCESO, "ACCESO"], #r4);}
-		| r5: IDENT { ## = #(#[ACCESO, "ACCESO"], #r5);}
+		//| r5: IDENT { ## = #(#[ACCESO, "ACCESO"], #r5);}
 //		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
 //			( PUNTO! sub3:subAcceso! { ##.addChild(#sub3); } )*
 		;
@@ -287,12 +293,6 @@ raizAcceso : IDENT //instruccion
 			//| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
 			//										##.addChild(#e1); }
 			;
-raizAccesoConSubAccesos : OP_MAS;
-
-raizAccesoSinAccesos: llamada
-//			| PARENT_AB! expresion PARENT_CE!;
-;
-
 subAcceso : llamada
 ;
  
@@ -301,7 +301,7 @@ subAcceso : llamada
 // subacceso en forma de llamada
 // llamada a un constructor
 // subacceso en forma de constructor
-llamada : IDENT PARENT_AB! listaExpresiones PARENT_CE!
+llamada : IDENT (PARENT_AB! listaExpresiones PARENT_CE!)?
 		{ ## = #(#[LLAMADA, "LLAMADA"], ##);}
 		;
 listaExpresiones : ((IDENT | literal) (COMA! (IDENT | literal))*)?
@@ -327,7 +327,7 @@ instDecMet :	// declarar metodo
 // Intruccion Condicional grande!
 // if (juanito=9) {} ...
 instCond : 	IF^ PARENT_AB! expresion PARENT_CE!
-			( LLAVE_AB! cuerpo_sp LLAVE_CE!
+			(LLAVE_AB! cuerpo_sp LLAVE_CE!
 				| instruccion )
 			sino 
 ;
