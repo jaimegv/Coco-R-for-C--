@@ -9,13 +9,20 @@ COMPILER Empty
 
 
 CHARACTERS
-// Add character set declarations here.
-// Examples:
-//   letter = 'A'..'Z' + 'a'..'z'.
-//   digit = "0123456789".
-//   cr = '\r'.
-//   lf = '\n'.
+  tabulator     = '\u0009'. /*  9 = tabulator */
+  lf            = '\u000a'. /* 10 = line feed */
+  cr            = '\u000d'. /* 13 = carriage return */
+  zero          = '0'.
+  nonZeroDigit  = "123456789".
+  digit         = '0' + nonZeroDigit .
+  letter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '$'.
+  letter2		= 'A' .. 'Z' + 'a' .. 'z' + '_'.
 
+  c1 			= ANY - "\"".
+  c3 			= 'A' .. 'Z' + 'a' .. 'z' + '_' + digit.
+  c4			= ANY - cr.
+  c5			= ANY - "*".
+  c6 			= ANY - "/".
 
 TOKENS
 // Add token declarations here.
