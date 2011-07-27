@@ -9,7 +9,7 @@ COMPILER Empty
 
 
 CHARACTERS
-  tabulator     = '\u0009'. /*  9 = tabulator */
+  tab           = '\u0009'. /*  9 = tabulator */
   lf            = '\u000a'. /* 10 = line feed */
   cr            = '\u000d'. /* 13 = carriage return */
   zero          = '0'.
@@ -25,13 +25,54 @@ CHARACTERS
   c6 			= ANY - "/".
 
 TOKENS
-// Add token declarations here.
-// Example:
-//   ident = letter {letter | digit}.
-//   number = digit {digit}.
+  ident = letter { letter2 | digit }.
+
+  enteros = ( zero | nonZeroDigit { digit }).
+  
+  cadenaCar = "\"" { c1 } "\"".
 
 
-PRAGMAS
+  boolean = "boolean".
+  char    = "char".
+  class   = "class".
+  false   = "false".
+  int     = "int".
+  new     = "new".
+  short   = "short".
+  static  = "static".
+  true    = "true".
+  void    = "void".
+  
+
+  dosPuntos   = ":".
+  comma   = ",".
+  punto     = ".".
+  llaveIzda  = "{".
+  corcheteIzda  = "[".
+  parentesisIzda    = "(".
+  menos   = "-".
+  not     = "!".
+  mas    = "+".
+  llaveDer  = "}".
+  corcheteDer  = "]".
+  parentesisDer    = ")".
+  multiplicacion	= "*".
+  div				= "/".
+  menor				= "<".
+  mayor				= ">".
+  igual				= "=".
+  puntoComa			= ";".
+  doblesComillas	= '"'.
+  interrogacion		= "?".
+  
+COMMENTS FROM "/*" TO "*/"
+COMMENTS FROM "//" TO lf
+
+IGNORE lf + cr + tab
+
+
+
+//PRAGMAS
 // Add pragma declarations here.
 // Example:
 //   switch = '$' { digit | letter }. (. Optional semantic action .)
