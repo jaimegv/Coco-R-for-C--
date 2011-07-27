@@ -26,7 +26,7 @@ public class Main {
         //Por ahora se pasará el archivo directamente.
 
 //        inputName = "F:\\Universidad\\4º\\Compiladores\\pruebas_definitivas\\prueba1\\PruebaWeb.java";
-        inputName = "/home/fernando/Escritorio/prueba1.java";
+        inputName = "/home/vickop/Escritorio/coco";
 //    inputName = "F:\\Universidad\\4º\\Compiladores\\pruebas_definitivas\\prueba1\\prueba1.java";
 //        inputName = "F:\\Universidad\\4º\\Compiladores\\pruebas_definitivas\\prueba3\\prueba3.java";
 

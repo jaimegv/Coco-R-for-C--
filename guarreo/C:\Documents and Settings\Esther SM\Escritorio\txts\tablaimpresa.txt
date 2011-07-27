@@ -3,11 +3,23 @@
 Contiene las siguientes entradas 
 Simbolos.......
 -----------------------------------------
+Simbolo:  polla
+Tipo:  clase
+Linea:  1
+Desplazamiento:  0
+-----------------------------------------
 
 
 ************************************************************ 
 ***********Imprimiendo las tablas padre (clases)************ 
 ************************************************************ 
+xxxxxxxxxxxxxxxxxxx  Imprimiendo la tabla [polla]  xxxxxxxxxxxxxxxxxxx
+Desplazamiento total: 0
+Tabla superior: Abuelo
+Simbolos.......
+-----------------------------------------
+
+
 
 
 ************************************************************ 
