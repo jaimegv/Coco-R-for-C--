@@ -138,9 +138,11 @@ DecCabMet = . /*Ttipo ident ( {comma ident} | (parent_ab Ttipo {comma Ttipo} par
 
 Main = main parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo = Instruccion | (Ttipo ident (/*Subprograma*/ | DecVar)).
+Cuerpo_Main = {Instruccion | Ttipo ident (Subprograma2 | DecVar)}.
 
-Cuerpo2 = Instruccion | Ttipo ident (DecVar).
+Cuerpo = {Instruccion | Ttipo ident (Subprograma2 | DecVar)}.
+
+Cuerpo2 = {Instruccion | Ttipo ident (DecVar)}.
 
 DecVar = [op_asig Expresion] puntoComa.
 
@@ -153,7 +155,7 @@ Subprograma2 = parent_ab Parametros parent_ce llave_ab Cuerpo2 llave_ce.
 
 
 /******************INSTRUCCIONES*****************************/
-Instruccion = InstReturn | InstCond | InstCout | InstCin.
+Instruccion = InstReturn. //| InstCond | InstCout | InstCin.
 
 InstReturn = (rreturn [Expresion] puntoComa).
 
