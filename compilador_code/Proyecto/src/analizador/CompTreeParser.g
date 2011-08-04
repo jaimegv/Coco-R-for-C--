@@ -6,7 +6,7 @@ header {
 // ANALISIS SEMÁNTICO -- Instalación de símbolos
 
 class CompTreeParser extends TreeParser;
- 
+
 options {
 //	k=1; //No sé por qué, pero en el TreeParser de LELI no lo pone
 	importVocab=CompParserVocab;
@@ -172,4 +172,4 @@ tipo :
 	| BOOL
 	| VOID
 	| CHAR OP_PRODUCTO	// cadena de caracteres
-	|  IDENT; 
+	| IDENT; 

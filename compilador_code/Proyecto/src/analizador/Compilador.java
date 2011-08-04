@@ -60,8 +60,12 @@ public class Compilador {
 //		float result = treeParser.expresion(ast);
 //		// Imprimimos el resultado
 //		System.out.println("Resultado: " + result);
-
-							
+							System.out.println("Empieza el sem");
+							CompTreeParser TreeParser = new CompTreeParser();
+							System.out.println("algo");
+							float result = TreeParser.PROGRAMA;
+							System.out.println("Resultado: "+result);
+						
 						} catch (ANTLRException Ex) {				
 								//fichero.println("Error en token desconocido.");
 								//fichero.println(Ex.getMessage());
