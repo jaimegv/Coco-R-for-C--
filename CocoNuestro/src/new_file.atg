@@ -76,8 +76,8 @@ TOKENS
   op_mayor			= ">".
   op_menor_igual = "<=" .
   op_mayor_igual = ">=" .
-  op_igual			= "=".
-  op_asig           = ":=".
+  op_igual			= "==".
+  op_asig           = "=".
   puntoComa			= ";".
   doblesComillas	= '"'.
   interrogacion		= "?".
@@ -122,7 +122,7 @@ PRODUCTIONS
 //   Statement = ident "=" number { "+" number } .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS = {DecClase} | (Ttipo (Main | ident (Subprograma | DecVar))).
+CEMASMAS = DecClase CEMASMAS | (Ttipo (Main | ident (Subprograma | DecVar) CEMASMAS)).
 
 Ttipo = 	// Booleano necesario para eliminar
 	(intt						// errores con declaracion de globales
@@ -138,11 +138,10 @@ DecCabMet = . /*Ttipo ident ( {comma ident} | (parent_ab Ttipo {comma Ttipo} par
 
 Main = main parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo_Main = {Instruccion | Ttipo ident (Subprograma2 | DecVar)}.
-
 Cuerpo = {Instruccion | Ttipo ident (Subprograma2 | DecVar)}.
 
 Cuerpo2 = {Instruccion | Ttipo ident (DecVar)}.
+//El apéndice del final indica el nivel de anhidamiento.
 
 DecVar = [op_asig Expresion] puntoComa.
 
@@ -151,11 +150,13 @@ Parametros = Ttipo ident [{comma Ttipo ident}].
 Subprograma = parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
 
 Subprograma2 = parent_ab Parametros parent_ce llave_ab Cuerpo2 llave_ce.
-
+//El apendice del final indica el nivel de anhidamiento
 
 
 /******************INSTRUCCIONES*****************************/
-Instruccion = InstReturn. //| InstCond | InstCout | InstCin.
+Instruccion = InstReturn | InstCout | InstCin | InstExpresion.
+
+InstExpresion = ident (op_asig) Expresion puntoComa.
 
 InstReturn = (rreturn [Expresion] puntoComa).
 
