@@ -122,7 +122,8 @@ PRODUCTIONS
 //   Statement = ident "=" number { "+" number } .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS = DecClase CEMASMAS | (Ttipo (Main | ident (Subprograma | DecVar) CEMASMAS)).
+CEMASMAS = DecClase CEMASMAS
+			 | (Ttipo (Main | ident (Subprograma | DecVar | DecMetodo) CEMASMAS)).
 
 Ttipo = 	// Booleano necesario para eliminar
 	(intt						// errores con declaracion de globales
@@ -132,11 +133,14 @@ Ttipo = 	// Booleano necesario para eliminar
 //	| ident // si es un ttipo de variable puede ser IDENT, e.o.c. NO
 
 
-DecClase = classs ident llave_ab [(publicc | privatte) dosPuntos DecCabMet].
+DecClase = classs ident llave_ab [DecCabMet]
+		{[(publicc | privatte) dosPuntos DecCabMet] puntoComa} llave_ce puntoComa.
 
-DecCabMet = . /*Ttipo ident ( {comma ident} | (parent_ab Ttipo {comma Ttipo} parent_ce)).*/
+DecCabMet = Ttipo ident ( {comma ident} | (parent_ab [Ttipo {comma Ttipo}] parent_ce)).
 
-Main = main parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
+DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
+
+Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 Cuerpo = {Instruccion | Ttipo ident (Subprograma2 | DecVar)}.
 
@@ -147,7 +151,7 @@ DecVar = [op_asig Expresion] puntoComa.
 
 Parametros = Ttipo ident [{comma Ttipo ident}].
 
-Subprograma = parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
+Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 Subprograma2 = parent_ab Parametros parent_ce llave_ab Cuerpo2 llave_ce.
 //El apendice del final indica el nivel de anhidamiento
@@ -162,7 +166,7 @@ InstReturn = (rreturn [Expresion] puntoComa).
 
 InstCond = .
 
-InstCout = cout (menor_menor Arg_io) puntoComa.
+InstCout = cout {menor_menor Arg_io} puntoComa.
 
 InstCin = cin mayor_mayor Arg_io puntoComa.
 
