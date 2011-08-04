@@ -14,7 +14,7 @@ CHARACTERS
   cr            = '\u000d'. /* 13 = carriage return */
   zero          = '0'.
   nonZeroDigit  = "123456789".
-  digit         = '0' + nonZeroDigit .
+  digit         = '0' + nonZeroDigit.
   letter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '$'.
   letter2		= 'A' .. 'Z' + 'a' .. 'z' + '_'.
 
@@ -27,45 +27,65 @@ CHARACTERS
 TOKENS
   ident = letter { letter2 | digit }.
 
+
   enteros = ( zero | nonZeroDigit { digit }).
   
   cadenaCar = "\"" { c1 } "\"".
 
 
-  boolean = "boolean".
-  char    = "char".
-  class   = "class".
+  bool = "boolean".
+  charr    = "char".
+  classs   = "class".
   false   = "false".
-  int     = "int".
+  intt     = "int".
   new     = "new".
   short   = "short".
   static  = "static".
   true    = "true".
-  void    = "void".
-  opAsig = ":=".
-  public = "public".
-  private = "private".
+  voidd    = "void".
+  publicc = "public".
+  privatte = "private".
+  dospuntos_dos = "::".
+  rreturn = "return".
+  cout = "cout".
+  cin = "cin".
+  menor_menor = "<<".
+  mayor_mayor = ">>".
+  iff = "if".
+  elsse = "else".
+  main = "main".
+  
   
   dosPuntos   = ":".
   comma   = ",".
   punto     = ".".
   llave_ab  = "{".
-  corcheteIzda  = "[".
+  corchete_ab  = "[".
   parent_ab    = "(".
-  menos   = "-".
-  not     = "!".
-  mas    = "+".
+  op_menos   = "-".
+  op_menosmenos   = "--".  
+  op_not     = "!".
+  op_mas    = "+".
+  op_masmas = "++".
   llave_ce  = "}".
-  corcheteDer  = "]".
+  corchete_ce  = "]".
   parent_ce    = ")".
-  multiplicacion	= "*".
-  div				= "/".
-  menor				= "<".
-  mayor				= ">".
-  igual				= "=".
+  op_producto	= "*".
+  op_division		= "/".
+  op_menor			= "<".
+  op_mayor			= ">".
+  op_menor_igual = "<=" .
+  op_mayor_igual = ">=" .
+  op_igual			= "=".
+  op_asig           = ":=".
   puntoComa			= ";".
   doblesComillas	= '"'.
   interrogacion		= "?".
+  barra_vert = "|".
+  op_distinto = "!=".
+  op_and = "&&".
+  op_asig_mas = ":=+".
+  op_or = "||".
   
 COMMENTS FROM "/*" TO "*/"
 COMMENTS FROM "//" TO lf
@@ -102,337 +122,111 @@ PRODUCTIONS
 //   Statement = ident "=" number { "+" number } .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS = {(Ttipo ident (comma | opAsig | puntoComa)) InstDecVar}
-			{DecMetodo
-		  		| Subprograma
-		  			| DecClase}	// aqui irá la decClase, programas, metodos... 
-			Main.
+CEMASMAS = {DecClase} | (Ttipo (Main | ident (Subprograma | DecVar))).
 
-/*listaVarGlobal : (instDecVar)* 	// declaracion de variable globla (de ahi el true)
-				{ ## = #( #[VARSGLOBAL, "VARSGLOBAL"], ##);}
-			;
+Ttipo = 	// Booleano necesario para eliminar
+	(intt						// errores con declaracion de globales
+	| bool
+	| voidd
+	| charr [op_producto]).// cadena de caracteres
+//	| ident // si es un ttipo de variable puede ser IDENT, e.o.c. NO
+
+
+DecClase = classs ident llave_ab [(publicc | privatte) dosPuntos DecCabMet].
+
+DecCabMet = . /*Ttipo ident ( {comma ident} | (parent_ab Ttipo {comma Ttipo} parent_ce)).*/
+
+Main = main parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
+
+Cuerpo = Instruccion | (Ttipo ident (/*Subprograma*/ | DecVar)).
+
+Cuerpo2 = Instruccion | Ttipo ident (DecVar).
+
+DecVar = [op_asig Expresion] puntoComa.
+
+Parametros = Ttipo ident [{comma Ttipo ident}].
+
+Subprograma = parent_ab Parametros parent_ce llave_ab Cuerpo llave_ce.
+
+Subprograma2 = parent_ab Parametros parent_ce llave_ab Cuerpo2 llave_ce.
+
+
+
+/******************INSTRUCCIONES*****************************/
+Instruccion = InstReturn | InstCond | InstCout | InstCin.
+
+InstReturn = (rreturn [Expresion] puntoComa).
+
+InstCond = .
+
+InstCout = cout (menor_menor Arg_io) puntoComa.
+
+InstCin = cin mayor_mayor Arg_io puntoComa.
+
+Arg_io = ident | cadenaCar.
+
+
+
+/******************EXPRESIONES*****************************/
+
+
+Expresion = Expresion2 Expresion1	
+.
+
+Expresion1 = ["?" Expresion ":" Expresion Expresion1]
+.
+
+Expresion2 = Expresion3 Expresion21
+.
+
+Expresion21 = ["<" Expresion3 Expresion21]
+.
+
+Expresion3 = Expresion4 Expresion31
+.
+
+Expresion31 = ["+" Expresion4 Expresion31]
+.
+
+Expresion4 = "!" Expresion4
+|Expresion5
+.
+
+/* Expresion 5 recoge todos los siguientes supuestos:
+
+			Constructor
+			ident
+			ident.ident
+			ident (Argumentos)
+			enteros
+			Todas aquellas Expresiones que contienen los siguientes operadores
+					
+							Aritméticos (+)
+							Relación    (<)
+							Lógicos   	(!)  
+							Asignacion 	(=)
+							Condicional
+							Acceso a miembros de una clase (.)
+							Acceso a un vector ([])
+							
 */
 
-// aqui se entra al main->raiz del arbol
-Main = Ttipo main parent_ab ListaDecParams parent_ce
-		llave_ab
-			Cuerpo_sp 
-		llave_ce.
+Expresion5 = "(" Expresion ")"
+| "new" ident "("Argumentos")"       /*Constructor*/
+| ident ["."ident ["("Argumentos")"] | "("Argumentos")"| "["Expresion"]"]
+| enteros
+| cadenaCar
+| "true"
+| "false"
+.
+
+/**********************************************************/
+
+Argumentos = [Expresion {"," Argumentos}].
 
 
-/* Reglas de generación*/
-// FUNCIONES-SUBPROGRAMAS C++
-Subprograma = Ttipo ident parent_ab ListaDecParams parent_ce
-				llave_ab 
-					Cuerpo_sp
-				llave_ce.
-
-// Declaracion de Clase
-// ejemplo: class Persona {};
-DecClase = 	class ident llave_ab
-	// ejemplo: 
-	//	public : void imprime (void);	// método que no recibe ni devuelve nada
-	//  private: int d,m,a;	// tres enteros privados
-	// Se puede declarar la parte privada sincabecera PRIVATE al ppio:
-	[DecCabMet]
-	// Parte publica de la clase
-	[public dosPuntos DecCabMet]
-	// Parte Privada de la Clase
-	[private dosPuntos DecCabMet]
-	llave_ce puntoComa.
-
-DecCabMet : (Ttipo ident 
-				{ (comma ident) {comma ident}
-					| (parent_ab Ttipo {comma Ttipo} parent_ce) 
-				}
-			puntoComa)
-			
-			{Ttipo ident 
-				{ (comma ident) {comma ident}
-					| (parent_ab Ttipo {comma Ttipo} parent_ce) 
-				}
-			puntoComa}
-
-// Declaracion de metodos de una clase
-// ejemplo: int Fecha::daDia (void)
-decMetodo : ttipo[true] IDENT^ DOSPUNTOS_DOS! IDENT PARENT_AB! listaDecParams PARENT_CE!
-				LLAVE_AB! 
-					cuerpo_sp 
-				LLAVE_CE!
-			{ ## = #( #[DEC_METODO, "DEC_METODO"], ##);}
-			;
-
-// Argumentos de entrada de las funciones
-// por ejemplo: int s, char s, int w ó vacio (solo paso por valor)
-listaDecParams { final AST raiz = #[RES_PARAMETRO, "PARAMETRO"]; } 
-		:	(ttipo[true] (IDENT (COMA! (ttipo[true] IDENT | IDENT)?)*)?)?
-		;
+Operador = op_mas | op_menos | op_producto | op_division.
 
 
-// Cuerpo de un subprograma o programa general
-// lista declaracion de instrucciones
-cuerpo_sp : ( instruccion )*
-			{ ## = #( #[LISTA_INSTRUCCIONES, "LISTA_INSTRUCCIONES"], ##);}  
-		;
 
-// Instruccion return
-// puede o no estar, y devolver un valor o una var...
-instReturn : RETURN! (instExpresion // esta tiene PUNTO_COMA!
-						| PUNTO_COMA! /*nada*/)	// return; se puede omitir
-			{ ## = #( #[INST_RETURN, "INST_RETURN"], ##);}
-		;
-
-// Instruccion de declaracion de variables
-instDecVar	{ final AST raiz = #[INTS_DEC_VAR, "INTS_DEC_VAR"]; } 
-		:	listaDeclaraciones[raiz, true] PUNTO_COMA!
-		;
-		exception catch [RecognitionException ex]
-		{	reportError("hola caracola");
-			consume();
-			// 3. Consumir tokens
-			consumeUntil($FOLLOW(instDecVar));
-		}
-
-listaDeclaraciones [AST raiz, boolean inicializacion] : 
-		t: ttipo[true]! declaracion[raiz, #t, inicializacion]
-				(COMA! declaracion[raiz, #t, inicializacion])*
-		;
-
-declaracion !	// desactivamos el AST contructor por defecto
-		[AST r, AST t, boolean inicializacion]	// parametros de la gen gramtrica
-		{	
-			AST raiz = astFactory.dupTree(r);	// copiamos el arbol
-			raiz.addChild(astFactory.dupTree(t));	// copia del arbol
-		}
-		: i1: IDENT	// CASO en que es: int var
-			{
-				raiz.addChild(#i1);
-				## = raiz;
-			}
-		| { inicializacion }? // pred semantico, caso int var=23
-			// si tiene un true se puede asignar cosas
-		  i2: IDENT OP_ASIG arg:q_argumento	// CASO: int var=23
-		  { 
-				raiz.addChild(#i2);
-				raiz.addChild(#arg);
-				## = raiz;
-		  }
-/*		| { decmetodo }? // pred semantico, caso: hola.hola =234
-		  i5: IDENT PUNTO! IDENT OP_ASIG q_argumento
-		  { 
-				raiz.addChild(#i5);
-				## = raiz;
-		  }
-
-		| { decmetodo }? // pred semantico, caso saludo.hola(); ó saludo.hola(23);
-			// si tiene un true se puede asignar cosas
-		  i3: IDENT PUNTO! IDENT PARENT_AB! arg:q_argumento PARENT_CE! (OP_ASIG asignado:q_argumento)? PUNTO_COMA! 
-		  { raiz.addChild(#i3);
-		  	raiz.addChild(#arg);
-		  	raiz.addChild(#asignado);
-		  	## = raiz;
-		  }
-*/
-		| { inicializacion }? // pred semantico, caso saludo.hola(); ó saludo.hola(23);
-			// si tiene un true se puede asignar cosas
-		  i6: IDENT PARENT_AB! valor:q_argumento PARENT_CE! 
-		  { raiz.addChild(#i6);
-		  	raiz.addChild(#valor);
-		  	## = raiz;
-		  }
-		| // si tiene un true se puede asignar cosas
-		  i4: IDENT CORCHETE_AB (LIT_ENTERO_OCTAL|LIT_ENTERO_DECIMAL)? CORCHETE_CE	// CASO: int jarl[23]
-		  { raiz.addChild(#i4);
-		  	//raiz.addChild(#li);
-		  	## = raiz;
-		  }
-;
-				
-// Diferentes tipos de sentencias
-// El llamante ya ha puesto el instruccion*
-instruccion : (ttipo[true] IDENT)=> instDecVar	// declaracion de var no global! (de ahi el false)
-//			| instDecMet
-			| instExpresion					// asig, suma...
-			| instCond
-			| instCondSimple
-			| instCout
-			| instCin
-			//| sentencia_llam_func
-			| instNula						// Simplemente: -> ; <-
-			| instReturn
-			; // No se añade la insReturn aqui!
-
-// Instrucicon de E/S
-// cout << s << msg << f;
-instCout : COUT^ (MENOR_MENOR arg_io)+ PUNTO_COMA!; 
-// cin >> num;	// se lee un nmero del teclado
-instCin : CIN^ MAYOR_MAYOR arg_io PUNTO_COMA!;
-// argumentos que pueden recibir las expresiones
-arg_io: IDENT | LIT_CADENA;
-
-// instExpresion
-// lleva el peso de todo: cond(simple|comleja), asig...
-instExpresion : expresion PUNTO_COMA!
-			{ ## = #( #[INST_EXPRESION, "INST_EXPRESION"], ##); };
-
-// EMPIEZA LAS DIFERENTES EXPRESION
-expresion : expAsignacion;
-
-expAsignacion : expOLogico ( (OP_ASIG^ ( instCondSimple | expOLogico ))
-								|	(OP_ASIG_MAS^ ( instCondSimple | expOLogico )) )?;
-
-// instConSimple <- NO NOS TOCA!!
-// del tipo (v[2] < v[3]) ? v[2]: v[3]
-//sentCondSimple
-instCondSimple : PARENT_AB! acceso (OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
-										OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^)
-							acceso
-				 PARENT_CE! INTER acceso DOSPUNTOS acceso
-				 { ## = #( #[CONDSIMPLE, "CONDSIMPLE"], ##); }
-		;	// tambien la meto en la regla: expresion o una mas adelante, jejeje
-
-expOLogico: expYLogico (OP_OR^ expYLogico)?;
-
-expYLogico : expComparacion (OP_AND^ expComparacion)?;
-
-expComparacion : expAritmetica 
-		(
-			(OP_IGUAL^ | OP_DISTINTO^ | OP_MAYOR^
-				OP_MENOR^ | OP_MENOR_IGUAL^ | OP_MAYOR_IGUAL^
-			)
-			expAritmetica 
-		)*;
-
-expAritmetica : expProducto ((OP_MAS^|OP_MENOS^) expProducto)*;
-
-expProducto : expCambioSigno
-		((OP_PRODUCTO^ | OP_DIVISION^) expCambioSigno)*;
-
-expCambioSigno : 
-			( OP_MENOS! expPostIncremento
-				{ ## = #(#[OP_MENOS_UNARIO,"OP_MENOS_UNARIO"], ##); }
-			) | (OP_MAS!)? expPostIncremento;
-
-expPostIncremento : expNegacion (OP_MASMAS | OP_MENOSMENOS)?;
-
-// seria esto: expEsUn; pero no gastamos esta expresion
-expNegacion : (OP_NOT^)* acceso;
-
-//expEsUn : acceso (RES_ESUN^ tipo ); no tenemos de esto
-
-acceso 	: r1: IDENT { ## = #(#[ACCESO, "ACCESO"], #r1);}
-			( PUNTO! sub1:subAcceso! { ##.addChild(#sub1); } )
-/*		| r2: raizAccesoConSubAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r2);}
-			( PUNTO! sub2:subAcceso! { ##.addChild(#sub2); } )+
-*/
-		| r3: literal { ## = #(#[ACCESO, "ACCESO"], #r3);}
-		| r4: llamada { ## = #(#[ACCESO, "ACCESO"], #r4);}
-		//| r5: IDENT { ## = #(#[ACCESO, "ACCESO"], #r5);}
-//		| r3: raizAccesoSinAccesos! {  ## = #(#[ACCESO, "ACCESO"], #r3);}
-//			( PUNTO! sub3:subAcceso! { ##.addChild(#sub3); } )*
-		;
-/* Raiz de los accesos que no son llamadas a un metodos de la clase*/
-raizAcceso : IDENT //instruccion
-//			| l1:literal
-			//| conversion	// conversion de tipos, NO!
-			//| PARENT_AB! e1:expresion PARENT_CE! { 	## = #(#[ACCESO, "ACasdCESO"], #e1);
-			//										##.addChild(#e1); }
-			;
-subAcceso : llamada
-;
- 
-// Representa:
-// llamada a un metodo
-// subacceso en forma de llamada
-// llamada a un constructor
-// subacceso en forma de constructor
-llamada : IDENT (PARENT_AB! listaExpresiones PARENT_CE!)?
-		{ ## = #(#[LLAMADA, "LLAMADA"], ##);}
-		;
-listaExpresiones : ((IDENT | literal) (COMA! (IDENT | literal))*)?
-		{ ## = #(#[LISTA_EXPRESIONES, "LISTA_EXPRESIONES"], ##);}
-		;
-literal : LIT_ENTERO_OCTAL { ## = #(#[LITERAL, "ent_OCTAL"], ##);}
-		| LIT_ENTERO_DECIMAL { ## = #(#[LITERAL, "ENT_DECIMAL"], ##);}
-		| LIT_CADENA { ## = #(#[LITERAL, "LIT_CADENA"], ##);}
-		| CTE_LOGTRUE { ## = #(#[LITERAL, "LIT_TRUE"], ##);}
-		| CTE_LOGFALSE { ## = #(#[LITERAL, "LIT_FALSE"], ##);}
-		// Creo que es todo
-		// añadido tras ver el condicional simple
-		;
-
-// instruccion NULA
-instNula : PUNTO_COMA! ;	// se omite por que no vale para nada
-
-// Por ejemplo: hola.saludo(1,2,43,4) ó hola.jarl() ó hola.jar=234;
-instDecMet :	// declarar metodo
-		d : IDENT PUNTO! IDENT PARENT_AB! lista_valores PARENT_CE! PUNTO_COMA!
-		{	## = #(#[CALL_METODO, "CALL_METODO"], ##); };
-
-// Intruccion Condicional grande!
-// if (juanito=9) {} ...
-instCond : 	IF^ PARENT_AB! expresion PARENT_CE!
-			(LLAVE_AB! cuerpo_sp LLAVE_CE!
-				| instruccion )
-			sino 
-;
-
-// if (pascual)... 
-sino : sinosi sino	//else if...
-		| sinofin	//else...
-		| /*nada*/
-;
-
-// else if (lalala) 
-// 	{hagase mi voluntad}		
-sinosi : ELSE^ IF PARENT_AB! expresion PARENT_CE!
-			( LLAVE_AB! cuerpo_sp LLAVE_CE!
-				| instruccion )
-;
-
-// else {hagase mi voluntad}
-sinofin: ELSE^
-			( LLAVE_AB! cuerpo_sp LLAVE_CE!
-				| instruccion )
-;
-
-// la lista: 2,34,5__ NOTA: cuidado con el vacio de q_argumento
-lista_valores : q_argumento (COMA! q_argumento)*
-						{ ## = #( #[ARGUMENTOS_ENTRADA, "ARGUMENTOS_ENTRADA"], ##);};
-
-
-detIgual [AST raiz] : 
-		t: OP_ASIG 	;
-	
-// Tipo de argumento que se asignan a variables y demás
-// serán: 34, "hola", funcionJARL(23), algo.algo()
-q_argumento : LIT_CADENA
-			| LIT_ENTERO_OCTAL
-			| LIT_ENTERO_DECIMAL
-			| IDENT PARENT_AB! q_argumento PARENT_CE!
-			| IDENT
-			| CTE_LOGTRUE
-			| CTE_LOGFALSE
-			| /* nada */ 
-;
-
-// declaracion de un elem de un vector (elem_vector)
-// afirmamos que solo puede ir un entero dentro del corchete
-e_vector : IDENT^ CORCHETE_AB! LIT_ENTERO_DECIMAL CORCHETE_CE! ;
-
-// tipos genericos que reconoce nuestro lenguaje
-ttipo [boolean variable] : 	// Booleano necesario para eliminar
-	INT						// errores con declaracion de globales
-	| BOOL
-	| VOID
-	| CHAR OP_PRODUCTO	// cadena de caracteres
-	| CHAR
-	| { variable }? // si es un ttipo de variable puede ser IDENT, e.o.c. NO
-		IDENT; 
-
-cadena : vector
-	| /* NADA (para el -> int IDENT*/;
-
-vector : CORCHETE_AB LIT_ENTERO_DECIMAL CORCHETE_CE; // int e[20]
 END CEMASMAS.
-
