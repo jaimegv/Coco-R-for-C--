@@ -34,6 +34,7 @@ TOKENS
 
 
   bool = "boolean".
+  boool = "bool".
   charr    = "char".
   classs   = "class".
   false   = "false".
@@ -127,7 +128,7 @@ CEMASMAS = DecClase CEMASMAS
 
 Ttipo = 	// Booleano necesario para eliminar
 	(intt						// errores con declaracion de globales
-	| bool
+	| bool | boool
 	| voidd
 	| charr [op_producto]).// cadena de caracteres
 //	| ident // si es un ttipo de variable puede ser IDENT, e.o.c. NO
@@ -142,14 +143,16 @@ DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo
 
 Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo = {Instruccion | Ttipo ident (Subprograma2 | DecVar)}.
+Cuerpo = {Instruccion | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
 
-Cuerpo2 = {Instruccion | Ttipo ident (DecVar)}.
+Cuerpo2 = {Instruccion | Ttipo ident ([Vector] DecVar) [op_asig (ident | enteros | cadenaCar)]}.
 //El apéndice del final indica el nivel de anhidamiento.
 
 DecVar = [op_asig Expresion] puntoComa.
 
-Parametros = Ttipo ident [{comma Ttipo ident}].
+Parametros = Ttipo ident [Vector] [{comma Ttipo ident [Vector]}].
+
+Vector = corchete_ab [enteros] corchete_ce.
 
 Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
