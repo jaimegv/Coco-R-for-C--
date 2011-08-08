@@ -65,7 +65,7 @@ TOKENS
   parent_ab    = "(".
   op_menos   = "-".
   op_menosmenos   = "--".  
-  op_not     = "!".
+
   op_mas    = "+".
   op_masmas = "++".
   llave_ce  = "}".
@@ -73,16 +73,19 @@ TOKENS
   parent_ce    = ")".
   op_producto	= "*".
   op_division		= "/".
-  op_menor			= "<".
-  op_mayor			= ">".
-  op_menor_igual = "<=" .
-  op_mayor_igual = ">=" .
-  op_igual			= "==".
+
   op_asig           = "=".
   puntoComa			= ";".
   doblesComillas	= '"'.
   interrogacion		= "?".
   barra_vert = "|".
+
+  op_negacion    = "!".
+  op_menor	   	 = "<".
+  op_mayor		 = ">".
+  op_menor_igual = "<=" .
+  op_mayor_igual = ">=" .
+  op_igual			= "==".
   op_distinto = "!=".
   op_and = "&&".
   op_or = "||".
@@ -211,16 +214,16 @@ Expresion1 = ["?" Expresion ":" Expresion Expresion1]
 Expresion2 = Expresion3 Expresion21
 .
 
-Expresion21 = ["<" Expresion3 Expresion21]
+Expresion21 = [Operador_Logico Expresion3 Expresion21]
 .
 
 Expresion3 = Expresion4 Expresion31
 .
 
-Expresion31 = [Operador Expresion4 Expresion31]
+Expresion31 = [Operador_Aritmetico Expresion4 Expresion31]
 .
 
-Expresion4 = "!" Expresion4
+Expresion4 = op_negacion Expresion4
 |Expresion5
 .
 
@@ -257,7 +260,10 @@ Expresion5 = "(" Expresion ")"
 Argumentos = [Expresion {"," Argumentos}].
 
 
-Operador = op_mas | op_menos | op_producto | op_division.
+Operador_Aritmetico = op_mas | op_menos | op_producto | op_division.
+
+Operador_Logico = op_menor | op_mayor |   op_menor_igual
+				| op_mayor_igual | op_igual | op_or | op_and | op_distinto.	
 
 
 
