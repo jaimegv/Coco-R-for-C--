@@ -2,7 +2,10 @@
 COMPILER CEMASMAS
 
 // Add auxiliary methods and declaration here.
-
+	// Declaracion de constantes para tipos
+	final int undef=0, entera=1, bool=2, cadena=3;
+	// Declaración de constantes de tipo de scopes
+	final int var=0, funcion=1, clase=2, metodo=3;
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -130,35 +133,58 @@ PRODUCTIONS
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
 
+
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS = DecClase CEMASMAS
-			 | ((Ttipo | voidd) (Main | ident (Subprograma | DecVar | DecMetodo) CEMASMAS)).
+CEMASMAS (. int type; .)  
+=
+	DecClase CEMASMAS
+			 | ((Ttipo<out type> | voidd) (Main | ident (Subprograma | DecVar | DecMetodo) CEMASMAS))
+.
 
-Ttipo = 	// Booleano necesario para eliminar
-	(intt						// errores con declaracion de globales
-	| bool | boool
-//	| voidd
-	| charr [op_producto]).// cadena de caracteres
-//	| ident // si es un ttipo de variable puede ser IDENT, e.o.c. NO
+Ttipo<out int type>	// Devolvemo un entero con el tipo
+= 				(.	type = undef; //inicializamos
+				.)
+(	intt		(. type = entera;	.)	
+	| bool		(. type = bool; 	.)	// Entendemos que estos dos
+	| boool		(. type = bool; 	.)	// son el mismo tipo		
+	| charr [op_producto]) 	(. type = cadena; .)
+.
 
 
-DecClase = classs ident llave_ab [DecCabMet]
-		{[(publicc | privatte) dosPuntos DecCabMet] puntoComa} llave_ce puntoComa.
+DecClase	(. int type; .) // Dec Variable
+=
+classs ident llave_ab [DecCabMet]
+		{[(publicc | privatte) dosPuntos DecCabMet] puntoComa} llave_ce puntoComa
+.
 
-DecCabMet = (Ttipo | voidd) ident ( {comma ident} | (parent_ab [Ttipo {comma Ttipo}] parent_ce)).
+DecCabMet	(. int type; .) 
+=
+(Ttipo<out type> | voidd) ident 
+				( {comma ident} | (parent_ab [Ttipo<out type> {comma Ttipo<out type>}] parent_ce))
+.
 
 DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo = {Instruccion | (Ttipo | voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
+Cuerpo 	(. int type; .) 
+=
+	{Instruccion 
+		| (Ttipo<out type>|voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}
+.
 
-Cuerpo2 = {Instruccion |(Ttipo | voidd) ident ([Vector] DecVar) [op_asig (ident | enteros | cadenaCar)]}.
+Cuerpo2	(. int type; .) 
+=
+	{Instruccion | (Ttipo<out type> | voidd) ident ([Vector] DecVar) [op_asig (ident | enteros | cadenaCar)]}
+.
 //El apéndice del final indica el nivel de anhidamiento.
 
 DecVar = [op_asig Expresion] puntoComa.
 
-Parametros = Ttipo ident [Vector] [{comma Ttipo ident [Vector]}] | voidd.
+Parametros	(. int type; .) 
+=
+	Ttipo<out type>ident [Vector] [{comma Ttipo<out type>ident [Vector]}] | voidd
+.
 
 Vector = corchete_ab [enteros] corchete_ce.
 
@@ -180,13 +206,22 @@ InstReturn = (rreturn [Expresion] puntoComa).
 
 /****************************************************/
 
-InstIfElse = iff Expresion ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else].
+InstIfElse	(. int type; .) 
+=
+	iff Expresion ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo<out type>ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else]
+.
 
-Cuerpo_if = {Instruccion_sinif | (Ttipo | voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
+Cuerpo_if	(. int type; .) 
+=
+{Instruccion_sinif | (Ttipo<out type> | voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}
+.
 
 Instruccion_sinif = InstReturn | InstCout | InstCin | InstExpresion.
 
-Else = elsse ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))).
+Else	(. int type; .) 
+=
+	elsse ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo<out type>ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))))
+.
 
 /***************************************************/
 
