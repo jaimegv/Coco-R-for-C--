@@ -132,12 +132,12 @@ PRODUCTIONS
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
 CEMASMAS = DecClase CEMASMAS
-			 | (Ttipo (Main | ident (Subprograma | DecVar | DecMetodo) CEMASMAS)).
+			 | ((Ttipo | voidd) (Main | ident (Subprograma | DecVar | DecMetodo) CEMASMAS)).
 
 Ttipo = 	// Booleano necesario para eliminar
 	(intt						// errores con declaracion de globales
 	| bool | boool
-	| voidd
+//	| voidd
 	| charr [op_producto]).// cadena de caracteres
 //	| ident // si es un ttipo de variable puede ser IDENT, e.o.c. NO
 
@@ -145,7 +145,7 @@ Ttipo = 	// Booleano necesario para eliminar
 DecClase = classs ident llave_ab [DecCabMet]
 		{[(publicc | privatte) dosPuntos DecCabMet] puntoComa} llave_ce puntoComa.
 
-DecCabMet = Ttipo ident ( {comma ident} | (parent_ab [Ttipo {comma Ttipo}] parent_ce)).
+DecCabMet = (Ttipo | voidd) ident ( {comma ident} | (parent_ab [Ttipo {comma Ttipo}] parent_ce)).
 
 DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
@@ -158,7 +158,7 @@ Cuerpo2 = {Instruccion | Ttipo ident ([Vector] DecVar) [op_asig (ident | enteros
 
 DecVar = [op_asig Expresion] puntoComa.
 
-Parametros = Ttipo ident [Vector] [{comma Ttipo ident [Vector]}].
+Parametros = Ttipo ident [Vector] [{comma Ttipo ident [Vector]}] | voidd.
 
 Vector = corchete_ab [enteros] corchete_ce.
 
