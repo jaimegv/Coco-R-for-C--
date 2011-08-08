@@ -151,9 +151,9 @@ DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo
 
 Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo = {Instruccion | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
+Cuerpo = {Instruccion | (Ttipo | voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
 
-Cuerpo2 = {Instruccion | Ttipo ident ([Vector] DecVar) [op_asig (ident | enteros | cadenaCar)]}.
+Cuerpo2 = {Instruccion |(Ttipo | voidd) ident ([Vector] DecVar) [op_asig (ident | enteros | cadenaCar)]}.
 //El apéndice del final indica el nivel de anhidamiento.
 
 DecVar = [op_asig Expresion] puntoComa.
@@ -182,7 +182,7 @@ InstReturn = (rreturn [Expresion] puntoComa).
 
 InstIfElse = iff Expresion ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else].
 
-Cuerpo_if = {Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
+Cuerpo_if = {Instruccion_sinif | (Ttipo | voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
 
 Instruccion_sinif = InstReturn | InstCout | InstCin | InstExpresion.
 
@@ -263,7 +263,7 @@ Argumentos = [Expresion {"," Argumentos}].
 Operador_Aritmetico = op_mas | op_menos | op_producto | op_division.
 
 Operador_Logico = op_menor | op_mayor |   op_menor_igual
-				| op_mayor_igual | op_igual | op_or | op_and | op_distinto.	
+				| op_mayor_igual | op_igual | op_or | op_and | op_distinto.
 
 
 
