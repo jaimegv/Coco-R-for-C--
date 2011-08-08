@@ -78,6 +78,9 @@ public class Parser {
 	// DeclaraciÃ³n de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3;
 
+	// Tabla de simbolos global
+	public TablaSimbolos tabla;
+
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
