@@ -74,7 +74,15 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	
+	final int undef=0, entera=1, bool=2, cadena=3;
+	// DeclaraciÃ³n de constantes de tipo de scopes
+	final int var=0, funcion=1, clase=2, metodo=3;
+
+// If you want your generated compiler case insensitive add the
+// keyword IGNORECASE here.
+
+
+
 
 	public Parser(Scanner scanner) {
 		this.scanner = scanner;
@@ -135,12 +143,13 @@ public class Parser {
 	}
 	
 	void CEMASMAS() {
+		int type; 
 		if (la.kind == 7) {
 			DecClase();
 			CEMASMAS();
 		} else if (StartOf(1)) {
 			if (StartOf(2)) {
-				Ttipo();
+				type = Ttipo();
 			} else {
 				Get();
 			}
@@ -161,6 +170,7 @@ public class Parser {
 	}
 
 	void DecClase() {
+		int type; 
 		Expect(7);
 		Expect(1);
 		Expect(29);
@@ -183,19 +193,27 @@ public class Parser {
 		Expect(42);
 	}
 
-	void Ttipo() {
+	int  Ttipo() {
+		int  type;
+		type = undef; //inicializamos
+		
 		if (la.kind == 9) {
 			Get();
+			type = entera;	
 		} else if (la.kind == 4) {
 			Get();
+			type = bool; 	
 		} else if (la.kind == 5) {
 			Get();
+			type = bool; 	
 		} else if (la.kind == 6) {
 			Get();
 			if (la.kind == 39) {
 				Get();
 			}
 		} else SynErr(64);
+		type = cadena; 
+		return type;
 	}
 
 	void Main() {
@@ -243,8 +261,9 @@ public class Parser {
 	}
 
 	void DecCabMet() {
+		int type; 
 		if (StartOf(2)) {
-			Ttipo();
+			type = Ttipo();
 		} else if (la.kind == 14) {
 			Get();
 		} else SynErr(65);
@@ -257,10 +276,10 @@ public class Parser {
 		} else if (la.kind == 31) {
 			Get();
 			if (StartOf(2)) {
-				Ttipo();
+				type = Ttipo();
 				while (la.kind == 27) {
 					Get();
-					Ttipo();
+					type = Ttipo();
 				}
 			}
 			Expect(38);
@@ -268,8 +287,9 @@ public class Parser {
 	}
 
 	void Parametros() {
+		int type; 
 		if (StartOf(2)) {
-			Ttipo();
+			type = Ttipo();
 			Expect(1);
 			if (la.kind == 30) {
 				Vector();
@@ -277,7 +297,7 @@ public class Parser {
 			if (la.kind == 27) {
 				while (la.kind == 27) {
 					Get();
-					Ttipo();
+					type = Ttipo();
 					Expect(1);
 					if (la.kind == 30) {
 						Vector();
@@ -290,14 +310,19 @@ public class Parser {
 	}
 
 	void Cuerpo() {
+		int type; 
 		while (StartOf(4)) {
 			if (StartOf(5)) {
 				Instruccion();
 			} else {
-				Ttipo();
+				if (StartOf(2)) {
+					type = Ttipo();
+				} else {
+					Get();
+				}
 				Expect(1);
 				if (la.kind == 31) {
-					Subprograma2();
+					Subprograma();
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector();
@@ -332,46 +357,12 @@ public class Parser {
 		} else SynErr(70);
 	}
 
-	void Subprograma2() {
-		Expect(31);
-		Parametros();
-		Expect(38);
-		Expect(29);
-		Cuerpo2();
-		Expect(36);
-	}
-
 	void Vector() {
 		Expect(30);
 		if (la.kind == 2) {
 			Get();
 		}
 		Expect(37);
-	}
-
-	void Cuerpo2() {
-		while (StartOf(4)) {
-			if (StartOf(5)) {
-				Instruccion();
-			} else {
-				Ttipo();
-				Expect(1);
-				if (la.kind == 30) {
-					Vector();
-				}
-				DecVar();
-				if (la.kind == 41) {
-					Get();
-					if (la.kind == 1) {
-						Get();
-					} else if (la.kind == 2) {
-						Get();
-					} else if (la.kind == 3) {
-						Get();
-					} else SynErr(71);
-				}
-			}
-		}
 	}
 
 	void Expresion() {
@@ -439,24 +430,25 @@ public class Parser {
 			}
 			Expresion();
 			Expect(42);
-		} else SynErr(72);
+		} else SynErr(71);
 	}
 
 	void InstIfElse() {
+		int type; 
 		Expect(23);
 		Expresion();
 		if (la.kind == 29) {
 			Get();
-			Cuerpo_if();
+			Cuerpo();
 			Expect(36);
 		} else if (StartOf(8)) {
-			if (StartOf(9)) {
-				Instruccion_sinif();
+			if (StartOf(5)) {
+				Instruccion();
 			} else {
-				Ttipo();
+				type = Ttipo();
 				Expect(1);
 				if (la.kind == 31) {
-					Subprograma2();
+					Subprograma();
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector();
@@ -470,11 +462,11 @@ public class Parser {
 							Get();
 						} else if (la.kind == 3) {
 							Get();
-						} else SynErr(73);
+						} else SynErr(72);
 					}
-				} else SynErr(74);
+				} else SynErr(73);
 			}
-		} else SynErr(75);
+		} else SynErr(74);
 		if (la.kind == 24) {
 			Else();
 		}
@@ -490,61 +482,21 @@ public class Parser {
 		}
 	}
 
-	void Cuerpo_if() {
-		while (StartOf(8)) {
-			if (StartOf(9)) {
-				Instruccion_sinif();
-			} else {
-				Ttipo();
-				Expect(1);
-				if (la.kind == 31) {
-					Subprograma2();
-				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
-					if (la.kind == 30) {
-						Vector();
-					}
-					DecVar();
-					if (la.kind == 41) {
-						Get();
-						if (la.kind == 1) {
-							Get();
-						} else if (la.kind == 2) {
-							Get();
-						} else if (la.kind == 3) {
-							Get();
-						} else SynErr(76);
-					}
-				} else SynErr(77);
-			}
-		}
-	}
-
-	void Instruccion_sinif() {
-		if (la.kind == 18) {
-			InstReturn();
-		} else if (la.kind == 19) {
-			InstCout();
-		} else if (la.kind == 20) {
-			InstCin();
-		} else if (la.kind == 1) {
-			InstExpresion();
-		} else SynErr(78);
-	}
-
 	void Else() {
+		int type; 
 		Expect(24);
 		if (la.kind == 29) {
 			Get();
-			Cuerpo_if();
+			Cuerpo();
 			Expect(36);
 		} else if (StartOf(8)) {
-			if (StartOf(9)) {
-				Instruccion_sinif();
+			if (StartOf(5)) {
+				Instruccion();
 			} else {
-				Ttipo();
+				type = Ttipo();
 				Expect(1);
 				if (la.kind == 31) {
-					Subprograma2();
+					Subprograma();
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector();
@@ -558,11 +510,11 @@ public class Parser {
 							Get();
 						} else if (la.kind == 3) {
 							Get();
-						} else SynErr(79);
+						} else SynErr(75);
 					}
-				} else SynErr(80);
+				} else SynErr(76);
 			}
-		} else SynErr(81);
+		} else SynErr(77);
 	}
 
 	void Arg_io() {
@@ -570,7 +522,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 3) {
 			Get();
-		} else SynErr(82);
+		} else SynErr(78);
 	}
 
 	void Expresion2() {
@@ -594,7 +546,7 @@ public class Parser {
 	}
 
 	void Expresion21() {
-		if (StartOf(10)) {
+		if (StartOf(9)) {
 			Operador_Logico();
 			Expresion3();
 			Expresion21();
@@ -635,7 +587,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(83); break;
+		default: SynErr(79); break;
 		}
 	}
 
@@ -643,13 +595,13 @@ public class Parser {
 		if (la.kind == 46) {
 			Get();
 			Expresion4();
-		} else if (StartOf(11)) {
+		} else if (StartOf(10)) {
 			Expresion5();
-		} else SynErr(84);
+		} else SynErr(80);
 	}
 
 	void Expresion31() {
-		if (StartOf(12)) {
+		if (StartOf(11)) {
 			Operador_Aritmetico();
 			Expresion4();
 			Expresion31();
@@ -665,7 +617,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(85);
+		} else SynErr(81);
 	}
 
 	void Expresion5() {
@@ -723,7 +675,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(86); break;
+		default: SynErr(82); break;
 		}
 	}
 
@@ -743,12 +695,11 @@ public class Parser {
 		{x,x,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
-		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
@@ -847,22 +798,18 @@ class Errors {
 			case 68: s = "invalid Cuerpo"; break;
 			case 69: s = "invalid Cuerpo"; break;
 			case 70: s = "invalid Instruccion"; break;
-			case 71: s = "invalid Cuerpo2"; break;
-			case 72: s = "invalid InstExpresion"; break;
+			case 71: s = "invalid InstExpresion"; break;
+			case 72: s = "invalid InstIfElse"; break;
 			case 73: s = "invalid InstIfElse"; break;
 			case 74: s = "invalid InstIfElse"; break;
-			case 75: s = "invalid InstIfElse"; break;
-			case 76: s = "invalid Cuerpo_if"; break;
-			case 77: s = "invalid Cuerpo_if"; break;
-			case 78: s = "invalid Instruccion_sinif"; break;
-			case 79: s = "invalid Else"; break;
-			case 80: s = "invalid Else"; break;
-			case 81: s = "invalid Else"; break;
-			case 82: s = "invalid Arg_io"; break;
-			case 83: s = "invalid Operador_Logico"; break;
-			case 84: s = "invalid Expresion4"; break;
-			case 85: s = "invalid Operador_Aritmetico"; break;
-			case 86: s = "invalid Expresion5"; break;
+			case 75: s = "invalid Else"; break;
+			case 76: s = "invalid Else"; break;
+			case 77: s = "invalid Else"; break;
+			case 78: s = "invalid Arg_io"; break;
+			case 79: s = "invalid Operador_Logico"; break;
+			case 80: s = "invalid Expresion4"; break;
+			case 81: s = "invalid Operador_Aritmetico"; break;
+			case 82: s = "invalid Expresion5"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
