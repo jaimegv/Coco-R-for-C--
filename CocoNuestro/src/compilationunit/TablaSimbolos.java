@@ -15,14 +15,36 @@ public class TablaSimbolos {
 	// Declaración de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3;
 	
-	public Simbolo undefObj;
+	public Simbolo Objeto;
+	public Simbolo topScope;	// Ambito Actual
 	
+	Parser parser;
 	
-	public void SymbolTable(Parser parser) {
-		undefObj = new Simbolo();
-		undefObj.nombre  =  "undef"; 
-		undefObj.type = undef; 
+	// Constructor
+	public void TablaSimbolos (Parser parser) {
+		this.parser=parser;
+		Objeto = new Simbolo();
+		Objeto.nombre  =  "undef"; 
+		Objeto.type = undef;	// tipo del objeto
+		Objeto.kind=var;		// tipo de inicio
 	}
+	
+	// Abrir un nuevo ambito para hacerlo el actual
+	public void OpenAmbito() {
+		Objeto = new Simbolo();
+		Objeto.nombre  =  ""; 
+		Objeto.type = undef;	// tipo del objeto
+		Objeto.kind=var;		//
+	}
+
+	// Crear un nuevo objteo en el actual SCOPE-ambito
+	public void NuevoAmbito(String nombre, int kind, int type) {
+		Objeto = new Simbolo();
+		Objeto.nombre  =  ""; 
+		Objeto.type = undef;	// tipo del objeto
+		Objeto.kind=var;		//
+	}
+	
 	
 	
     public void DestruirTSG () {
