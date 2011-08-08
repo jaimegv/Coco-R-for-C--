@@ -85,8 +85,13 @@ TOKENS
   barra_vert = "|".
   op_distinto = "!=".
   op_and = "&&".
-  op_asig_mas = ":=+".
   op_or = "||".
+  
+  op_asig_mas = "+=".
+  op_asig_menos = "-=".
+  op_asig_producto = "*=".
+  op_asig_division = "/=".
+  op_asig_modulo = "%=".
   
 COMMENTS FROM "/*" TO "*/"
 COMMENTS FROM "//" TO lf
@@ -161,13 +166,30 @@ Subprograma2 = parent_ab Parametros parent_ce llave_ab Cuerpo2 llave_ce.
 
 
 /******************INSTRUCCIONES*****************************/
-Instruccion = InstReturn | InstCout | InstCin | InstExpresion.
+Instruccion = InstReturn | InstCout | InstCin | InstExpresion | InstIfElse.
 
-InstExpresion = ident (op_asig) Expresion puntoComa.
+InstExpresion = ident ((parent_ab Argumentos parent_ce puntoComa)
+				| ((op_asig | op_asig_mas | op_asig_menos |
+					op_asig_producto | op_asig_division | op_asig_modulo) 
+													Expresion puntoComa)).
 
 InstReturn = (rreturn [Expresion] puntoComa).
 
-InstCond = .
+/****************************************************/
+
+InstIfElse = iff Expresion ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else].
+
+Cuerpo_if = {Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}.
+
+Instruccion_sinif = InstReturn | InstCout | InstCin | InstExpresion.
+
+Else = elsse ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))).
+
+/***************************************************/
+
+
+/***************************************************/
+
 
 InstCout = cout {menor_menor Arg_io} puntoComa.
 
@@ -195,7 +217,7 @@ Expresion21 = ["<" Expresion3 Expresion21]
 Expresion3 = Expresion4 Expresion31
 .
 
-Expresion31 = ["+" Expresion4 Expresion31]
+Expresion31 = [Operador Expresion4 Expresion31]
 .
 
 Expresion4 = "!" Expresion4
