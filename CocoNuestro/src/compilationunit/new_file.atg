@@ -150,8 +150,8 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 (	intt		(. type = entera;	.)	
 	| bool		(. type = bool; 	.)	// Entendemos que estos dos
 	| boool		(. type = bool; 	.)	// son el mismo tipo		
-	| charr [op_producto]) 	(. type = cadena; .)
-.
+	| charr [op_producto] 	(. type = cadena; .)
+).
 
 
 DecClase	(. int type; .) // Dec Variable
@@ -173,8 +173,14 @@ Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 Cuerpo 	(. int type; .) 
 =
 	{Instruccion 
-		| (Ttipo<out type>|voidd) ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}
+		| (Ttipo<out type>|voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}
 .
+
+Cuerpo2	(. int type; .) 
+=
+	{Instruccion | (Ttipo<out type> | voidd) ident ([Vector] DecVar) [op_asig (ident | enteros | cadenaCar)]}
+.
+//El apéndice del final indica el nivel de anhidamiento.
 
 DecVar = [op_asig Expresion] puntoComa.
 
@@ -186,6 +192,9 @@ Parametros	(. int type; .)
 Vector = corchete_ab [enteros] corchete_ce.
 
 Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
+
+Subprograma2 = parent_ab Parametros parent_ce llave_ab Cuerpo2 llave_ce.
+//El apendice del final indica el nivel de anhidamiento
 
 
 /******************INSTRUCCIONES*****************************/
@@ -200,15 +209,15 @@ InstReturn = (rreturn [Expresion] puntoComa).
 
 /****************************************************/
 
-InstIfElse	(. int type; .) 
+InstIfElse	(. int type;
+				int type1; .) 
 =
-	iff Expresion ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else]
+	iff Expresion<out type1> ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo<out type>ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else]
 .
-
 
 Else	(. int type; .) 
 =
-	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))))
+	elsse ((llave_ab Cuerpo_if llave_ce) | (Instruccion_sinif | Ttipo<out type>ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))))
 .
 
 /***************************************************/
@@ -227,7 +236,13 @@ Arg_io = ident | cadenaCar.
 
 /******************EXPRESIONES*****************************/
 
+Expresion<out int type> 
+= (. type=undef; .)
+(	enteros (.	type=entera;	.)
+).
 
+
+/*
 Expresion = Expresion2 Expresion1	
 .
 
@@ -281,7 +296,7 @@ Expresion5 = "(" Expresion ")"
 /**********************************************************/
 
 Argumentos = [Expresion {"," Argumentos}].
-
+*/
 
 Operador_Aritmetico = op_mas | op_menos | op_producto | op_division.
 
