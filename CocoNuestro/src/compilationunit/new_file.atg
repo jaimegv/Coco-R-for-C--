@@ -205,12 +205,6 @@ InstIfElse	(. int type; .)
 	iff Expresion ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else]
 .
 
-//Cuerpo_if	(. int type; .) 
-//=
-//{Instruccion_sinif | (Ttipo<out type> | voidd) ident (Subprograma2 | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}
-//.
-
-//Instruccion_sinif = InstReturn | InstCout | InstCin | InstExpresion.
 
 Else	(. int type; .) 
 =
