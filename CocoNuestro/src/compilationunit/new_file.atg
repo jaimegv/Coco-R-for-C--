@@ -262,33 +262,74 @@ Expresion<out int type>
 	| false	(.	type=bool;	.)
 ).
 */
-Expresion <out int tipoDev>
- = Expresion2 <out type> Expresion1	<out type1>
+Expresion <out int tipoDev> (. int type; 
+							   int type1;.)
+ = (. 	tipoDev=undef;.)
+   Expresion2 <out type> Expresion1	<out type1> (. if ((type1!=undef)&&(type != type1)) 
+ 												   {SemErr("tipos discordantes E");}
+ 												   else
+ 												   {tipoDev=type;}.)
 .
 
-Expresion1 <out int tipoDev>
-= ["?" Expresion<out type>":" Expresion <out type1> Expresion1 <out type2>]
+Expresion1 <out int tipoDev> (. int type; 
+							   int type1;
+							   int type2;.)
+= (. 	tipoDev=undef;.)
+  ["?" Expresion<out type>":" Expresion <out type1> Expresion1 <out type2>]
 .
 
-Expresion2 <out int tipoDev>
-= Expresion3 <out type> Expresion21 <out type1>
+Expresion2 <out int tipoDev> (. int type; 
+							   int type1;.)
+= (. 	tipoDev=undef;.) 
+   Expresion3 <out type> Expresion21 <out type1> (. if ((type1!=undef)&&(type != type1)) 
+ 												   {SemErr("tipos discordantes E2");}
+ 												   else
+ 												   {tipoDev=type;}.)
 .
 
-Expresion21 <out int tipoDev>
-= [Operador_Logico Expresion3 <out type> Expresion21 <out type1>]
+Expresion21 <out int tipoDev> (. int type; 
+							   int type1;.)
+= (. 	tipoDev=undef;.) 
+   [Operador_Logico Expresion3 <out type> Expresion21 <out type1>
+												(. if (type != type1) 
+ 												   {SemErr("tipos discordantes E21");}
+ 												   else
+ 												   {tipoDev=type;}.)]
 .
 
-Expresion3 <out int tipoDev>
-= Expresion4 <out type> Expresion31 <out type1>
+Expresion3 <out int tipoDev> (. int type; 
+							   int type1;.)
+= (. 	tipoDev=undef;.)
+   Expresion4 <out type> Expresion31 <out type1> (. if ((type1!=undef)&&(type != type1)) 
+ 												   {SemErr("tipos discordantes E3");}
+ 												 else
+ 												   {tipoDev=type;}.)
 .
 
-Expresion31 <out int tipoDev>
-= [Operador_Aritmetico Expresion4 <out type> Expresion31 <out type1>]
+Expresion31 <out int tipoDev> (. int type; 
+							   int type1;.)
+= (. 	tipoDev=undef;
+	    type=undef;
+	    type1=undef;.)
+   [Operador_Aritmetico Expresion4 <out type> Expresion31 <out type1> 
+								   (. if ((type1!=undef)&&(type != type1)) 
+								   {SemErr("tipos discordantes E31");}
+								   else
+								   {tipoDev=type;}.)
+								   ]
 .
 
-Expresion4 <out int tipoDev>
-= op_negacion Expresion4 <out type>
-|Expresion5 <out type1>
+Expresion4 <out int tipoDev> (. int type; 
+							   int type1;.)
+= (. 	tipoDev=undef;.)
+  (
+   op_negacion Expresion4 <out type> (. if (type != bool) 
+ 										{SemErr("tipos discordantes E4");}
+ 									 else
+ 										{tipoDev=bool;}.)
+   | Expresion5 <out type1> (.tipoDev = type1;.)
+)
+
 .
 
 /* Expresion 5 recoge todos los siguientes supuestos:
@@ -310,16 +351,18 @@ Expresion4 <out int tipoDev>
 */
 
 
-Expresion5 <out int tipoDev>
+Expresion5 <out int tipoDev> (. int type; 
+							   int type1;.)
 =	(. 	tipoDev=undef;.)
-"(" Expresion <out type1> ")"	//(. tipoDev=type1;.)
-| "new" ident "("Argumentos")"       /*Constructor*/
-| ident ["."ident ["("Argumentos")"] | "("Argumentos")"| "["Expresion <out type> "]" /*(. tipoDev=type;.)*/]
-| enteros		(. tipoDev=entero;	.)
+(
+"(" Expresion <out type1> ")"	(. tipoDev=type1;.)
+//| "new" ident "("Argumentos")"       /*Constructor*/
+//| ident ["."ident ["("Argumentos")"] | "("Argumentos")"| "["Expresion <out type> "]"]
+| enteros		(. tipoDev=entera;	.)
 | cadenaCar		(. tipoDev=cadena;	.)
 | "true"		(. tipoDev=bool;	.)
 | "false"		(. tipoDev=bool;	.)
-.
+).
 
 Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
 					| parent_ab Expresion_Entera parent_ce [Operador_Aritmetico Expresion_Entera]

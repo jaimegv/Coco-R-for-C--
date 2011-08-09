@@ -418,8 +418,15 @@ public class Parser {
 
 	int  Expresion() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		tipoDev=undef;
 		type = Expresion2();
 		type1 = Expresion1();
+		if ((type1!=undef)&&(type != type1)) 
+		{SemErr("tipos discordantes E");}
+		else
+		{tipoDev=type;}
 		return tipoDev;
 	}
 
@@ -613,13 +620,24 @@ public class Parser {
 
 	int  Expresion2() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		tipoDev=undef;
 		type = Expresion3();
 		type1 = Expresion21();
+		if ((type1!=undef)&&(type != type1)) 
+		{SemErr("tipos discordantes E2");}
+		else
+		{tipoDev=type;}
 		return tipoDev;
 	}
 
 	int  Expresion1() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		int type2;
+		tipoDev=undef;
 		if (la.kind == 44) {
 			Get();
 			type = Expresion();
@@ -632,17 +650,31 @@ public class Parser {
 
 	int  Expresion3() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		tipoDev=undef;
 		type = Expresion4();
 		type1 = Expresion31();
+		if ((type1!=undef)&&(type != type1)) 
+		{SemErr("tipos discordantes E3");}
+		else
+		  {tipoDev=type;}
 		return tipoDev;
 	}
 
 	int  Expresion21() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		tipoDev=undef;
 		if (StartOf(9)) {
 			Operador_Logico();
 			type = Expresion3();
 			type1 = Expresion21();
+			if (type != type1) 
+			{SemErr("tipos discordantes E21");}
+			else
+			{tipoDev=type;}
 		}
 		return tipoDev;
 	}
@@ -687,21 +719,38 @@ public class Parser {
 
 	int  Expresion4() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		tipoDev=undef;
 		if (la.kind == 46) {
 			Get();
 			type = Expresion4();
+			if (type != bool) 
+			{SemErr("tipos discordantes E4");}
+			else
+			{tipoDev=bool;}
 		} else if (StartOf(10)) {
 			type1 = Expresion5();
+			tipoDev = type1;
 		} else SynErr(80);
 		return tipoDev;
 	}
 
 	int  Expresion31() {
 		int  tipoDev;
+		int type; 
+		int type1;
+		tipoDev=undef;
+		type=undef;
+		type1=undef;
 		if (StartOf(5)) {
 			Operador_Aritmetico();
 			type = Expresion4();
 			type1 = Expresion31();
+			if ((type1!=undef)&&(type != type1)) 
+			{SemErr("tipos discordantes E31");}
+			else
+			{tipoDev=type;}
 		}
 		return tipoDev;
 	}
@@ -720,67 +769,27 @@ public class Parser {
 
 	int  Expresion5() {
 		int  tipoDev;
-		switch (la.kind) {
-		case 31: {
-			tipoDev=undef;
+		int type; 
+		int type1;
+		tipoDev=undef;
+		if (la.kind == 31) {
 			Get();
 			type1 = Expresion();
 			Expect(38);
-			break;
-		}
-		case 10: {
+			tipoDev=type1;
+		} else if (la.kind == 2) {
 			Get();
-			Expect(1);
-			Expect(31);
-			Argumentos();
-			Expect(38);
-			break;
-		}
-		case 1: {
-			Get();
-			if (la.kind == 28 || la.kind == 30 || la.kind == 31) {
-				if (la.kind == 28) {
-					Get();
-					Expect(1);
-					if (la.kind == 31) {
-						Get();
-						Argumentos();
-						Expect(38);
-					}
-				} else if (la.kind == 31) {
-					Get();
-					Argumentos();
-					Expect(38);
-				} else {
-					Get();
-					type = Expresion();
-					Expect(37);
-				}
-			}
-			break;
-		}
-		case 2: {
-			Get();
-			tipoDev=entero;	
-			break;
-		}
-		case 3: {
+			tipoDev=entera;	
+		} else if (la.kind == 3) {
 			Get();
 			tipoDev=cadena;	
-			break;
-		}
-		case 13: {
+		} else if (la.kind == 13) {
 			Get();
 			tipoDev=bool;	
-			break;
-		}
-		case 8: {
+		} else if (la.kind == 8) {
 			Get();
 			tipoDev=bool;	
-			break;
-		}
-		default: SynErr(82); break;
-		}
+		} else SynErr(82);
 		return tipoDev;
 	}
 
@@ -802,11 +811,11 @@ public class Parser {
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+		{x,x,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
 } // end Parser
