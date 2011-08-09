@@ -176,11 +176,7 @@ Param_Cab = (. int type; .)
 
 	[Ttipo<out type> [Vector] [{comma Ttipo<out type> [Vector]}] | voidd]
 .
-/*
-(Ttipo<out type> | voidd) ident 
-				( {comma ident} | (parent_ab [Ttipo<out type> {comma Ttipo<out type>}] parent_ce))
-.
-*/
+
 DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
@@ -201,7 +197,7 @@ Parametros	(. int type; .)
 	Ttipo<out type>ident [Vector] [{comma Ttipo<out type>ident [Vector]}] | voidd
 .
 
-Vector = corchete_ab [enteros] corchete_ce.
+Vector = corchete_ab [Expresion_Entera] corchete_ce.
 
 Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
@@ -239,7 +235,7 @@ InstCout = cout {menor_menor Arg_io} puntoComa.
 
 InstCin = cin mayor_mayor Arg_io puntoComa.
 
-Arg_io = ident | cadenaCar.
+Arg_io = ident [Vector] | cadenaCar.
 
 
 
@@ -302,6 +298,9 @@ Expresion5 = "(" Expresion ")"
 | "false"
 .
 
+Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
+					| parent_ab (enteros | ident) [Operador_Aritmetico Expresion_Entera] parent_ce.
+					
 /**********************************************************/
 
 Argumentos = [Expresion {"," Argumentos}].
