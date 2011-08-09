@@ -247,7 +247,7 @@ Else	(. int type; .)
 /***************************************************/
 
 
-/***************************************************/
+/******************PRINT***********************/
 
 
 InstCout = cout {menor_menor Arg_io} puntoComa.
@@ -445,9 +445,11 @@ Argumentos
 .
 
 
-Operador_Aritmetico = op_mas | op_menos | op_producto | op_division.
+Operador_Aritmetico = op_mas | op_menos | op_producto | op_division
+.
 
-Operador_Logico = op_or | op_and | op_negacion.
+Operador_Logico = op_or | op_and | op_negacion
+.
 				
 Operador_Relacional = op_menor | op_mayor |   op_menor_igual
 				| op_mayor_igual | op_igual | op_distinto
