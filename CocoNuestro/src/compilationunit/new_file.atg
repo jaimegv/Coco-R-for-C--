@@ -299,7 +299,7 @@ Expresion5 = "(" Expresion ")"
 .
 
 Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
-					| parent_ab (enteros | ident) [Operador_Aritmetico Expresion_Entera] parent_ce.
+					| parent_ab Expresion_Entera parent_ce [Operador_Aritmetico Expresion_Entera].
 					
 /**********************************************************/
 
