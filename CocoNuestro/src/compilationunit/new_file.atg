@@ -156,16 +156,31 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 
 DecClase	(. int type; .) // Dec Variable
 =
-classs ident llave_ab [DecCabMet]
-		{[(publicc | privatte) dosPuntos DecCabMet] puntoComa} llave_ce puntoComa
-.
+[publicc | privatte] classs ident llave_ab 
+							Cuerpo_Clase
+							[(publicc dosPuntos Cuerpo_Clase [privatte dosPuntos Cuerpo_Clase])
+							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]		
+								  llave_ce puntoComa.
+
+Cuerpo_Clase	(. int type; .) // Dec Variable 
+
+= [{(Ttipo<out type> ident (DecVar | DecCabMet))
+							  | voidd ident DecCabMet}].
+
 
 DecCabMet	(. int type; .) 
-=
+= parent_ab Param_Cab parent_ce puntoComa
+.
+
+Param_Cab = (. int type; .) 
+
+	[Ttipo<out type> [Vector] [{comma Ttipo<out type> [Vector]}] | voidd]
+.
+/*
 (Ttipo<out type> | voidd) ident 
 				( {comma ident} | (parent_ab [Ttipo<out type> {comma Ttipo<out type>}] parent_ce))
 .
-
+*/
 DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
@@ -194,7 +209,7 @@ Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 /******************INSTRUCCIONES*****************************/
 Instruccion = InstReturn | InstCout | InstCin | InstExpresion | InstIfElse.
 
-InstExpresion = ident ((parent_ab Argumentos parent_ce puntoComa)
+InstExpresion = ident[punto ident] ((parent_ab Argumentos parent_ce puntoComa)
 				| ((op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													Expresion puntoComa)).
