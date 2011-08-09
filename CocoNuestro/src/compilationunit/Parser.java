@@ -214,8 +214,8 @@ public class Parser {
 			if (la.kind == 39) {
 				Get();
 			}
+			type = cadena; 
 		} else SynErr(64);
-		type = cadena; 
 		return type;
 	}
 
@@ -437,7 +437,8 @@ public class Parser {
 	}
 
 	void InstIfElse() {
-		int type; 
+		int type;
+		int type1; 
 		Expect(23);
 		Expresion();
 		if (la.kind == 29) {
