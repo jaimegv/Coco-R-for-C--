@@ -142,12 +142,17 @@ CEMASMAS (. int type=undef;
 			int type1;.)  
 =
 	DecClase CEMASMAS
-			 | ((Ttipo<out type> | voidd) (Main | ident (Subprograma | DecVar<out type1> (. if (type1==type) { System.out.println("tipos ok!"+type+" "+type1);}
-			 																				else if (type1==undef) {//System.out.println("tipos ok!__No has inicializado la var, pero ok!");
-			 																				} 
-																							else {SemErr("Del error de arriba->Tipos distintos "+type+" y " + type1);
-																									} .) 
-			 																| DecMetodo) CEMASMAS))
+			 | ((Ttipo<out type> | voidd) 
+			 		(Main | ident (Subprograma | DecVar<out type1> (. 	if (type1==type) {
+			 																//System.out.println("tipos ok!"+type+" "+type1);
+		 																}
+																		else if (type1==undef) {
+																			//System.out.println("tipos ok!__No has inicializado la var, pero ok!");
+																		} 
+																		else {
+																			SemErr("Del error de arriba->Tipos distintos "+type+" y " + type1);
+																		} .) 
+								| DecMetodo) CEMASMAS))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo
@@ -270,9 +275,7 @@ Expresion <out int tipoDev>
  = Expresion2 <out type> Expresion1	<out type1>	(.	if (type==type1) {
  														tipoDev=type;
  														//System.out.println("expresion!"+type);
- 													}
- 													else if (type1==undef) {
- 														//System.out.println("No has hecho expresion condicional...pero ok!");
+ 													} else if (type1==undef) {
  														tipoDev=type;
  													} else {
  														SemErr("Error en Expresion");
@@ -291,14 +294,22 @@ Expresion2 <out int tipoDev>
 (.	tipoDev=undef;
 	int type, type1;
 .)
-= Expresion3 <out type> Expresion21 <out type1> (. if ((type==type1) && (type1==entera)) {
-														tipoDev=bool;
-													} else if ((type==type1) && (type1==bool)) {
+= Expresion3 <out type> Expresion21 <out type1> (.  if (type1==undef) {	// no hay segunda parte expr
 														tipoDev=type;
-													} else if (type1==undef) {
-														tipoDev=type;
+													} else if (type1==entera) {	// Expresion con op_relacional
+														if (type==type1) {
+															tipoDev=entera;		// op_relacional ok!
+														} else {
+															SemErr("Operando relacional incorrecto.");
+														}
+													} else if (type1==bool) {	// Expresion con op_logico
+														if (type==type1) {
+															tipoDev=bool;	// op_logico ok!
+														} else {
+															SemErr("Operando logico incorrecto.");
+														}
 													} else {
-														SemErr("Operacion sobre tipos no enteros"+type+" "+type1);
+														SemErr("Operacion Expr2 problems"+type+" "+type1);
 													}
 												.)
 .
@@ -307,18 +318,23 @@ Expresion21 <out int tipoDev>
 (.	tipoDev=undef;
 	int type, type1;
 .)
-= [Operador_Logico Expresion3 <out type> Expresion21 <out type1> (.	if ((type==bool) && (type1==undef)) {
-																		tipoDev=type;
-																	} else if ((type==bool) && (!(type==type1))) {
-																		SemErr("Op logico con tipo_arg diferentes"+type+" "+type1);
-																	} else if (type==entera) {
-																		SemErr("Op logico con arg entero"+type);
-																	} else {
-																		tipoDev=type1;
+= [Operador_Logico Expresion3 <out type> Expresion21 <out type1> (.	if (type==bool) {
+																		if (type1==undef) {	// todo ok!
+																			tipoDev=type;
+																		} else if (type1==bool) {	//2º ok!
+																			tipoDev=type;
+																		} else {				// 2º arg problem
+																			SemErr("OpLogico Error:"+type);
+																		}
+//																	} else if ((type==bool) && (!(type==type1))) {
+//																		SemErr("Op logico con tipo_arg diferentes"+type+" "+type1);
+//																	} else if (type==entera) {
+//																		SemErr("Op logico con arg entero:"+type);
+																	} else {	// error en 1º arg
+																		tipoDev=type;	// lo envio para q salte el error
+																		SemErr("OpLogico Error:"+type);
 																	}
-																	System.out.println("tipos"+type+" "+type1);
-																.)
-												]
+																.)]
 | [Operador_Relacional Expresion3 <out type> Expresion21 <out type1> (.	if ((type==entera) && (type1==undef)) {
 																		tipoDev=type;
 																	} else if ((type==entera) && (!(type==type1))) {
@@ -326,7 +342,6 @@ Expresion21 <out int tipoDev>
 																	} else {
 																		tipoDev=type1;
 																	}
-																	System.out.println("tipos!!!"+type+" "+type1);
 																.)
 												]
 .
@@ -349,12 +364,18 @@ Expresion31 <out int tipoDev>
 (.	tipoDev=undef;
 	int type, type1;
 .)
-= [Operador_Aritmetico Expresion4 <out type> Expresion31 <out type1> (. if ((type==type1) && !(type==entera)) {
-																			SemErr("Operacion Arit sobre tipos no enteros");
-																		} else if (type1==undef) {
-																			tipoDev=type;
-																		} else {
-																			tipoDev=type;
+= [Operador_Aritmetico Expresion4 <out type> Expresion31 <out type1> (. if (type1==undef) {	// No hay 2º parte
+																			if (type==entera) {	// todo ok!
+																				tipoDev=type;
+																			} else {			// NO es un tipo ENTERO
+																				SemErr("Operacion Arit con arg no entero");
+																			}
+																		} else {	// hay otro expresion
+																			if ((type==type1) && (type==entera)) {	// las dos son enteras
+																				tipoDev=type;
+																			} else {
+																				SemErr("Operacion Arit sobre tipos no enteros");
+																			}
 																		}
 																	  .)
 																	]
