@@ -8,7 +8,7 @@ COMPILER CEMASMAS
 	final int var=0, funcion=1, clase=2, metodo=3;
 
 	// Tabla de simbolos global
-	public TablaSimbolos tabla;
+//	public TablaSimbolos tabla;
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -138,10 +138,14 @@ PRODUCTIONS
 
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS (. int type; .)  
+CEMASMAS (. int type=undef; 
+			int type1;.)  
 =
 	DecClase CEMASMAS
-			 | ((Ttipo<out type> | voidd) (Main | ident (Subprograma | DecVar | DecMetodo) CEMASMAS))
+			 | ((Ttipo<out type> | voidd) (Main | ident (Subprograma | DecVar<out type1> (. if (type1==type) { System.out.println("tipos ok!");}
+																							else {SemErr("Tipos distintos");
+																									} .) 
+			 																| DecMetodo) CEMASMAS))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo
@@ -164,7 +168,7 @@ DecClase	(. int type; .) // Dec Variable
 
 Cuerpo_Clase	(. int type; .) // Dec Variable 
 
-= [{(Ttipo<out type> ident (DecVar | DecCabMet))
+= [{(Ttipo<out type> ident (DecVar<out type> | DecCabMet))
 							  | voidd ident DecCabMet}].
 
 
@@ -184,13 +188,16 @@ Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 Cuerpo 	(. int type; .) 
 =
 	{Instruccion 
-		| (Ttipo<out type>|voidd) ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))}
+		| (Ttipo<out type>|voidd) ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)]))}
 .
 
 
 //El apéndice del final indica el nivel de anhidamiento.
 
-DecVar = [op_asig Expresion] puntoComa.
+DecVar <out int type>
+= (. int type1=undef;.)
+[op_asig Expresion<out type1>] puntoComa	(.	type=type1;.)
+.
 
 Parametros	(. int type; .) 
 =
@@ -205,24 +212,30 @@ Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 /******************INSTRUCCIONES*****************************/
 Instruccion = InstReturn | InstCout | InstCin | InstExpresion | InstIfElse.
 
-InstExpresion = ident[punto ident] ((parent_ab Argumentos parent_ce puntoComa)
+InstExpresion
+=	(. int type=undef; .)
+		ident[punto ident] ((parent_ab Argumentos parent_ce puntoComa)
 				| ((op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
-													Expresion puntoComa)).
+													Expresion<out type> puntoComa))
+.
 
-InstReturn = (rreturn [Expresion] puntoComa).
+InstReturn
+=	(. int type=undef; .)
+(rreturn [Expresion<out type>] puntoComa)
+.
 
 /****************************************************/
 
 InstIfElse	(. int type;
 				int type1; .) 
 =
-	iff Expresion ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)])))) [Else]
+	iff Expresion<out type> ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)])))) [Else]
 .
 
 Else	(. int type; .) 
 =
-	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar [op_asig (ident | enteros | cadenaCar)]))))
+	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)]))))
 .
 
 /***************************************************/
@@ -240,18 +253,20 @@ Arg_io = ident [Vector] | cadenaCar.
 
 
 /******************EXPRESIONES*****************************/
-
-/*Expresion//<out int type> 
+/*
+Expresion<out int type> 
 = (. type=undef; .)
 (	enteros (.	type=entera;	.)
+	| cadenaCar (.	type=cadena;	.)
+	| true	(.	type=bool;	.)
+	| false	(.	type=bool;	.)
 ).
 */
-
-
-Expresion = Expresion2 Expresion1	
+Expresion <out int type>
+ = Expresion2 Expresion1	
 .
 
-Expresion1 = ["?" Expresion ":" Expresion Expresion1]
+Expresion1 = ["?" Expresion<out type>":" Expresion<out type>Expresion1]
 .
 
 Expresion2 = Expresion3 Expresion21
@@ -286,24 +301,32 @@ Expresion4 = op_negacion Expresion4
 							Condicional
 							Acceso a miembros de una clase (.)
 							Acceso a un vector ([])
-							
 */
 
-Expresion5 = "(" Expresion ")"
+
+Expresion5 <out int tipoDev>
+=	(. 	tipoDev=undef;
+		int type=undef;
+		int type1=undef; .)
+"(" Expresion <out type1> ")"	(. tipoDev=type1;.)
 | "new" ident "("Argumentos")"       /*Constructor*/
-| ident ["."ident ["("Argumentos")"] | "("Argumentos")"| "["Expresion"]"]
-| enteros
-| cadenaCar
-| "true"
-| "false"
+| ident ["."ident ["("Argumentos")"] | "("Argumentos")"| "["Expresion <out type> "]" (. tipoDev=type;.)]
+| enteros		(. tipoDev=entero;	.)
+| cadenaCar		(. tipoDev=cadena;	.)
+| "true"		(. tipoDev=bool;	.)
+| "false"		(. tipoDev=bool;	.)
 .
 
 Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
-					| parent_ab Expresion_Entera parent_ce [Operador_Aritmetico Expresion_Entera].
-					
+					| parent_ab Expresion_Entera parent_ce [Operador_Aritmetico Expresion_Entera]
+.
+
 /**********************************************************/
 
-Argumentos = [Expresion {"," Argumentos}].
+Argumentos
+=	(. int type=undef; .)
+[Expresion<out type> {"," Argumentos}]
+.
 
 
 Operador_Aritmetico = op_mas | op_menos | op_producto | op_division.
