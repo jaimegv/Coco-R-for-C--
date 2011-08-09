@@ -79,7 +79,7 @@ public class Parser {
 	final int var=0, funcion=1, clase=2, metodo=3;
 
 	// Tabla de simbolos global
-	public TablaSimbolos tabla;
+//	public TablaSimbolos tabla;
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -146,7 +146,8 @@ public class Parser {
 	}
 	
 	void CEMASMAS() {
-		int type; 
+		int type=undef; 
+		int type1;
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
 			CEMASMAS();
@@ -163,7 +164,10 @@ public class Parser {
 				if (la.kind == 31) {
 					Subprograma();
 				} else if (la.kind == 41 || la.kind == 42) {
-					DecVar();
+					type1 = DecVar();
+					if (type1==type) { System.out.println("tipos ok!");}
+					else {SemErr("Tipos distintos");
+							} 
 				} else if (la.kind == 17) {
 					DecMetodo();
 				} else SynErr(61);
@@ -256,12 +260,16 @@ public class Parser {
 		Expect(36);
 	}
 
-	void DecVar() {
+	int  DecVar() {
+		int  type;
+		int type1=undef;
 		if (la.kind == 41) {
 			Get();
-			Expresion();
+			type1 = Expresion();
 		}
 		Expect(42);
+		type=type1;
+		return type;
 	}
 
 	void DecMetodo() {
@@ -285,7 +293,7 @@ public class Parser {
 					type = Ttipo();
 					Expect(1);
 					if (la.kind == 41 || la.kind == 42) {
-						DecVar();
+						type = DecVar();
 					} else if (la.kind == 31) {
 						DecCabMet();
 					} else SynErr(65);
@@ -378,7 +386,7 @@ public class Parser {
 					if (la.kind == 30) {
 						Vector();
 					}
-					DecVar();
+					type = DecVar();
 					if (la.kind == 41) {
 						Get();
 						if (la.kind == 1) {
@@ -408,9 +416,11 @@ public class Parser {
 		} else SynErr(69);
 	}
 
-	void Expresion() {
-		Expresion2();
-		Expresion1();
+	int  Expresion() {
+		int  tipoDev;
+		type = Expresion2();
+		type1 = Expresion1();
+		return tipoDev;
 	}
 
 	void Expresion_Entera() {
@@ -436,9 +446,10 @@ public class Parser {
 	}
 
 	void InstReturn() {
+		int type=undef; 
 		Expect(18);
 		if (StartOf(6)) {
-			Expresion();
+			type = Expresion();
 		}
 		Expect(42);
 	}
@@ -460,6 +471,7 @@ public class Parser {
 	}
 
 	void InstExpresion() {
+		int type=undef; 
 		Expect(1);
 		if (la.kind == 28) {
 			Get();
@@ -497,7 +509,7 @@ public class Parser {
 				break;
 			}
 			}
-			Expresion();
+			type = Expresion();
 			Expect(42);
 		} else SynErr(71);
 	}
@@ -506,7 +518,7 @@ public class Parser {
 		int type;
 		int type1; 
 		Expect(23);
-		Expresion();
+		type = Expresion();
 		if (la.kind == 29) {
 			Get();
 			Cuerpo();
@@ -523,7 +535,7 @@ public class Parser {
 					if (la.kind == 30) {
 						Vector();
 					}
-					DecVar();
+					type = DecVar();
 					if (la.kind == 41) {
 						Get();
 						if (la.kind == 1) {
@@ -543,8 +555,9 @@ public class Parser {
 	}
 
 	void Argumentos() {
+		int type=undef; 
 		if (StartOf(6)) {
-			Expresion();
+			type = Expresion();
 			while (la.kind == 27) {
 				Get();
 				Argumentos();
@@ -571,7 +584,7 @@ public class Parser {
 					if (la.kind == 30) {
 						Vector();
 					}
-					DecVar();
+					type = DecVar();
 					if (la.kind == 41) {
 						Get();
 						if (la.kind == 1) {
@@ -598,32 +611,40 @@ public class Parser {
 		} else SynErr(78);
 	}
 
-	void Expresion2() {
-		Expresion3();
-		Expresion21();
+	int  Expresion2() {
+		int  tipoDev;
+		type = Expresion3();
+		type1 = Expresion21();
+		return tipoDev;
 	}
 
-	void Expresion1() {
+	int  Expresion1() {
+		int  tipoDev;
 		if (la.kind == 44) {
 			Get();
-			Expresion();
+			type = Expresion();
 			Expect(26);
-			Expresion();
-			Expresion1();
+			type1 = Expresion();
+			type2 = Expresion1();
 		}
+		return tipoDev;
 	}
 
-	void Expresion3() {
-		Expresion4();
-		Expresion31();
+	int  Expresion3() {
+		int  tipoDev;
+		type = Expresion4();
+		type1 = Expresion31();
+		return tipoDev;
 	}
 
-	void Expresion21() {
+	int  Expresion21() {
+		int  tipoDev;
 		if (StartOf(9)) {
 			Operador_Logico();
-			Expresion3();
-			Expresion21();
+			type = Expresion3();
+			type1 = Expresion21();
 		}
+		return tipoDev;
 	}
 
 	void Operador_Logico() {
@@ -664,21 +685,25 @@ public class Parser {
 		}
 	}
 
-	void Expresion4() {
+	int  Expresion4() {
+		int  tipoDev;
 		if (la.kind == 46) {
 			Get();
-			Expresion4();
+			type = Expresion4();
 		} else if (StartOf(10)) {
-			Expresion5();
+			type1 = Expresion5();
 		} else SynErr(80);
+		return tipoDev;
 	}
 
-	void Expresion31() {
+	int  Expresion31() {
+		int  tipoDev;
 		if (StartOf(5)) {
 			Operador_Aritmetico();
-			Expresion4();
-			Expresion31();
+			type = Expresion4();
+			type1 = Expresion31();
 		}
+		return tipoDev;
 	}
 
 	void Operador_Aritmetico() {
@@ -693,11 +718,13 @@ public class Parser {
 		} else SynErr(81);
 	}
 
-	void Expresion5() {
+	int  Expresion5() {
+		int  tipoDev;
 		switch (la.kind) {
 		case 31: {
+			tipoDev=undef;
 			Get();
-			Expresion();
+			type1 = Expresion();
 			Expect(38);
 			break;
 		}
@@ -726,7 +753,7 @@ public class Parser {
 					Expect(38);
 				} else {
 					Get();
-					Expresion();
+					type = Expresion();
 					Expect(37);
 				}
 			}
@@ -734,22 +761,27 @@ public class Parser {
 		}
 		case 2: {
 			Get();
+			tipoDev=entero;	
 			break;
 		}
 		case 3: {
 			Get();
+			tipoDev=cadena;	
 			break;
 		}
 		case 13: {
 			Get();
+			tipoDev=bool;	
 			break;
 		}
 		case 8: {
 			Get();
+			tipoDev=bool;	
 			break;
 		}
 		default: SynErr(82); break;
 		}
+		return tipoDev;
 	}
 
 
