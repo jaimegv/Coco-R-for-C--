@@ -311,6 +311,8 @@ Expresion21 <out int tipoDev>
 																		tipoDev=type;
 																	} else if ((type==bool) && (!(type==type1))) {
 																		SemErr("Op logico con tipo_arg diferentes"+type+" "+type1);
+																	} else if (type==entera) {
+																		SemErr("Op logico con arg entero"+type);
 																	} else {
 																		tipoDev=type1;
 																	}
