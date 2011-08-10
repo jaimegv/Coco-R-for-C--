@@ -215,6 +215,10 @@ Vector = corchete_ab [Expresion_Entera] corchete_ce.
 Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 
+/******************Llamadas*****************************/
+LlamMet = ident punto ident { parent_ab parent_ce | parent_ab {Argumentos} parent_ce}
+.
+
 /******************INSTRUCCIONES*****************************/
 Instruccion
 (. int type; .)
@@ -257,11 +261,27 @@ Else	(. int type; .)
 /******************PRINT***********************/
 
 
-InstCout = cout {menor_menor Arg_io} puntoComa.
+InstCout
+(. int type=undef; .)
+=
+	cout {menor_menor Arg_io<out type>} puntoComa (.if (type==undef) {
+														SemErr("InstCout: Error tipos.");
+													}.)
+.
 
-InstCin = cin mayor_mayor Arg_io puntoComa.
+InstCin
+(. int type; .)
+=
+	cin mayor_mayor Arg_io <out type> puntoComa
+.
 
-Arg_io = ident [Vector] | cadenaCar.
+Arg_io<out int tipoDev>
+(. tipoDev=undef; .)
+=
+	ident [Vector]
+		| cadenaCar (. tipoDev = cadena; .)
+			|
+.
 
 
 
