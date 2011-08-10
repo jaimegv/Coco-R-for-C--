@@ -216,7 +216,11 @@ Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
 
 /******************INSTRUCCIONES*****************************/
-Instruccion = InstReturn | InstCout | InstCin | InstExpresion | InstIfElse.
+Instruccion
+(. int type; .)
+=
+	InstReturn< out type > | InstCout | InstCin | InstExpresion | InstIfElse
+.
 
 InstExpresion
 =	(. int type=undef; .)
@@ -226,9 +230,11 @@ InstExpresion
 													Expresion<out type> puntoComa))
 .
 
-InstReturn
-=	(. int type=undef; .)
-(rreturn [Expresion<out type>] puntoComa)
+InstReturn <out int tipoDev>
+(.	tipoDev=undef;
+	int type; .)
+=
+(rreturn [Expresion<out type> (. tipoDev= type; .) ] puntoComa)
 .
 
 /****************************************************/
@@ -275,7 +281,6 @@ Expresion <out int tipoDev>
 .)
  = Expresion2 <out type> Expresion1	<out type1>	(.	if (type==type1) {
  														tipoDev=type;
- 														//System.out.println("expresion!"+type);
  													} else if (type1==undef) {
  														tipoDev=type;
  													} else {
@@ -327,22 +332,23 @@ Expresion21 <out int tipoDev>
 																		} else {				// 2º arg problem
 																			SemErr("OpLogico Error:"+type);
 																		}
-//																	} else if ((type==bool) && (!(type==type1))) {
-//																		SemErr("Op logico con tipo_arg diferentes"+type+" "+type1);
-//																	} else if (type==entera) {
-//																		SemErr("Op logico con arg entero:"+type);
 																	} else {	// error en 1º arg
 																		tipoDev=type;	// lo envio para q salte el error
 																		SemErr("OpLogico Error:"+type);
 																	}
 																.)]
-| [Operador_Relacional Expresion3 <out type> Expresion21 <out type1> (.	if ((type==entera) && (type1==undef)) {
-																		tipoDev=type;
-																	} else if ((type==entera) && (!(type==type1))) {
-																		SemErr("Op Relacional con tipo_arg diferentes"+type+" "+type1);
-																	} else {
-																		tipoDev=type1;
-																	}
+| [Operador_Relacional Expresion3 <out type> Expresion21 <out type1> (.	if (type==entera) {
+																			if (type1==undef) {	// todo ok!
+																				tipoDev=type;
+																			} else if (type1==entera) {	//2º ok!
+																				tipoDev=type;
+																			} else {				// 2º arg problem
+																				SemErr("OpRelacional Error:"+type);
+																			}
+																		} else {	// error en 1º arg
+																			tipoDev=type;	// lo envio para q salte el error
+																			SemErr("OpRelacional Error:"+type);
+																		}
 																.)
 												]
 .
