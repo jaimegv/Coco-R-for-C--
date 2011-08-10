@@ -1,7 +1,14 @@
-bool juan=!true;	// NO DA ERROR
-int pepe=-3+23;		// NO DA ERROR
+bool juan=!true;
+int pepe=-3+23;
+bool hola= false && true;
+int jarl= 1 < 2;
+bool hola = true;
+int paco= 3;
+int paco= -3;
+bool yes=!true;
 
 
 void main (void)
 {
+	return 3<2;
 }
