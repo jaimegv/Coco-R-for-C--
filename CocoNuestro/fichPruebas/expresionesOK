@@ -1,0 +1,7 @@
+bool juan=!true;	// NO DA ERROR
+int pepe=-3+23;		// NO DA ERROR
+
+
+void main (void)
+{
+}

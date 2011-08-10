@@ -1,0 +1,19 @@
+//hola caracola
+
+bool hola= 2 && true;	// debe dar error
+bool hola= true && 2;	// debe dar error
+bool jarl= "cadena" < 2;// debe dar error
+int hola = true;	// debe dar error
+bool paco= 3;		// debe dar error
+int paco= !3;		// debe dar error
+bool yes=-true;		// debe dar error
+
+
+void main (void)
+{
+	return  true < 3;	// da error
+	//return  true && 3;	// da error
+	//return  2 && true;	// da error
+	//return  true < 3;	// da error
+	//return  3 > true;	// da error
+}
