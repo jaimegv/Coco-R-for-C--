@@ -9,7 +9,7 @@ public class Tablas {
 	
 	public Tablas()
 	{
-		Ambito_Global = New TablaSimbolos();
+		Ambito_Global = new TablaSimbolos();
 		Ambito_Actual = Ambito_Global;
 	}
 }
