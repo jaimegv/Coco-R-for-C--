@@ -1,5 +1,10 @@
 package compilationunit;
 
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Queue;
 /*import java.util.Vector;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,6 +21,53 @@ public class TablaSimbolos {
 	final int var=0, funcion=1, clase=2, metodo=3;
 	//Declaración de visibilidad
 	final int privado=0, publico=1;
+	
+	private TablaSimbolos ambito_padre;
+	private Vector tabla;
+	
+	public TablaSimbolos()
+		{
+		this.tabla = new Vector();
+		this.ambito_padre = null;
+		}
+	
+	public TablaSimbolos(TablaSimbolos ambito_padre)
+		{
+		this.tabla = new Vector();
+		this.ambito_padre = ambito_padre;
+		}
+	
+	public int InsertarSimbolo (Simbolo simbolo)
+		{
+		for(int i=0; i< tabla.size(); i++)
+			{
+            if (getNombre(simbolo) == getNombre(tabla.elementAt(i)))
+            	{
+            	return -1;
+            	}
+			}
+	}
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
 	
 	public Simbolo Objeto;
 	public Simbolo topScope;	// Ambito Actual
@@ -47,3 +99,4 @@ public class TablaSimbolos {
     	System.out.println("Hola mundo! esto es la Tabla de simbolo");
     }
 }
+*/
