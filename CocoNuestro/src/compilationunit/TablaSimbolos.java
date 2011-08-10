@@ -77,6 +77,11 @@ public class TablaSimbolos {
 			}
 		return null;
 		}
+	
+	public TablaSimbolos Ambito_Padre ()
+		{
+		return null; //Falta hacer el cuerpo de esta función
+		}
 
 	}
 

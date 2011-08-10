@@ -16,8 +16,8 @@ public class Main {
 		
 		Simbolo simboloprueba2;
 		
-		simboloprueba2 = tablaprueba.GetSimbolo("holas");
-		if (simboloprueba == null)
+		simboloprueba2 = tablaprueba.GetSimbolo("hola");
+		if (simboloprueba2 == null)
 			System.out.println("No se ha encontrado");
 		else
 			System.out.println(simboloprueba2.GetNombre());
