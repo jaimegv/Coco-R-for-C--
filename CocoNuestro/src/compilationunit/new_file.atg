@@ -150,7 +150,7 @@ CEMASMAS (. int type=undef;
 																			//System.out.println("tipos ok!__No has inicializado la var, pero ok!");
 																		} 
 																		else {
-																			SemErr("Del error de arriba->Tipos distintos "+type+" y " + type1);
+																			SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
 																		} .) 
 								| DecMetodo) CEMASMAS))
 .
@@ -306,13 +306,13 @@ Expresion2 <out int tipoDev>
 														if (type==type1) {
 															tipoDev=entera;		// op_relacional ok!
 														} else {
-															SemErr("Operando relacional incorrecto.");
+															SemErr("OpRelacional: Error argumentos.");
 														}
 													} else if (type1==bool) {	// Expresion con op_logico
 														if (type==type1) {
 															tipoDev=bool;	// op_logico ok!
 														} else {
-															SemErr("Operando logico incorrecto.");
+															SemErr("OpLogica: Error argumentos");
 														}
 													} else {
 														SemErr("Operacion Expr2 problems"+type+" "+type1);
@@ -330,11 +330,11 @@ Expresion21 <out int tipoDev>
 																		} else if (type1==bool) {	//2º ok!
 																			tipoDev=type;
 																		} else {				// 2º arg problem
-																			SemErr("OpLogico Error:"+type);
+																			SemErr("OpLogica: Error argumentos.");
 																		}
 																	} else {	// error en 1º arg
 																		tipoDev=type;	// lo envio para q salte el error
-																		SemErr("OpLogico Error:"+type);
+																		SemErr("OpLogica: Error argumentos.");
 																	}
 																.)]
 | [Operador_Relacional Expresion3 <out type> Expresion21 <out type1> (.	if (type==entera) {
@@ -343,11 +343,11 @@ Expresion21 <out int tipoDev>
 																			} else if (type1==entera) {	//2º ok!
 																				tipoDev=type;
 																			} else {				// 2º arg problem
-																				SemErr("OpRelacional Error:"+type);
+																				SemErr("OpRelacional: Error argumentos");
 																			}
 																		} else {	// error en 1º arg
 																			tipoDev=type;	// lo envio para q salte el error
-																			SemErr("OpRelacional Error:"+type);
+																			SemErr("OpRelacional: Error argumentos");
 																		}
 																.)
 												]
@@ -395,13 +395,13 @@ Expresion4 <out int tipoDev>
 = op_negacion Expresion4 <out type> (.	if (type==bool) {
 											tipoDev=type;
 										} else {
-											SemErr("Estas negando un tipo NO bool");
+											SemErr("OpNegLogico: Error argumento.");
 										}
 									.)
 | op_menos Expresion4<out type1>	(.	if (type1==entera) {
 											tipoDev=type1;
 										} else {
-											SemErr("Estas negando un tipo NO entero");
+											SemErr("OpNegAritmetico: Error argumento.");
 										}
 									.)
 | Expresion5 <out type2> (. tipoDev=type2; .)
