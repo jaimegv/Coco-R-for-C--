@@ -14,6 +14,8 @@ public class TablaSimbolos {
 	final int undef=0, entera=1, bool=2, cadena=3, vacio=4;
 	// Declaración de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3;
+	//Declaración de visibilidad
+	final int privado=0, publico=1;
 	
 	public Simbolo Objeto;
 	public Simbolo topScope;	// Ambito Actual
@@ -23,26 +25,20 @@ public class TablaSimbolos {
 	// Constructor
 	public void TablaSimbolos (Parser parser) {
 		this.parser=parser;
-		Objeto = new Simbolo();
-		Objeto.nombre  =  "undef"; 
-		Objeto.type = undef;	// tipo del objeto
-		Objeto.kind=var;		// tipo de inicio
+		Objeto = new Simbolo("undef", 0 , 0);
+
 	}
 	
 	// Abrir un nuevo ambito para hacerlo el actual
-	public void OpenAmbito() {
-		Objeto = new Simbolo();
-		Objeto.nombre  =  ""; 
-		Objeto.type = undef;	// tipo del objeto
-		Objeto.kind=var;		//
+	public void AbrirAmbito() {
+		Objeto = new Simbolo("undef", undef , var);
+	//
 	}
 
 	// Crear un nuevo objteo en el actual SCOPE-ambito
 	public void NuevoAmbito(String nombre, int kind, int type) {
-		Objeto = new Simbolo();
-		Objeto.nombre  =  ""; 
-		Objeto.type = undef;	// tipo del objeto
-		Objeto.kind=var;		//
+		Objeto = new Simbolo("undef", undef , var);
+
 	}
 	
 	
