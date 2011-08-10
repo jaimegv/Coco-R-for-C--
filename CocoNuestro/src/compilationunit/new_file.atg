@@ -219,7 +219,7 @@ Subprograma = parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 LlamMet = ident punto ident { parent_ab parent_ce | parent_ab {Argumentos} parent_ce}
 .
 
-/******************INSTRUCCIONES*****************************/
+/******************INSTRUCCIONES****************************/
 Instruccion
 (. int type; .)
 =
