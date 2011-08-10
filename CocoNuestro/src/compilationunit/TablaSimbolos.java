@@ -39,13 +39,20 @@ public class TablaSimbolos {
 	
 	public int InsertarSimbolo (Simbolo simbolo)
 		{
+		Simbolo simbolito;
 		for(int i=0; i< tabla.size(); i++)
 			{
-            if (getNombre(simbolo) == getNombre(tabla.elementAt(i)))
+			
+			simbolito = (Simbolo) tabla.elementAt(i);
+            if ((this.tabla.elementAt(i) instanceof Simbolo) && 
+            		(simbolo.GetNombre() == simbolito.GetNombre()))
             	{
             	return -1;
             	}
 			}
+		tabla.addElement(simbolo);
+		return 0;
+		}
 	}
 
 
