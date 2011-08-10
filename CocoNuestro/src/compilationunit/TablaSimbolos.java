@@ -39,6 +39,8 @@ public class TablaSimbolos {
 	
 	public int InsertarSimbolo (Simbolo simbolo)
 		{
+		//Inserta un nuevo simbolo en la tabla
+		//Si se encuentra un simbolo con el mismo nombre devuelve -1 y e.o.c.
 		Simbolo simbolito;
 		simbolito = null;
 		for(int i=0; i< tabla.size(); i++)
@@ -53,6 +55,27 @@ public class TablaSimbolos {
 			}
 		tabla.addElement(simbolo);
 		return 0;
+		}
+	
+	public Simbolo GetSimbolo (String nombre)
+		//Devuelve el simbolo almacenado con este nombre
+		//Si el simbolo no esta se devuelve null
+		{
+		Simbolo simbolito;
+		simbolito = null;
+		
+	
+		for(int i=0; i< tabla.size(); i++)
+			{
+			simbolito = (Simbolo) tabla.elementAt(i);
+			if ((this.tabla.elementAt(i) instanceof Simbolo) && 
+            		(nombre == simbolito.GetNombre()))
+				{
+				return simbolito;
+				}
+			
+			}
+		return null;
 		}
 
 	}
