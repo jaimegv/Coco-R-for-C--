@@ -236,7 +236,8 @@ InstReturn
 InstIfElse	(. int type;
 				int type1; .) 
 =
-	iff Expresion<out type> ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)])))) [Else]
+		iff Expresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");} .) 
+	((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)])))) [Else]
 .
 
 Else	(. int type; .) 

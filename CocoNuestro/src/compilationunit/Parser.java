@@ -165,9 +165,15 @@ public class Parser {
 					Subprograma();
 				} else if (la.kind == 41 || la.kind == 42) {
 					type1 = DecVar();
-					if (type1==type) { System.out.println("tipos ok!");}
-					else {SemErr("Tipos distintos");
-							} 
+					if (type1==type) {
+					//System.out.println("tipos ok!"+type+" "+type1);
+					}
+					else if (type1==undef) {
+						//System.out.println("tipos ok!__No has inicializado la var, pero ok!");
+					} 
+					else {
+						SemErr("Del error de arriba->Tipos distintos "+type+" y " + type1);
+					} 
 				} else if (la.kind == 17) {
 					DecMetodo();
 				} else SynErr(61);
@@ -418,15 +424,20 @@ public class Parser {
 
 	int  Expresion() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
+		int type, type1;
+		
 		type = Expresion2();
 		type1 = Expresion1();
-		if ((type1!=undef)&&(type != type1)) 
-		{SemErr("tipos discordantes E");}
-		else
-		{tipoDev=type;}
+		if (type==type1) {
+		tipoDev=type;
+		//System.out.println("expresion!"+type);
+		} else if (type1==undef) {
+			tipoDev=type;
+		} else {
+			SemErr("Error en Expresion");
+		}
+		
 		return tipoDev;
 	}
 
@@ -526,6 +537,7 @@ public class Parser {
 		int type1; 
 		Expect(23);
 		type = Expresion();
+		if (type != bool) {SemErr("La condicion de un if debe ser logica");} 
 		if (la.kind == 29) {
 			Get();
 			Cuerpo();
@@ -620,24 +632,37 @@ public class Parser {
 
 	int  Expresion2() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
+		int type, type1;
+		
 		type = Expresion3();
 		type1 = Expresion21();
-		if ((type1!=undef)&&(type != type1)) 
-		{SemErr("tipos discordantes E2");}
-		else
-		{tipoDev=type;}
+		if (type1==undef) {	// no hay segunda parte expr
+		tipoDev=type;
+		} else if (type1==entera) {	// Expresion con op_relacional
+			if (type==type1) {
+				tipoDev=entera;		// op_relacional ok!
+			} else {
+				SemErr("Operando relacional incorrecto.");
+			}
+		} else if (type1==bool) {	// Expresion con op_logico
+			if (type==type1) {
+				tipoDev=bool;	// op_logico ok!
+			} else {
+				SemErr("Operando logico incorrecto.");
+			}
+		} else {
+			SemErr("Operacion Expr2 problems"+type+" "+type1);
+		}
+		
 		return tipoDev;
 	}
 
 	int  Expresion1() {
 		int  tipoDev;
-		int type; 
-		int type1;
-		int type2;
 		tipoDev=undef;
+		int type, type1, type2; 
+		
 		if (la.kind == 44) {
 			Get();
 			type = Expresion();
@@ -650,36 +675,79 @@ public class Parser {
 
 	int  Expresion3() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
+		int type, type1;
+		
 		type = Expresion4();
 		type1 = Expresion31();
-		if ((type1!=undef)&&(type != type1)) 
-		{SemErr("tipos discordantes E3");}
-		else
-		  {tipoDev=type;}
+		if (type1==undef) {
+		tipoDev=type;
+		} else if ((type==type1) && (type1==entera)) {
+			tipoDev=type;
+		} else {
+			SemErr("Operacion Arit sobre tipos no enteros");
+		}
+		 
 		return tipoDev;
 	}
 
 	int  Expresion21() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
+		int type, type1;
+		
 		if (StartOf(9)) {
-			Operador_Logico();
-			type = Expresion3();
-			type1 = Expresion21();
-			if (type != type1) 
-			{SemErr("tipos discordantes E21");}
-			else
-			{tipoDev=type;}
-		}
+			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
+				Operador_Logico();
+				type = Expresion3();
+				type1 = Expresion21();
+				if (type==bool) {
+				if (type1==undef) {	// todo ok!
+					tipoDev=type;
+				} else if (type1==bool) {	//2Âº ok!
+					tipoDev=type;
+				} else {				// 2Âº arg problem
+					SemErr("OpLogico Error:"+type);
+				}
+				//																	} else if ((type==bool) && (!(type==type1))) {
+				//																		SemErr("Op logico con tipo_arg diferentes"+type+" "+type1);
+				//																	} else if (type==entera) {
+				//																		SemErr("Op logico con arg entero:"+type);
+																					} else {	// error en 1Âº arg
+																						tipoDev=type;	// lo envio para q salte el error
+																						SemErr("OpLogico Error:"+type);
+																					}
+																				
+			}
+		} else if (StartOf(10)) {
+			if (StartOf(11)) {
+				Operador_Relacional();
+				type = Expresion3();
+				type1 = Expresion21();
+				if ((type==entera) && (type1==undef)) {
+				tipoDev=type;
+				} else if ((type==entera) && (!(type==type1))) {
+					SemErr("Op Relacional con tipo_arg diferentes"+type+" "+type1);
+				} else {
+					tipoDev=type1;
+				}
+				
+			}
+		} else SynErr(79);
 		return tipoDev;
 	}
 
 	void Operador_Logico() {
+		if (la.kind == 54) {
+			Get();
+		} else if (la.kind == 53) {
+			Get();
+		} else if (la.kind == 46) {
+			Get();
+		} else SynErr(80);
+	}
+
+	void Operador_Relacional() {
 		switch (la.kind) {
 		case 47: {
 			Get();
@@ -701,56 +769,67 @@ public class Parser {
 			Get();
 			break;
 		}
-		case 54: {
-			Get();
-			break;
-		}
-		case 53: {
-			Get();
-			break;
-		}
 		case 52: {
 			Get();
 			break;
 		}
-		default: SynErr(79); break;
+		default: SynErr(81); break;
 		}
 	}
 
 	int  Expresion4() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
+		int type, type1, type2;
+		
 		if (la.kind == 46) {
 			Get();
 			type = Expresion4();
-			if (type != bool) 
-			{SemErr("tipos discordantes E4");}
-			else
-			{tipoDev=bool;}
-		} else if (StartOf(10)) {
-			type1 = Expresion5();
-			tipoDev = type1;
-		} else SynErr(80);
+			if (type==bool) {
+			tipoDev=type;
+			} else {
+				SemErr("Estas negando un tipo NO bool");
+			}
+			
+		} else if (la.kind == 32) {
+			Get();
+			type1 = Expresion4();
+			if (type1==entera) {
+			tipoDev=type1;
+			} else {
+				SemErr("Estas negando un tipo NO entero");
+			}
+			
+		} else if (StartOf(12)) {
+			type2 = Expresion5();
+			tipoDev=type2; 
+		} else SynErr(82);
 		return tipoDev;
 	}
 
 	int  Expresion31() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
-		type=undef;
-		type1=undef;
+		int type, type1;
+		
 		if (StartOf(5)) {
 			Operador_Aritmetico();
 			type = Expresion4();
 			type1 = Expresion31();
-			if ((type1!=undef)&&(type != type1)) 
-			{SemErr("tipos discordantes E31");}
-			else
-			{tipoDev=type;}
+			if (type1==undef) {	// No hay 2Âº parte
+			if (type==entera) {	// todo ok!
+				tipoDev=type;
+			} else {			// NO es un tipo ENTERO
+				SemErr("Operacion Arit con arg no entero");
+			}
+			} else {	// hay otro expresion
+				if ((type==type1) && (type==entera)) {	// las dos son enteras
+					tipoDev=type;
+				} else {
+					SemErr("Operacion Arit sobre tipos no enteros");
+				}
+			}
+			 
 		}
 		return tipoDev;
 	}
@@ -764,32 +843,76 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(81);
+		} else SynErr(83);
 	}
 
 	int  Expresion5() {
 		int  tipoDev;
-		int type; 
-		int type1;
 		tipoDev=undef;
-		if (la.kind == 31) {
+		int type1, type;
+		
+		switch (la.kind) {
+		case 31: {
 			Get();
 			type1 = Expresion();
 			Expect(38);
-			tipoDev=type1;
-		} else if (la.kind == 2) {
+			tipoDev=type1; 
+			break;
+		}
+		case 10: {
+			Get();
+			Expect(1);
+			Expect(31);
+			Argumentos();
+			Expect(38);
+			break;
+		}
+		case 1: {
+			Get();
+			if (la.kind == 28 || la.kind == 30 || la.kind == 31) {
+				if (la.kind == 28) {
+					Get();
+					Expect(1);
+					if (la.kind == 31) {
+						Get();
+						Argumentos();
+						Expect(38);
+					}
+				} else if (la.kind == 31) {
+					Get();
+					Argumentos();
+					Expect(38);
+				} else {
+					Get();
+					type = Expresion();
+					Expect(37);
+					tipoDev=type;
+				}
+			}
+			break;
+		}
+		case 2: {
 			Get();
 			tipoDev=entera;	
-		} else if (la.kind == 3) {
+			break;
+		}
+		case 3: {
 			Get();
 			tipoDev=cadena;	
-		} else if (la.kind == 13) {
+			break;
+		}
+		case 13: {
 			Get();
 			tipoDev=bool;	
-		} else if (la.kind == 8) {
+			break;
+		}
+		case 8: {
 			Get();
 			tipoDev=bool;	
-		} else SynErr(82);
+			break;
+		}
+		default: SynErr(84); break;
+		}
 		return tipoDev;
 	}
 
@@ -811,11 +934,13 @@ public class Parser {
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
-		{x,x,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,T,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
+		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,T,x, T,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
 } // end Parser
@@ -919,10 +1044,12 @@ class Errors {
 			case 76: s = "invalid Else"; break;
 			case 77: s = "invalid Else"; break;
 			case 78: s = "invalid Arg_io"; break;
-			case 79: s = "invalid Operador_Logico"; break;
-			case 80: s = "invalid Expresion4"; break;
-			case 81: s = "invalid Operador_Aritmetico"; break;
-			case 82: s = "invalid Expresion5"; break;
+			case 79: s = "invalid Expresion21"; break;
+			case 80: s = "invalid Operador_Logico"; break;
+			case 81: s = "invalid Operador_Relacional"; break;
+			case 82: s = "invalid Expresion4"; break;
+			case 83: s = "invalid Operador_Aritmetico"; break;
+			case 84: s = "invalid Expresion5"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
