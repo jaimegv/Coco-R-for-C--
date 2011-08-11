@@ -1,5 +1,5 @@
 // Set the name of your grammar here (and at the end of this grammar):
-COMPILER CEMASMAS
+COMPILER CEMASMAS1
 
 // Add auxiliary methods and declaration here.
 	// Declaracion de constantes para tipos
@@ -135,15 +135,18 @@ PRODUCTIONS
 // Example:
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
-
+CEMASMAS1 (.	Tablas tabla = new Tablas();	.)  //Se crea el ámbito global
+= CEMASMAS.
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
 CEMASMAS (. int type=undef; 
-			int type1;.)  
+			int type1;
+			Tablas tabla ;.)  
 =
 	DecClase CEMASMAS
 			 | ((Ttipo<out type> | voidd) 
-			 		(Main | ident (Subprograma | DecVar<out type1> (. 	if (type1==type) {
+			 		(Main | ident  (. Simbolo simbolo = new Simbolo(t.val, type, 0);.)
+			 					  (Subprograma | DecVar<out type1> (. 	if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
 		 																}
 																		else if (type1==undef) {
@@ -482,4 +485,4 @@ Operador_Relacional = op_menor | op_mayor |   op_menor_igual
 				| op_mayor_igual | op_igual | op_distinto
 .
 
-END CEMASMAS.
+END CEMASMAS1.

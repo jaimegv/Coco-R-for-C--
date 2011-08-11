@@ -145,9 +145,15 @@ public class Parser {
 		}
 	}
 	
+	void CEMASMAS1() {
+		Tablas tabla = new Tablas();	
+		CEMASMAS();
+	}
+
 	void CEMASMAS() {
 		int type=undef; 
 		int type1;
+		Tablas tabla ;
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
 			CEMASMAS();
@@ -161,6 +167,7 @@ public class Parser {
 				Main();
 			} else if (la.kind == 1) {
 				Get();
+				Simbolo simbolo = new Simbolo(t.val, type, 0);
 				if (la.kind == 31) {
 					Subprograma();
 				} else if (la.kind == 41 || la.kind == 42) {
@@ -955,7 +962,7 @@ public class Parser {
 		la = new Token();
 		la.val = "";		
 		Get();
-		CEMASMAS();
+		CEMASMAS1();
 		Expect(0);
 
 	}

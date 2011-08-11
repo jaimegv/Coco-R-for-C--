@@ -30,6 +30,7 @@ public class Simbolo {
 
 public Simbolo(String nombre, int type, int kind){
 	   this.nombre = nombre;
+	   System.out.println("Nuevo simbolo con nombre: " + this.nombre);
 	   this.type = type;
 	   this.kind = kind;
 	   this.nparametros = 0;

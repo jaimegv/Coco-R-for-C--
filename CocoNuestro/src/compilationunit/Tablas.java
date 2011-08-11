@@ -7,10 +7,11 @@ public class Tablas {
 	private TablaSimbolos ambito_actual;
 
 	// Constructor
-	public Tablas()	{
+	public Tablas()	
+		{
 		ambito_global = new TablaSimbolos();
 		ambito_actual = ambito_global;
-	}
+		}
 	
 	public TablaSimbolos GetAmbitoActual ()
 		{
@@ -22,15 +23,16 @@ public class Tablas {
 	return ambito_global;
 	}
 	
-	// Abrir un nuevo ámbito
-	public void NuevoAmbito() {
+	public void NuevoAmbito() 
+		{
 		// Nuevo ambito a desarrollar que será el actual
 		// su padre es el actual ambito
 		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);
 		ambito_actual = ambito_nuevo;
-	}
+		}
 	
-	public void CerrarAmbito()
+	public void CerrarAmbito() 
+	//¡Cerrar un ambito no es destruirlo!
 		{
 		TablaSimbolos ambitopadre = this.ambito_actual.Ambito_Padre();
 		this.ambito_actual = ambitopadre;
