@@ -172,7 +172,7 @@ public class Parser {
 						//System.out.println("tipos ok!__No has inicializado la var, pero ok!");
 					} 
 					else {
-						SemErr("Del error de arriba->Tipos distintos "+type+" y " + type1);
+						SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
 					} 
 				} else if (la.kind == 17) {
 					DecMetodo();
@@ -409,8 +409,9 @@ public class Parser {
 	}
 
 	void Instruccion() {
+		int type; 
 		if (la.kind == 18) {
-			InstReturn();
+			type  = InstReturn();
 		} else if (la.kind == 19) {
 			InstCout();
 		} else if (la.kind == 20) {
@@ -431,7 +432,6 @@ public class Parser {
 		type1 = Expresion1();
 		if (type==type1) {
 		tipoDev=type;
-		//System.out.println("expresion!"+type);
 		} else if (type1==undef) {
 			tipoDev=type;
 		} else {
@@ -463,28 +463,66 @@ public class Parser {
 		} else SynErr(70);
 	}
 
-	void InstReturn() {
+	void LlamMet() {
+		Expect(1);
+		Expect(28);
+		Expect(1);
+		while (la.kind == 31) {
+			if (la.kind == 31) {
+				Get();
+				Expect(38);
+			} else {
+				Get();
+				while (StartOf(6)) {
+					Argumentos();
+				}
+				Expect(38);
+			}
+		}
+	}
+
+	void Argumentos() {
 		int type=undef; 
-		Expect(18);
-		if (StartOf(6)) {
+		if (StartOf(7)) {
 			type = Expresion();
+			while (la.kind == 27) {
+				Get();
+				Argumentos();
+			}
+		}
+	}
+
+	int  InstReturn() {
+		int  tipoDev;
+		tipoDev=undef;
+		int type; 
+		Expect(18);
+		if (StartOf(7)) {
+			type = Expresion();
+			tipoDev= type; 
 		}
 		Expect(42);
+		return tipoDev;
 	}
 
 	void InstCout() {
+		int type=undef; 
 		Expect(19);
 		while (la.kind == 21) {
 			Get();
-			Arg_io();
+			type = Arg_io();
 		}
 		Expect(42);
+		if (type==undef) {
+		SemErr("InstCout: Error tipos.");
+		}
 	}
 
 	void InstCin() {
+		int type; 
 		Expect(20);
 		Expect(22);
-		Arg_io();
+		type = Arg_io();
 		Expect(42);
 	}
 
@@ -500,7 +538,7 @@ public class Parser {
 			Argumentos();
 			Expect(38);
 			Expect(42);
-		} else if (StartOf(7)) {
+		} else if (StartOf(8)) {
 			switch (la.kind) {
 			case 41: {
 				Get();
@@ -542,7 +580,7 @@ public class Parser {
 			Get();
 			Cuerpo();
 			Expect(36);
-		} else if (StartOf(8)) {
+		} else if (StartOf(9)) {
 			if (StartOf(4)) {
 				Instruccion();
 			} else {
@@ -573,17 +611,6 @@ public class Parser {
 		}
 	}
 
-	void Argumentos() {
-		int type=undef; 
-		if (StartOf(6)) {
-			type = Expresion();
-			while (la.kind == 27) {
-				Get();
-				Argumentos();
-			}
-		}
-	}
-
 	void Else() {
 		int type; 
 		Expect(24);
@@ -591,7 +618,7 @@ public class Parser {
 			Get();
 			Cuerpo();
 			Expect(36);
-		} else if (StartOf(8)) {
+		} else if (StartOf(9)) {
 			if (StartOf(4)) {
 				Instruccion();
 			} else {
@@ -619,7 +646,9 @@ public class Parser {
 		} else SynErr(77);
 	}
 
-	void Arg_io() {
+	int  Arg_io() {
+		int  tipoDev;
+		tipoDev=undef; 
 		if (la.kind == 1) {
 			Get();
 			if (la.kind == 30) {
@@ -627,7 +656,10 @@ public class Parser {
 			}
 		} else if (la.kind == 3) {
 			Get();
+			tipoDev = cadena; 
+		} else if (la.kind == 21 || la.kind == 42) {
 		} else SynErr(78);
+		return tipoDev;
 	}
 
 	int  Expresion2() {
@@ -643,13 +675,13 @@ public class Parser {
 			if (type==type1) {
 				tipoDev=entera;		// op_relacional ok!
 			} else {
-				SemErr("Operando relacional incorrecto.");
+				SemErr("OpRelacional: Error argumentos.");
 			}
 		} else if (type1==bool) {	// Expresion con op_logico
 			if (type==type1) {
 				tipoDev=bool;	// op_logico ok!
 			} else {
-				SemErr("Operando logico incorrecto.");
+				SemErr("OpLogica: Error argumentos");
 			}
 		} else {
 			SemErr("Operacion Expr2 problems"+type+" "+type1);
@@ -696,7 +728,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(9)) {
+		if (StartOf(10)) {
 			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 				Operador_Logico();
 				type = Expresion3();
@@ -707,29 +739,30 @@ public class Parser {
 				} else if (type1==bool) {	//2Âº ok!
 					tipoDev=type;
 				} else {				// 2Âº arg problem
-					SemErr("OpLogico Error:"+type);
+					SemErr("OpLogica: Error argumentos.");
 				}
-				//																	} else if ((type==bool) && (!(type==type1))) {
-				//																		SemErr("Op logico con tipo_arg diferentes"+type+" "+type1);
-				//																	} else if (type==entera) {
-				//																		SemErr("Op logico con arg entero:"+type);
-																					} else {	// error en 1Âº arg
-																						tipoDev=type;	// lo envio para q salte el error
-																						SemErr("OpLogico Error:"+type);
-																					}
-																				
+				} else {	// error en 1Âº arg
+					tipoDev=type;	// lo envio para q salte el error
+					SemErr("OpLogica: Error argumentos.");
+				}
+				
 			}
-		} else if (StartOf(10)) {
-			if (StartOf(11)) {
+		} else if (StartOf(11)) {
+			if (StartOf(12)) {
 				Operador_Relacional();
 				type = Expresion3();
 				type1 = Expresion21();
-				if ((type==entera) && (type1==undef)) {
-				tipoDev=type;
-				} else if ((type==entera) && (!(type==type1))) {
-					SemErr("Op Relacional con tipo_arg diferentes"+type+" "+type1);
-				} else {
-					tipoDev=type1;
+				if (type==entera) {
+				if (type1==undef) {	// todo ok!
+					tipoDev=type;
+				} else if (type1==entera) {	//2Âº ok!
+					tipoDev=type;
+				} else {				// 2Âº arg problem
+					SemErr("OpRelacional: Error argumentos");
+				}
+				} else {	// error en 1Âº arg
+					tipoDev=type;	// lo envio para q salte el error
+					SemErr("OpRelacional: Error argumentos");
 				}
 				
 			}
@@ -788,7 +821,7 @@ public class Parser {
 			if (type==bool) {
 			tipoDev=type;
 			} else {
-				SemErr("Estas negando un tipo NO bool");
+				SemErr("OpNegLogico: Error argumento.");
 			}
 			
 		} else if (la.kind == 32) {
@@ -797,10 +830,10 @@ public class Parser {
 			if (type1==entera) {
 			tipoDev=type1;
 			} else {
-				SemErr("Estas negando un tipo NO entero");
+				SemErr("OpNegAritmetico: Error argumento.");
 			}
 			
-		} else if (StartOf(12)) {
+		} else if (StartOf(13)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
 		} else SynErr(82);
@@ -934,11 +967,12 @@ public class Parser {
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,T,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
-		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,T,x, T,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,T,x, T,T,T,x, x,T,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,T, T,x,x,x, x,T,T,x, x,x,T,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,T,x, T,T,T,x, x,T,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,T, T,x,x,x, x,T,T,x, x,x,T,x, T,x,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 

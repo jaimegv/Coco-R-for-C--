@@ -7,20 +7,34 @@ public class Main {
 	public static void main(String[] arg) {
 		int error;
 		
-		TablaSimbolos tablaprueba = new TablaSimbolos();
+		Tablas tablon = new Tablas();
+		
+		TablaSimbolos tablaprueba = tablon.GetAmbitoActual();
+		
 		Simbolo simboloprueba = new Simbolo("hola",1,1);
+		Simbolo simboloprueba2 = new Simbolo("caracola",1,1);
 		
-		error = tablaprueba.InsertarSimbolo(simboloprueba);
+		error = tablon.InsertarEnActual(simboloprueba);
+		tablon.NuevoAmbito();
+		error = tablon.InsertarEnActual(simboloprueba2);
+		
+		//En teoria simboloprueba está en el ambito global y
+		//simboloprueba2 está en el actual. Probemos...
+		
 		System.out.println(error);
+		simboloprueba = null;
+		simboloprueba2 = null;
 		
-		
-		Simbolo simboloprueba2;
-		
-		simboloprueba2 = tablaprueba.GetSimbolo("hola");
-		if (simboloprueba2 == null)
-			System.out.println("No se ha encontrado");
-		else
+		if (tablon.EstaRecur("hola"))
+			{
+			simboloprueba2 = tablon.GetSimboloRecur("hola");
 			System.out.println(simboloprueba2.GetNombre());
+			}
+		else
+			System.out.println("uyuyuy");
+		
+		
+		
 		
 		
 		/*

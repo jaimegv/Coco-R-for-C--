@@ -57,9 +57,32 @@ public class TablaSimbolos {
 		return 0;
 		}
 	
+	public boolean Esta(String nombre)
+		//Devuelve cierto si hay un símbolo almacenado con el mismo nombre en este objeto
+		{
+		Simbolo simbolito = null;
+		for(int i=0; i< this.tabla.size(); i++)
+			{
+			simbolito = (Simbolo) this.tabla.elementAt(i);
+			if ((this.tabla.elementAt(i) instanceof Simbolo) && 
+					(nombre == simbolito.GetNombre()))
+				{
+				return true;
+				}
+		
+			}
+		return false;
+		}
+	
+	
+
+	
+	
+	
+	
 	public Simbolo GetSimbolo (String nombre)
 		//Devuelve el simbolo almacenado con este nombre
-		//Si el simbolo no esta se devuelve null
+		//Si el simbolo no esta se devuelve null (es preferible preguntar antes si está)
 		{
 		Simbolo simbolito;
 		simbolito = null;
@@ -80,7 +103,7 @@ public class TablaSimbolos {
 	
 	public TablaSimbolos Ambito_Padre ()
 		{
-		return null; //Falta hacer el cuerpo de esta función
+		return this.ambito_padre;
 		}
 
 	}
