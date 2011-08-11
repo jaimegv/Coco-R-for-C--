@@ -94,6 +94,10 @@ public void SetToVector()
 	tamano = 0;
 	}
 
+public void SetValor(Object valor)
+{
+	this.valor.insertElementAt(valor, 0);
+}
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
 	   return this.nombre;
