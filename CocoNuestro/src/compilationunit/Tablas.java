@@ -51,6 +51,7 @@ public class Tablas {
 		}
 	
 	public Simbolo GetSimboloRecur (String nombre)
+		//Devuelve el primer simbolo que se encuentre con ese nombre en la jerarquia de ambitos
 		{
 		TablaSimbolos currentbusqueda = this.ambito_actual;
 		
@@ -68,7 +69,6 @@ public class Tablas {
 	
 	
 		}
-	
 	
 	public boolean EstaRecur (String nombre)
 	//Esta funciona devuelve cierto cuando se encuentra un simbolo con el non el mismo nombre
@@ -95,6 +95,11 @@ public class Tablas {
 			return false;
 			}
 		
+		}
+
+	public boolean EstaEnActual (String nombre)
+		{
+		return this.ambito_actual.Esta(nombre);
 		}
 	
 }

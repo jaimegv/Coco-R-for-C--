@@ -22,16 +22,15 @@ public class Main {
 		//simboloprueba2 está en el actual. Probemos...
 		
 		System.out.println(error);
-		simboloprueba = null;
-		simboloprueba2 = null;
+//		tablon.CerrarAmbito();
 		
-		if (tablon.EstaRecur("hola"))
+		if (tablon.EstaRecur("caracola"))
 			{
 			simboloprueba2 = tablon.GetSimboloRecur("hola");
 			System.out.println(simboloprueba2.GetNombre());
 			}
 		else
-			System.out.println("uyuyuy");
+			System.out.println("No esta!");
 		
 		
 		
