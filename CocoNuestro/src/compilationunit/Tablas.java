@@ -52,6 +52,21 @@ public class Tablas {
 			}
 		}
 	
+	public int InsertarEnAmbitoPadre (Simbolo simbolo)
+	{
+		TablaSimbolos ambito_padre = this.ambito_actual.Ambito_Padre();
+		if (ambito_padre.InsertarSimbolo(simbolo) == 0)
+			{
+			System.out.println("Exito insertando simbolo en el ambito padre");
+			return 0;
+			}
+		else
+			{
+			System.out.println("JUR: El simbolo ya estaba definido en este ambito");
+			return -1;
+			}
+		}
+	
 	public Simbolo GetSimboloRecur (String nombre)
 		//Devuelve el primer simbolo que se encuentre con ese nombre en la jerarquia de ambitos
 		{
