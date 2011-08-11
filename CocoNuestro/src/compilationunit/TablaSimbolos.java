@@ -75,10 +75,6 @@ public class TablaSimbolos {
 		}
 	
 	
-
-	
-	
-	
 	
 	public Simbolo GetSimbolo (String nombre)
 		//Devuelve el simbolo almacenado con este nombre
