@@ -178,10 +178,14 @@ public class Parser {
 			} else if (la.kind == 1) {
 				Get();
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
+				simbolo.SetLine(t.line);
+				simbolo.SetColumn(t.col);
+				
 				if (tabla.EstaEnActual(simbolo.GetNombre()))
 						{
+						System.out.println("ohhh");
 						Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
-						SemErr(simbolo.GetNombre() + " ya estaba declarado en la linea " + simbolo.GetLine() + " columna " + simbolo.GetColumn());
+						SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 						}
 					else
 					   {
@@ -306,7 +310,7 @@ public class Parser {
 		Simbolo sim = new Simbolo ("Temp", 0,0);
 		int type;
 		Expect(30);
-		if (la.kind == 2 || la.kind == 32) {
+		if (la.kind == 2 || la.kind == 32 || la.kind == 33) {
 			type = ExpAritmetica(sim);
 			((Number)sim.GetValor()).intValue();
 			System.out.println("El tamano del vector es " + (Number)sim.GetValor());
@@ -869,6 +873,7 @@ public class Parser {
 		int  total;
 		total=undef;
 		int valor=0, valor1=0, valor2=1;
+		System.out.println("Estas en expProducto");
 		
 		valor = ExpCambioSigno();
 		total=valor; 
@@ -891,18 +896,27 @@ public class Parser {
 
 	int  ExpCambioSigno() {
 		int  valor;
-		valor=0;
+		int valor1=0;
+		valor=1;
+		System.out.println("Entraste en camb Signo");
 		
-		if (la.kind == 2 || la.kind == 32) {
-			while (la.kind == 32) {
+		if (la.kind == 32 || la.kind == 33) {
+			if (la.kind == 32) {
+				Get();
+				valor=-valor;/*cambio signo*/ 
+			} else {
 				Get();
 			}
-		}
-		Expect(2);
-		System.out.println("Argumento entero:"+Integer.parseInt(t.val));
-		valor = Integer.parseInt(t.val);
-		//			t.val=Integer.parseInt(t.val); 	
-		
+			valor1 = ExpCambioSigno();
+			valor = valor * valor1;
+			System.out.println("Negacion!:"+valor+" negado de "+valor1);
+			
+		} else if (la.kind == 2) {
+			Get();
+			valor = Integer.parseInt(t.val);
+			System.out.println("Argumento entero:"+valor);
+			
+		} else SynErr(80);
 		return valor;
 	}
 
@@ -932,7 +946,7 @@ public class Parser {
 		} else if (StartOf(13)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
-		} else SynErr(80);
+		} else SynErr(81);
 		return tipoDev;
 	}
 
@@ -972,7 +986,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(81);
+		} else SynErr(82);
 	}
 
 	int  Expresion5() {
@@ -1040,7 +1054,7 @@ public class Parser {
 			tipoDev=bool;	
 			break;
 		}
-		default: SynErr(82); break;
+		default: SynErr(83); break;
 		}
 		return tipoDev;
 	}
@@ -1064,7 +1078,7 @@ public class Parser {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
-		} else SynErr(83);
+		} else SynErr(84);
 	}
 
 
@@ -1198,10 +1212,11 @@ class Errors {
 			case 77: s = "invalid Expresion21"; break;
 			case 78: s = "invalid Operador_Logico"; break;
 			case 79: s = "invalid Operador_Relacional"; break;
-			case 80: s = "invalid Expresion4"; break;
-			case 81: s = "invalid Operador_Aritmetico"; break;
-			case 82: s = "invalid Expresion5"; break;
-			case 83: s = "invalid Expresion_Entera"; break;
+			case 80: s = "invalid ExpCambioSigno"; break;
+			case 81: s = "invalid Expresion4"; break;
+			case 82: s = "invalid Operador_Aritmetico"; break;
+			case 83: s = "invalid Expresion5"; break;
+			case 84: s = "invalid Expresion_Entera"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);

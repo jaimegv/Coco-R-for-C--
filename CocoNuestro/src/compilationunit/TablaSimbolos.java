@@ -91,7 +91,7 @@ public class TablaSimbolos {
 			{
 			simbolito = (Simbolo) tabla.elementAt(i);
 			if ((this.tabla.elementAt(i) instanceof Simbolo) && 
-            		(nombre == simbolito.GetNombre()))
+            		(nombre.contentEquals(simbolito.GetNombre())))
 				{
 				return simbolito;
 				}

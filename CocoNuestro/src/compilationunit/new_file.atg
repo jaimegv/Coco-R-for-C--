@@ -155,10 +155,14 @@ CEMASMAS
 	DecClase CEMASMAS
 			 | ((Ttipo<out type> | voidd)
 			 		(Main| ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 						   simbolo.SetLine(t.line);
+			 						   simbolo.SetColumn(t.col);
+			 						   
 			 						   if (tabla.EstaEnActual(simbolo.GetNombre()))
 			 						   		{
+			 						   		System.out.println("ohhh");
 			 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
-			 						   		SemErr(simbolo.GetNombre() + " ya estaba declarado en la linea " + simbolo.GetLine() + " columna " + simbolo.GetColumn());
+			 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 			 						   		}
 			 						   	else
 			 						   	   {
