@@ -1,3 +1,9 @@
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Queue;
+
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 //	import java.util.*;
@@ -196,8 +202,9 @@ DecCabMet	(. int type; .)
 = parent_ab Param_Cab parent_ce puntoComa
 .
 
-Param_Cab = (. int type; .) 
-	[Ttipo<out type> [Vector] [{comma Ttipo<out type> [Vector]}] | voidd]
+Param_Cab = (. int type;
+			   Simbolo sim = new Simbolo("Temo",0,0); .) 
+	[Ttipo<out type> [Vector<sim>] [{comma Ttipo<out type> [Vector<sim>]}] | voidd]
 .
 
 DecMetodo = (. Simbolo sim = new Simbolo("no def", 0, 0);.) 
@@ -212,7 +219,7 @@ Cuerpo 	(. int type;
 =
 	{Instruccion 
 		| (Ttipo<out type>|voidd) ident (Subprograma <sim>
-		 | ([Vector] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))}
+		 | ([Vector<sim>] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))}
 .
 
 
@@ -233,15 +240,21 @@ Parametros <Simbolo simbolo_nombre_funcion>	(. int type; .)
 = 	Ttipo<out type>ident (. Simbolo simbolo_parametro = new Simbolo(t.val, type, parametro);
 							simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
 							tabla.InsertarEnActual(simbolo_parametro); .) 
-				[Vector/*<simbolo_parametro>*/]
+				[Vector <simbolo_parametro>]
 				[{comma Ttipo<out type>ident (. simbolo_parametro = new Simbolo(t.val, type, parametro);
 												simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
 												tabla.InsertarEnActual(simbolo_parametro);.) 
-				[Vector/*<simbolo_parametro>*/]}] | voidd
+				[Vector <simbolo_parametro>]
+				}] 
+				| voidd
 .
 
-Vector/*<Simbolo simbolo>*/ = /*(. simbolo.SetToVector();.)*/
-corchete_ab [Expresion_Entera] corchete_ce.
+Vector <Simbolo simbolo> = (. simbolo.SetToVector();
+							  Simbolo sim = new Simbolo ("Temp", 0,0);
+							  int type;.)
+corchete_ab [expAritmetica <out type, sim> (. ((Number)sim.GetValor()).intValue();
+											 System.out.println("El tamano del vector es " + (Number)sim.GetValor());.)
+] corchete_ce.
 
 
 //*************SUBPROGRAMA**********************************//
@@ -293,7 +306,7 @@ InstIfElse
 =
 		iff Expresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");} .) 
 	((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma <simbolo>
-	 | ([Vector] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)])))) [Else]
+	 | ([Vector<simbolo>] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)])))) [Else]
 .
 
 Else	(. int type;
@@ -301,7 +314,7 @@ Else	(. int type;
 .) 
 =
 	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma <sim>
-				 | ([Vector] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))))
+				 | ([Vector<sim>] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))))
 .
 
 /***************************************************/
@@ -325,9 +338,10 @@ InstCin
 .
 
 Arg_io<out int tipoDev>
-(. tipoDev=undef; .)
-=
-	ident [Vector]
+(. tipoDev=undef;
+   Simbolo sim; .)
+= (. sim = new Simbolo("Temp", 0, 0); .)
+	ident [Vector <sim>]
 		| cadenaCar (. tipoDev = cadena; .)
 			|
 .
