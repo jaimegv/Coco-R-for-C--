@@ -159,7 +159,7 @@ CEMASMAS<Tablas tabla>
 			 						.)
 			 					  	(Subprograma <simbolo>
 			 					  	
-			 					  	| DecVar<out type1, simbolo> 
+			 					  	|[Vector<simbolo>] DecVar<out type1, simbolo> 
 		 					  											(. 	if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
 		 																}
@@ -170,7 +170,8 @@ CEMASMAS<Tablas tabla>
 																			SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
 																		}
 																		System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
-																		.) 
+																		.)
+									 
 								| DecMetodo) CEMASMAS<tabla>))
 .
 

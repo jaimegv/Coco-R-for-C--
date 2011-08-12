@@ -182,7 +182,10 @@ public class Parser {
 				
 				if (la.kind == 31) {
 					Subprograma(simbolo);
-				} else if (la.kind == 41 || la.kind == 42) {
+				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
+					if (la.kind == 30) {
+						Vector(simbolo);
+					}
 					type1 = DecVar(simbolo);
 					if (type1==type) {
 					//System.out.println("tipos ok!"+type+" "+type1);
@@ -290,6 +293,19 @@ public class Parser {
 		Expect(36);
 	}
 
+	void Vector(Simbolo simbolo) {
+		simbolo.SetToVector();
+		Simbolo sim = new Simbolo ("Temp", 0,0);
+		int type;
+		Expect(30);
+		if (la.kind == 2) {
+			type = expAritmetica(sim);
+			((Number)sim.GetValor()).intValue();
+			System.out.println("El tamano del vector es " + (Number)sim.GetValor());
+		}
+		Expect(37);
+	}
+
 	int  DecVar(Simbolo simbolo) {
 		int  type;
 		int type1=undef;
@@ -372,19 +388,6 @@ public class Parser {
 				Get();
 			}
 		}
-	}
-
-	void Vector(Simbolo simbolo) {
-		simbolo.SetToVector();
-		Simbolo sim = new Simbolo ("Temp", 0,0);
-		int type;
-		Expect(30);
-		if (la.kind == 2) {
-			type = expAritmetica(sim);
-			((Number)sim.GetValor()).intValue();
-			System.out.println("El tamano del vector es " + (Number)sim.GetValor());
-		}
-		Expect(37);
 	}
 
 	void Parametros(Simbolo simbolo_nombre_funcion) {
