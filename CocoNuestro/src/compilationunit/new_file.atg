@@ -150,7 +150,7 @@ CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 CEMASMAS<Tablas tabla>
 (.	int type=undef; 
 	int type1;
-.)  
+.)
 =
 	DecClase CEMASMAS<tabla>
 			 | ((Ttipo<out type> | voidd)
@@ -455,6 +455,7 @@ ExpAritmetica <out int tipoDev, Simbolo sim>
 ExpProducto <out int total>
 (.	total=undef;
 	int valor=0, valor1=0, valor2=1;
+	System.out.println("Estas en expProducto");
 .)
 = ExpCambioSigno<out valor> (.	total=valor; .)
                 [{ op_producto ExpCambioSigno<out valor1> 
@@ -466,21 +467,23 @@ ExpProducto <out int total>
 .
  
 ExpCambioSigno <out int valor>
-(.	valor=0;
+(.	int valor1=0;
+	valor=1;
+	System.out.println("Entraste en camb Signo");
 .)
-=  [{op_menos}] enteros (.	
-				System.out.println("Argumento entero:"+Integer.parseInt(t.val));
-				valor = Integer.parseInt(t.val);
-	//			t.val=Integer.parseInt(t.val); 	
-.)
-. 
-
-//hola <out int valor,int adios>=.
+=  
+(op_menos (. valor=-valor;/*cambio signo*/ .)
+	| op_menosmenos)
+ ExpCambioSigno<out valor1>	(. valor = valor * valor1;
+								System.out.println("Negacion!:"+valor+" negado de "+valor1);
+							.)
+	|  enteros (.	valor = Integer.parseInt(t.val);
+					System.out.println("Argumento entero:"+valor);
+				.)
+.
 
 
 /****************************************************/
-
-
 Expresion3 <out int tipoDev>
 (.	tipoDev=undef;
 	int type, type1;
