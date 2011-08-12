@@ -59,6 +59,7 @@ public void SetType(int type){
 
 public void SetKind(int kind){
 	   this.kind = kind;
+	   System.out.println("El simbolo ahora es de tipo " + this.kind);
 	}
 
 public void SetLine(int line){

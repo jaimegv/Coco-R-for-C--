@@ -76,10 +76,11 @@ public class Parser {
 
 	final int undef=0, entera=1, bool=2, cadena=3;
 	// DeclaraciÃ³n de constantes de tipo de scopes
-	final int var=0, funcion=1, clase=2, metodo=3;
+	final int var=0, funcion=1, clase=2, metodo=3, parametro=4;
 
 	// Tabla de simbolos global
-//	public TablaSimbolos tabla;
+	public Tablas tabla;
+	// Tupla devuelta por las expresiones (tipo, valor)
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -146,17 +147,17 @@ public class Parser {
 	}
 	
 	void CEMASMAS1() {
-		Tablas tabla = new Tablas();	
-		CEMASMAS();
+		tabla = new Tablas();	
+		CEMASMAS(tabla);
 	}
 
-	void CEMASMAS() {
+	void CEMASMAS(Tablas tabla) {
 		int type=undef; 
 		int type1;
-		Tablas tabla ;
+		
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
-			CEMASMAS();
+			CEMASMAS(tabla);
 		} else if (StartOf(1)) {
 			if (StartOf(2)) {
 				type = Ttipo();
@@ -168,10 +169,12 @@ public class Parser {
 			} else if (la.kind == 1) {
 				Get();
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
+				tabla.InsertarEnActual(simbolo);
+				
 				if (la.kind == 31) {
-					Subprograma();
+					Subprograma(simbolo);
 				} else if (la.kind == 41 || la.kind == 42) {
-					type1 = DecVar();
+					type1 = DecVar(simbolo);
 					if (type1==type) {
 					//System.out.println("tipos ok!"+type+" "+type1);
 					}
@@ -180,11 +183,13 @@ public class Parser {
 					} 
 					else {
 						SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
-					} 
+					}
+					System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
+					
 				} else if (la.kind == 17) {
 					DecMetodo();
 				} else SynErr(61);
-				CEMASMAS();
+				CEMASMAS(tabla);
 			} else SynErr(62);
 		} else SynErr(63);
 	}
@@ -251,10 +256,11 @@ public class Parser {
 	}
 
 	void Main() {
+		Simbolo simbolo = new Simbolo("main",0,funcion);
 		Expect(25);
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros();
+			Parametros(simbolo);
 		}
 		Expect(38);
 		Expect(29);
@@ -262,10 +268,12 @@ public class Parser {
 		Expect(36);
 	}
 
-	void Subprograma() {
+	void Subprograma(Simbolo simbolo) {
+		tabla.NuevoAmbito();
+		simbolo.SetKind (funcion);  
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros();
+			Parametros(simbolo);
 		}
 		Expect(38);
 		Expect(29);
@@ -273,24 +281,29 @@ public class Parser {
 		Expect(36);
 	}
 
-	int  DecVar() {
+	int  DecVar(Simbolo simbolo) {
 		int  type;
 		int type1=undef;
+		System.out.println("Estas en DecVar");
+		
 		if (la.kind == 41) {
 			Get();
-			type1 = Expresion();
+			type1 = expAritmetica(simbolo);
+			System.out.println("Variable inicializada a " + simbolo.GetValor()); 
 		}
 		Expect(42);
 		type=type1;
+		
 		return type;
 	}
 
 	void DecMetodo() {
+		Simbolo sim = new Simbolo("no def", 0, 0);
 		Expect(17);
 		Expect(1);
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros();
+			Parametros(sim);
 		}
 		Expect(38);
 		Expect(29);
@@ -299,14 +312,15 @@ public class Parser {
 	}
 
 	void Cuerpo_Clase() {
-		int type; 
+		int type;
+		Simbolo sim = new Simbolo(t.val, 0, 0);
 		if (StartOf(1)) {
 			while (StartOf(1)) {
 				if (StartOf(2)) {
 					type = Ttipo();
 					Expect(1);
 					if (la.kind == 41 || la.kind == 42) {
-						type = DecVar();
+						type = DecVar(sim);
 					} else if (la.kind == 31) {
 						DecCabMet();
 					} else SynErr(65);
@@ -358,11 +372,14 @@ public class Parser {
 		Expect(37);
 	}
 
-	void Parametros() {
+	void Parametros(Simbolo simbolo_nombre_funcion) {
 		int type; 
 		if (StartOf(2)) {
 			type = Ttipo();
 			Expect(1);
+			Simbolo simbolo_parametro = new Simbolo(t.val, type, parametro);
+			simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+			tabla.InsertarEnActual(simbolo_parametro); 
 			if (la.kind == 30) {
 				Vector();
 			}
@@ -371,6 +388,9 @@ public class Parser {
 					Get();
 					type = Ttipo();
 					Expect(1);
+					simbolo_parametro = new Simbolo(t.val, type, parametro);
+					simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+					tabla.InsertarEnActual(simbolo_parametro);
 					if (la.kind == 30) {
 						Vector();
 					}
@@ -382,7 +402,9 @@ public class Parser {
 	}
 
 	void Cuerpo() {
-		int type; 
+		int type;
+		Simbolo sim = new Simbolo(t.val, 0, 0);// borrar cuando sigas
+		
 		while (StartOf(3)) {
 			if (StartOf(4)) {
 				Instruccion();
@@ -394,12 +416,12 @@ public class Parser {
 				}
 				Expect(1);
 				if (la.kind == 31) {
-					Subprograma();
+					Subprograma(sim);
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector();
 					}
-					type = DecVar();
+					type = DecVar(sim);
 					if (la.kind == 41) {
 						Get();
 						if (la.kind == 1) {
@@ -430,21 +452,22 @@ public class Parser {
 		} else SynErr(69);
 	}
 
-	int  Expresion() {
+	int  expAritmetica(Simbolo sim) {
 		int  tipoDev;
 		tipoDev=undef;
-		int type, type1;
+		int tipo, tipo1;
 		
-		type = Expresion2();
-		type1 = Expresion1();
-		if (type==type1) {
-		tipoDev=type;
-		} else if (type1==undef) {
-			tipoDev=type;
-		} else {
-			SemErr("Error en Expresion");
+		tipo = expProducto(sim);
+		if (la.kind == 39 || la.kind == 40) {
+			while (la.kind == 39 || la.kind == 40) {
+				if (la.kind == 39) {
+					Get();
+				} else {
+					Get();
+				}
+				tipo1 = expProducto(sim);
+			}
 		}
-		
 		return tipoDev;
 	}
 
@@ -501,7 +524,7 @@ public class Parser {
 
 	int  InstReturn() {
 		int  tipoDev;
-		tipoDev=undef;
+		tipoDev = undef;
 		int type; 
 		Expect(18);
 		if (StartOf(7)) {
@@ -578,8 +601,10 @@ public class Parser {
 	}
 
 	void InstIfElse() {
-		int type;
-		int type1; 
+		int type, type1;
+		Simbolo sim = new Simbolo(t.val, 0, 0);
+		Simbolo simbolo = new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
+		
 		Expect(23);
 		type = Expresion();
 		if (type != bool) {SemErr("La condicion de un if debe ser logica");} 
@@ -594,12 +619,12 @@ public class Parser {
 				type = Ttipo();
 				Expect(1);
 				if (la.kind == 31) {
-					Subprograma();
+					Subprograma(simbolo);
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector();
 					}
-					type = DecVar();
+					type = DecVar(sim);
 					if (la.kind == 41) {
 						Get();
 						if (la.kind == 1) {
@@ -618,8 +643,28 @@ public class Parser {
 		}
 	}
 
+	int  Expresion() {
+		int  tipoDev;
+		tipoDev=undef;
+		int type, type1;
+		
+		type = Expresion2();
+		type1 = Expresion1();
+		if (type==type1) {
+		tipoDev=type;
+		} else if (type1==undef) {
+			tipoDev=type;
+		} else {
+			SemErr("Error en Expresion");
+		}
+		
+		return tipoDev;
+	}
+
 	void Else() {
-		int type; 
+		int type;
+		Simbolo sim = new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
+		
 		Expect(24);
 		if (la.kind == 29) {
 			Get();
@@ -632,12 +677,12 @@ public class Parser {
 				type = Ttipo();
 				Expect(1);
 				if (la.kind == 31) {
-					Subprograma();
+					Subprograma(sim);
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector();
 					}
-					type = DecVar();
+					type = DecVar(sim);
 					if (la.kind == 41) {
 						Get();
 						if (la.kind == 1) {
@@ -817,6 +862,37 @@ public class Parser {
 		}
 	}
 
+	int  expProducto(Simbolo sim) {
+		int  tipoDev;
+		tipoDev=undef;
+		int tipo, tipo1;
+		
+		tipo = expCambioSigno(sim);
+		if (la.kind == 39 || la.kind == 40) {
+			while (la.kind == 39 || la.kind == 40) {
+				if (la.kind == 39) {
+					Get();
+				} else {
+					Get();
+				}
+				tipo1 = expCambioSigno(sim);
+				
+			}
+		}
+		return tipoDev;
+	}
+
+	int  expCambioSigno(Simbolo sim) {
+		int  tipoDev;
+		tipoDev=undef;
+		
+		Expect(2);
+		sim.SetValor(Integer.parseInt(t.val));
+		//			t.val=Integer.parseInt(t.val); 	
+		
+		return tipoDev;
+	}
+
 	int  Expresion4() {
 		int  tipoDev;
 		tipoDev=undef;
@@ -863,7 +939,7 @@ public class Parser {
 				SemErr("Operacion Arit con arg no entero");
 			}
 			} else {	// hay otro expresion
-				if ((type==type1) && (type==entera)) {	// las dos son enteras
+				if ((type==type1) && (type==entera)) {	// las dos son
 					tipoDev=type;
 				} else {
 					SemErr("Operacion Arit sobre tipos no enteros");
