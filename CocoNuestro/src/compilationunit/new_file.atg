@@ -135,7 +135,7 @@ PRODUCTIONS
 // Example:
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
-CEMASMAS1 (.	Tablas tabla = new Tablas();	.)  //Se crea el ámbito global
+CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 = CEMASMAS.
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
