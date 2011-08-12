@@ -1,6 +1,6 @@
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
-
+//	import java.util.*;
 // Add auxiliary methods and declaration here.
 	// Declaracion de constantes para tipos
 	final int undef=0, entera=1, bool=2, cadena=3;
@@ -9,6 +9,7 @@ COMPILER CEMASMAS1
 
 	// Tabla de simbolos global
 	public Tablas tabla;
+	// Tupla devuelta por las expresiones (tipo, valor)
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -136,16 +137,23 @@ PRODUCTIONS
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
 CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
-= CEMASMAS.
+= CEMASMAS<tabla>
+.
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS (. int type=undef; 
-			int type1;.)  
+CEMASMAS<Tablas tabla>
+(.	int type=undef; 
+	int type1;
+//	Tablas tabla;
+.)  
 =
-	DecClase CEMASMAS
+	DecClase CEMASMAS<tabla>
 			 | ((Ttipo<out type> | voidd) 
-			 		(Main | ident  (. Simbolo simbolo = new Simbolo(t.val, type, 0);.)
-			 					  (Subprograma | DecVar<out type1> (. 	if (type1==type) {
+			 		(Main | ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 							tabla.InsertarEnActual(simbolo);
+			 						.)
+			 					  	(Subprograma | DecVar<out type1, simbolo> 
+		 					  											(. 	if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
 		 																}
 																		else if (type1==undef) {
@@ -153,8 +161,10 @@ CEMASMAS (. int type=undef;
 																		} 
 																		else {
 																			SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
-																		} .) 
-								| DecMetodo) CEMASMAS))
+																		}
+																		System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
+																		.) 
+								| DecMetodo) CEMASMAS<tabla>))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo
@@ -175,8 +185,9 @@ DecClase	(. int type; .) // Dec Variable
 							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]		
 								  llave_ce puntoComa.
 
-Cuerpo_Clase	(. int type; .) // Dec Variable 
-= [{(Ttipo<out type> ident (DecVar<out type> | DecCabMet))
+Cuerpo_Clase	(. int type;
+			Simbolo sim = new Simbolo(t.val, 0, 0);.) // Dec Variable// borrar cuando sigas 
+= [{(Ttipo<out type> ident (DecVar<out type, sim> | DecCabMet))
 							  | voidd ident DecCabMet}].
 
 
@@ -185,7 +196,6 @@ DecCabMet	(. int type; .)
 .
 
 Param_Cab = (. int type; .) 
-
 	[Ttipo<out type> [Vector] [{comma Ttipo<out type> [Vector]}] | voidd]
 .
 
@@ -193,19 +203,25 @@ DecMetodo = dospuntos_dos ident parent_ab [Parametros] parent_ce llave_ab Cuerpo
 
 Main = main parent_ab [Parametros] parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo 	(. int type; .) 
+Cuerpo 	(. int type;
+			Simbolo sim = new Simbolo(t.val, 0, 0);// borrar cuando sigas
+ .) 
 =
 	{Instruccion 
-		| (Ttipo<out type>|voidd) ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)]))}
+		| (Ttipo<out type>|voidd) ident (Subprograma | ([Vector] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))}
 .
 
 
 //El apéndice del final indica el nivel de anhidamiento.
 
-DecVar <out int type>
-= (. int type1=undef;.)
-[op_asig Expresion<out type1>] puntoComa	(.	type=type1;.)
+DecVar <out int type, Simbolo sim>
+= (. int type1=undef;
+System.out.println("Estas eb DecVar");
+.)
+[op_asig expAritmetica<out type1, sim>] puntoComa	(.	type=type1;
+													.)//Expresion<out type1, sim>] puntoComa	(.	type=type1;.)
 .
+
 
 Parametros	(. int type; .) 
 =
@@ -237,7 +253,7 @@ InstExpresion
 .
 
 InstReturn <out int tipoDev>
-(.	tipoDev=undef;
+(.	tipoDev = undef;
 	int type; .)
 =
 (rreturn [Expresion<out type> (. tipoDev= type; .) ] puntoComa)
@@ -245,16 +261,20 @@ InstReturn <out int tipoDev>
 
 /****************************************************/
 
-InstIfElse	(. int type;
-				int type1; .) 
+InstIfElse	
+(. int type, type1;
+	Simbolo sim = new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
+.) 
 =
 		iff Expresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");} .) 
-	((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)])))) [Else]
+	((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)])))) [Else]
 .
 
-Else	(. int type; .) 
+Else	(. int type;
+	Simbolo sim = new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
+.) 
 =
-	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type> [op_asig (ident | enteros | cadenaCar)]))))
+	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma | ([Vector] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))))
 .
 
 /***************************************************/
@@ -375,6 +395,37 @@ Expresion21 <out int tipoDev>
 												]
 .
 
+/***********PRUEBAS_PRECEDENCIA_OP*******************/
+expAritmetica <out int tipoDev, Simbolo sim>
+(.	tipoDev=undef;
+	int tipo, tipo1;
+.)
+=	expProducto<out tipo, sim> [{((op_producto | op_division) expProducto<out tipo1, sim>)}]
+.
+
+expProducto <out int tipoDev, Simbolo sim>
+(.	tipoDev=undef;
+	int tipo, tipo1;
+.)
+= expCambioSigno<out tipo, sim>
+                [{(op_producto | op_division) expCambioSigno<out tipo1, sim> (.  .)}]
+.
+ 
+expCambioSigno <out int tipoDev, Simbolo sim>
+(.	tipoDev=undef;
+.)
+=  enteros (.	
+				sim.SetValor(Integer.parseInt(t.val));
+	//			t.val=Integer.parseInt(t.val); 	
+.)
+. 
+
+//hola <out int valor,int adios>=.
+
+
+/****************************************************/
+
+
 Expresion3 <out int tipoDev>
 (.	tipoDev=undef;
 	int type, type1;
@@ -400,7 +451,7 @@ Expresion31 <out int tipoDev>
 																				SemErr("Operacion Arit con arg no entero");
 																			}
 																		} else {	// hay otro expresion
-																			if ((type==type1) && (type==entera)) {	// las dos son enteras
+																			if ((type==type1) && (type==entera)) {	// las dos son
 																				tipoDev=type;
 																			} else {
 																				SemErr("Operacion Arit sobre tipos no enteros");
