@@ -182,10 +182,9 @@ public class Parser {
 				
 				if (la.kind == 31) {
 					Subprograma(simbolo);
-				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
-					if (la.kind == 30) {
-						Vector(simbolo);
-					}
+				} else if (la.kind == 30) {
+					Vector(simbolo);
+				} else if (la.kind == 41 || la.kind == 42) {
 					type1 = DecVar(simbolo);
 					if (type1==type) {
 					//System.out.println("tipos ok!"+type+" "+type1);
@@ -420,8 +419,8 @@ public class Parser {
 	}
 
 	void Cuerpo() {
-		int type;
-		Simbolo sim = new Simbolo(t.val, 0, 0);// borrar cuando sigas
+		int type = undef;
+		// borrar cuando sigas
 		
 		while (StartOf(3)) {
 			if (StartOf(4)) {
@@ -433,24 +432,16 @@ public class Parser {
 					Get();
 				}
 				Expect(1);
+				Simbolo sim = new Simbolo(t.val, type, 0);
 				if (la.kind == 31) {
 					Subprograma(sim);
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector(sim);
+					} else {
+						type = DecVar(sim);
 					}
-					type = DecVar(sim);
-					if (la.kind == 41) {
-						Get();
-						if (la.kind == 1) {
-							Get();
-						} else if (la.kind == 2) {
-							Get();
-						} else if (la.kind == 3) {
-							Get();
-						} else SynErr(67);
-					}
-				} else SynErr(68);
+				} else SynErr(67);
 			}
 		}
 	}
@@ -467,7 +458,7 @@ public class Parser {
 			InstExpresion();
 		} else if (la.kind == 23) {
 			InstIfElse();
-		} else SynErr(69);
+		} else SynErr(68);
 	}
 
 	int  expAritmetica(Simbolo sim) {
@@ -593,7 +584,7 @@ public class Parser {
 			}
 			type = Expresion();
 			Expect(42);
-		} else SynErr(70);
+		} else SynErr(69);
 	}
 
 	void InstIfElse() {
@@ -629,11 +620,11 @@ public class Parser {
 							Get();
 						} else if (la.kind == 3) {
 							Get();
-						} else SynErr(71);
+						} else SynErr(70);
 					}
-				} else SynErr(72);
+				} else SynErr(71);
 			}
-		} else SynErr(73);
+		} else SynErr(72);
 		if (la.kind == 24) {
 			Else();
 		}
@@ -687,11 +678,11 @@ public class Parser {
 							Get();
 						} else if (la.kind == 3) {
 							Get();
-						} else SynErr(74);
+						} else SynErr(73);
 					}
-				} else SynErr(75);
+				} else SynErr(74);
 			}
-		} else SynErr(76);
+		} else SynErr(75);
 	}
 
 	int  Arg_io() {
@@ -708,7 +699,7 @@ public class Parser {
 			Get();
 			tipoDev = cadena; 
 		} else if (la.kind == 21 || la.kind == 42) {
-		} else SynErr(77);
+		} else SynErr(76);
 		return tipoDev;
 	}
 
@@ -816,7 +807,7 @@ public class Parser {
 				}
 				
 			}
-		} else SynErr(78);
+		} else SynErr(77);
 		return tipoDev;
 	}
 
@@ -827,7 +818,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 46) {
 			Get();
-		} else SynErr(79);
+		} else SynErr(78);
 	}
 
 	void Operador_Relacional() {
@@ -856,7 +847,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(80); break;
+		default: SynErr(79); break;
 		}
 	}
 
@@ -917,7 +908,7 @@ public class Parser {
 		} else if (StartOf(12)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
-		} else SynErr(81);
+		} else SynErr(80);
 		return tipoDev;
 	}
 
@@ -957,7 +948,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(82);
+		} else SynErr(81);
 	}
 
 	int  Expresion5() {
@@ -1025,7 +1016,7 @@ public class Parser {
 			tipoDev=bool;	
 			break;
 		}
-		default: SynErr(83); break;
+		default: SynErr(82); break;
 		}
 		return tipoDev;
 	}
@@ -1049,7 +1040,7 @@ public class Parser {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
-		} else SynErr(84);
+		} else SynErr(83);
 	}
 
 
@@ -1170,23 +1161,22 @@ class Errors {
 			case 65: s = "invalid Cuerpo_Clase"; break;
 			case 66: s = "invalid Parametros"; break;
 			case 67: s = "invalid Cuerpo"; break;
-			case 68: s = "invalid Cuerpo"; break;
-			case 69: s = "invalid Instruccion"; break;
-			case 70: s = "invalid InstExpresion"; break;
+			case 68: s = "invalid Instruccion"; break;
+			case 69: s = "invalid InstExpresion"; break;
+			case 70: s = "invalid InstIfElse"; break;
 			case 71: s = "invalid InstIfElse"; break;
 			case 72: s = "invalid InstIfElse"; break;
-			case 73: s = "invalid InstIfElse"; break;
+			case 73: s = "invalid Else"; break;
 			case 74: s = "invalid Else"; break;
 			case 75: s = "invalid Else"; break;
-			case 76: s = "invalid Else"; break;
-			case 77: s = "invalid Arg_io"; break;
-			case 78: s = "invalid Expresion21"; break;
-			case 79: s = "invalid Operador_Logico"; break;
-			case 80: s = "invalid Operador_Relacional"; break;
-			case 81: s = "invalid Expresion4"; break;
-			case 82: s = "invalid Operador_Aritmetico"; break;
-			case 83: s = "invalid Expresion5"; break;
-			case 84: s = "invalid Expresion_Entera"; break;
+			case 76: s = "invalid Arg_io"; break;
+			case 77: s = "invalid Expresion21"; break;
+			case 78: s = "invalid Operador_Logico"; break;
+			case 79: s = "invalid Operador_Relacional"; break;
+			case 80: s = "invalid Expresion4"; break;
+			case 81: s = "invalid Operador_Aritmetico"; break;
+			case 82: s = "invalid Expresion5"; break;
+			case 83: s = "invalid Expresion_Entera"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);

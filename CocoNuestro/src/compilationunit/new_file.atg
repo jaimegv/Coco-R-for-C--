@@ -159,7 +159,7 @@ CEMASMAS<Tablas tabla>
 			 						.)
 			 					  	(Subprograma <simbolo>
 			 					  	
-			 					  	|[Vector<simbolo>] DecVar<out type1, simbolo> 
+			 					  	| Vector<simbolo> | DecVar<out type1, simbolo> 
 		 					  											(. 	if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
 		 																}
@@ -214,13 +214,14 @@ dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_
 Main = (. Simbolo simbolo = new Simbolo("main",0,funcion);.)
 	   main parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce.
 
-Cuerpo 	(. int type;
-			Simbolo sim = new Simbolo(t.val, 0, 0);// borrar cuando sigas
+Cuerpo 	(. int type = undef;
+			// borrar cuando sigas
  .) 
 =
 	{Instruccion 
-		| (Ttipo<out type>|voidd) ident (Subprograma <sim>
-		 | ([Vector<sim>] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))}
+		| (Ttipo<out type>|voidd) ident (.Simbolo sim = new Simbolo(t.val, type, 0);.) 
+			(Subprograma <sim>
+		 | (Vector<sim> | DecVar<out type, sim> ))}
 .
 
 
