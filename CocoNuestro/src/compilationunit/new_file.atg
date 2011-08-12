@@ -153,8 +153,9 @@ CEMASMAS<Tablas tabla>
 .)  
 =
 	DecClase CEMASMAS<tabla>
-			 | ((Ttipo<out type> | voidd) 
+			 | ((Ttipo<out type> | voidd)
 			 		(Main| ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 							simbolo.SetValor(0);
 			 						   tabla.InsertarEnActual(simbolo);
 			 						.)
 			 					  	(Subprograma <simbolo>
@@ -231,10 +232,8 @@ DecVar <out int type, Simbolo simbolo>
 = (. int type1=undef;
 System.out.println("Estas en DecVar");
 .)
-[op_asig expAritmetica<out type1, simbolo> (. System.out.println("Variable inicializada a " + simbolo.GetValor()); .)
-
-] puntoComa	(.	type=type1;
-													.)//Expresion<out type1, sim>] puntoComa	(.	type=type1;.)
+[op_asig ExpAritmetica<out type1, simbolo> (. System.out.println("Variable inicializada a " + simbolo.GetValor()); .)
+					] puntoComa	(. type=type1; .)//Expresion<out type1, sim>] puntoComa	(.	type=type1;.)
 .
 
 
@@ -254,7 +253,7 @@ Parametros <Simbolo simbolo_nombre_funcion>	(. int type; .)
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();
 							  Simbolo sim = new Simbolo ("Temp", 0,0);
 							  int type;.)
-corchete_ab [expAritmetica <out type, sim> (. ((Number)sim.GetValor()).intValue();
+corchete_ab [ExpAritmetica <out type, sim> (. ((Number)sim.GetValor()).intValue();
 											 System.out.println("El tamano del vector es " + (Number)sim.GetValor());.)
 ] corchete_ce.
 
@@ -432,33 +431,46 @@ Expresion21 <out int tipoDev>
 																			}
 																		} else {	// error en 1º arg
 																			tipoDev=type;	// lo envio para q salte el error
-																			SemErr("OpRelacional: Error argumentos");
+												 
+												 							SemErr("OpRelacional: Error argumentos");
 																		}
 																.)
 												]
 .
 
 /***********PRUEBAS_PRECEDENCIA_OP*******************/
-expAritmetica <out int tipoDev, Simbolo sim>
+ExpAritmetica <out int tipoDev, Simbolo sim>
 (.	tipoDev=undef;
-	int tipo, tipo1;
+	int valor, valor1, valor2;
+	System.out.println("Estas en ExpArirmetica!");
 .)
-=	expProducto<out tipo, sim> [{((op_producto | op_division) expProducto<out tipo1, sim>)}]
+=	ExpProducto<out valor> 	(. sim.SetValor(valor); .)
+								[{ op_mas ExpProducto<out valor1>
+									(. sim.SetValor(((Number) sim.GetValor()).intValue() + valor1); .)
+								| | op_menos ExpProducto<out valor2>
+									(. sim.SetValor(((Number) sim.GetValor()).intValue() - valor2); .)
+								}]
 .
 
-expProducto <out int tipoDev, Simbolo sim>
-(.	tipoDev=undef;
-	int tipo, tipo1;
+ExpProducto <out int total>
+(.	total=undef;
+	int valor=0, valor1=0, valor2=1;
 .)
-= expCambioSigno<out tipo, sim>
-                [{(op_producto | op_division) expCambioSigno<out tipo1, sim> (.  .)}]
+= ExpCambioSigno<out valor> (.	total=valor; .)
+                [{ op_producto ExpCambioSigno<out valor1> 
+                				(. total=total * valor1; .)
+                	| op_division ExpCambioSigno<out valor2>
+                				(. total=total / valor2; .)
+				}]
+    			(. System.out.println("Valor de la primera parte"+total); .)
 .
  
-expCambioSigno <out int tipoDev, Simbolo sim>
-(.	tipoDev=undef;
+ExpCambioSigno <out int valor>
+(.	valor=0;
 .)
-=  enteros (.	
-				sim.SetValor(Integer.parseInt(t.val));
+=  [{op_menos}] enteros (.	
+				System.out.println("Argumento entero:"+Integer.parseInt(t.val));
+				valor = Integer.parseInt(t.val);
 	//			t.val=Integer.parseInt(t.val); 	
 .)
 . 
