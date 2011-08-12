@@ -8,7 +8,7 @@ COMPILER CEMASMAS1
 	final int var=0, funcion=1, clase=2, metodo=3;
 
 	// Tabla de simbolos global
-//	public TablaSimbolos tabla;
+	public Tablas tabla;
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -140,8 +140,7 @@ CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
 CEMASMAS (. int type=undef; 
-			int type1;
-			Tablas tabla ;.)  
+			int type1;.)  
 =
 	DecClase CEMASMAS
 			 | ((Ttipo<out type> | voidd) 
