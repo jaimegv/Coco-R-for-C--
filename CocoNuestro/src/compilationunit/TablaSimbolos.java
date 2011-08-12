@@ -63,12 +63,15 @@ public class TablaSimbolos {
 		Simbolo simbolito = null;
 		for(int i=0; i< this.tabla.size(); i++)
 			{
+			
 			simbolito = (Simbolo) this.tabla.elementAt(i);
-			if ((this.tabla.elementAt(i) instanceof Simbolo) && 
-					(nombre == simbolito.GetNombre()))
+			
+			if ((this.tabla.elementAt(i) instanceof Simbolo) && (nombre.contentEquals(simbolito.GetNombre())))
 				{
 				return true;
 				}
+			else
+				System.out.println("Pues no");
 		
 			}
 		return false;

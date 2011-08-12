@@ -143,20 +143,28 @@ PRODUCTIONS
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
 CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
-= CEMASMAS<tabla>
+= CEMASMAS
 .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
-CEMASMAS<Tablas tabla>
+CEMASMAS
 (.	int type=undef; 
 	int type1;
 .)
 =
-	DecClase CEMASMAS<tabla>
+	DecClase CEMASMAS
 			 | ((Ttipo<out type> | voidd)
 			 		(Main| ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
-			 							simbolo.SetValor(0);
-			 						   tabla.InsertarEnActual(simbolo);
+			 						   if (tabla.EstaEnActual(simbolo.GetNombre()))
+			 						   		{
+			 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
+			 						   		SemErr(simbolo.GetNombre() + " ya estaba declarado en la linea " + simbolo.GetLine() + " columna " + simbolo.GetColumn());
+			 						   		}
+			 						   	else
+			 						   	   {
+			 						   	   System.out.println(t.val + " mierda");
+			 							   tabla.InsertarEnActual(simbolo);
+			 							   }
 			 						.)
 			 					  	(Subprograma <simbolo>
 			 					  	
@@ -170,10 +178,10 @@ CEMASMAS<Tablas tabla>
 																		else {
 																			SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
 																		}
-																		System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
+																		//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 																		.)
 									 
-								| DecMetodo) CEMASMAS<tabla>))
+								| DecMetodo) CEMASMAS))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo

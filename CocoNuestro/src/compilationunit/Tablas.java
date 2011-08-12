@@ -9,6 +9,7 @@ public class Tablas {
 	// Constructor
 	public Tablas()	
 		{
+		System.out.println("Ambito global creado");
 		ambito_global = new TablaSimbolos();
 		ambito_actual = ambito_global;
 		}
@@ -29,6 +30,7 @@ public class Tablas {
 		// su padre es el actual ambito
 		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);
 		ambito_actual = ambito_nuevo;
+		System.out.println("Nuevo ambito creado");
 		}
 	
 	public void CerrarAmbito() 

@@ -18,6 +18,7 @@ public class Simbolo {
 	private String nombre;	// Nombre del objeto
 	private int type;		// tipo del objeto
 	private int kind;		// varible, funcion, metodo...
+	private boolean inicializada;
 	private boolean es_vector; // Indica si la variable es de tipo vector
 	private int tamano;   	//En caso de ser vector, indica el tamaño
 	private Vector valor;   //Aquí se guardará el valor de la variable. En caso de ser un vector, sus valores.
@@ -91,12 +92,13 @@ public void SetToVector(int tamano)
 public void SetToVector()
 	{
 	es_vector = true;
-	tamano = 0;
+	tamano = 1;
 	}
 
 public void SetValor(Object valor)
 {
 	this.valor.insertElementAt(valor, 0);
+	this.inicializada = true;
 }
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
@@ -149,7 +151,23 @@ public int GetTamano()
 
 public Object GetValor()
 	{
-	return this.valor.elementAt(0);
+	 if (this.inicializada)
+		return this.valor.elementAt(0);
+	else
+		{
+		System.out.println("Se ha intentado leer una variable no inicializada");
+		return null;
+		}
+		
+	}
+
+public Object GetValor(int posicion)
+	{
+	if (posicion >= tamano)
+		return null;
+	else
+		return this.valor.elementAt(posicion);
+
 	}
 
 public Vector GetParametros()
@@ -163,13 +181,6 @@ public Vector GetPosicionesVector()
 	return this.valor;
 	}
 
-public Object GetPosicionVector(int posicion)
-	{
-	if (posicion >= tamano)
-		return null;
-	else
-		return this.valor.elementAt(posicion);
-	}
 
 //************************************************//////
 

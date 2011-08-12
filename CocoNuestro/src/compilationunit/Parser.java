@@ -157,16 +157,16 @@ public class Parser {
 	
 	void CEMASMAS1() {
 		tabla = new Tablas();	
-		CEMASMAS(tabla);
+		CEMASMAS();
 	}
 
-	void CEMASMAS(Tablas tabla) {
+	void CEMASMAS() {
 		int type=undef; 
 		int type1;
 		
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
-			CEMASMAS(tabla);
+			CEMASMAS();
 		} else if (StartOf(1)) {
 			if (StartOf(2)) {
 				type = Ttipo();
@@ -178,7 +178,16 @@ public class Parser {
 			} else if (la.kind == 1) {
 				Get();
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
-				tabla.InsertarEnActual(simbolo);
+				if (tabla.EstaEnActual(simbolo.GetNombre()))
+						{
+						Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
+						SemErr(simbolo.GetNombre() + " ya estaba declarado en la linea " + simbolo.GetLine() + " columna " + simbolo.GetColumn());
+						}
+					else
+					   {
+					   System.out.println(t.val + " mierda");
+				 tabla.InsertarEnActual(simbolo);
+				 }
 				
 				if (la.kind == 31) {
 					Subprograma(simbolo);
@@ -195,12 +204,12 @@ public class Parser {
 					else {
 						SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
 					}
-					System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
+					//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 					
 				} else if (la.kind == 17) {
 					DecMetodo();
 				} else SynErr(61);
-				CEMASMAS(tabla);
+				CEMASMAS();
 			} else SynErr(62);
 		} else SynErr(63);
 	}
@@ -297,8 +306,8 @@ public class Parser {
 		Simbolo sim = new Simbolo ("Temp", 0,0);
 		int type;
 		Expect(30);
-		if (la.kind == 2) {
-			type = expAritmetica(sim);
+		if (la.kind == 2 || la.kind == 32) {
+			type = ExpAritmetica(sim);
 			((Number)sim.GetValor()).intValue();
 			System.out.println("El tamano del vector es " + (Number)sim.GetValor());
 		}
@@ -312,12 +321,11 @@ public class Parser {
 		
 		if (la.kind == 41) {
 			Get();
-			type1 = expAritmetica(simbolo);
+			type1 = ExpAritmetica(simbolo);
 			System.out.println("Variable inicializada a " + simbolo.GetValor()); 
 		}
 		Expect(42);
-		type=type1;
-		
+		type=type1; 
 		return type;
 	}
 
@@ -461,20 +469,26 @@ public class Parser {
 		} else SynErr(68);
 	}
 
-	int  expAritmetica(Simbolo sim) {
+	int  ExpAritmetica(Simbolo sim) {
 		int  tipoDev;
 		tipoDev=undef;
-		int tipo, tipo1;
+		int valor, valor1, valor2;
+		System.out.println("Estas en ExpArirmetica!");
 		
-		tipo = expProducto(sim);
-		if (la.kind == 39 || la.kind == 40) {
-			while (la.kind == 39 || la.kind == 40) {
-				if (la.kind == 39) {
+		valor = ExpProducto();
+		sim.SetValor(valor); 
+		if (la.kind == 32 || la.kind == 34) {
+			while (la.kind == 32 || la.kind == 34) {
+				if (la.kind == 34) {
 					Get();
+					valor1 = ExpProducto();
+					sim.SetValor(((Number) sim.GetValor()).intValue() + valor1); 
+				} else if (StartOf(5)) {
 				} else {
 					Get();
+					valor2 = ExpProducto();
+					sim.SetValor(((Number) sim.GetValor()).intValue() - valor2); 
 				}
-				tipo1 = expProducto(sim);
 			}
 		}
 		return tipoDev;
@@ -490,7 +504,7 @@ public class Parser {
 				Expect(38);
 			} else {
 				Get();
-				while (StartOf(5)) {
+				while (StartOf(6)) {
 					Argumentos();
 				}
 				Expect(38);
@@ -500,7 +514,7 @@ public class Parser {
 
 	void Argumentos() {
 		int type=undef; 
-		if (StartOf(6)) {
+		if (StartOf(7)) {
 			type = Expresion();
 			while (la.kind == 27) {
 				Get();
@@ -514,7 +528,7 @@ public class Parser {
 		tipoDev = undef;
 		int type; 
 		Expect(18);
-		if (StartOf(6)) {
+		if (StartOf(7)) {
 			type = Expresion();
 			tipoDev= type; 
 		}
@@ -555,7 +569,7 @@ public class Parser {
 			Argumentos();
 			Expect(38);
 			Expect(42);
-		} else if (StartOf(7)) {
+		} else if (StartOf(8)) {
 			switch (la.kind) {
 			case 41: {
 				Get();
@@ -599,7 +613,7 @@ public class Parser {
 			Get();
 			Cuerpo();
 			Expect(36);
-		} else if (StartOf(8)) {
+		} else if (StartOf(9)) {
 			if (StartOf(4)) {
 				Instruccion();
 			} else {
@@ -657,7 +671,7 @@ public class Parser {
 			Get();
 			Cuerpo();
 			Expect(36);
-		} else if (StartOf(8)) {
+		} else if (StartOf(9)) {
 			if (StartOf(4)) {
 				Instruccion();
 			} else {
@@ -769,7 +783,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(9)) {
+		if (StartOf(10)) {
 			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 				Operador_Logico();
 				type = Expresion3();
@@ -788,8 +802,8 @@ public class Parser {
 				}
 				
 			}
-		} else if (StartOf(10)) {
-			if (StartOf(11)) {
+		} else if (StartOf(11)) {
+			if (StartOf(12)) {
 				Operador_Relacional();
 				type = Expresion3();
 				type1 = Expresion21();
@@ -803,7 +817,7 @@ public class Parser {
 				}
 				} else {	// error en 1Âº arg
 					tipoDev=type;	// lo envio para q salte el error
-					SemErr("OpRelacional: Error argumentos");
+												 							SemErr("OpRelacional: Error argumentos");
 				}
 				
 			}
@@ -851,35 +865,45 @@ public class Parser {
 		}
 	}
 
-	int  expProducto(Simbolo sim) {
-		int  tipoDev;
-		tipoDev=undef;
-		int tipo, tipo1;
+	int  ExpProducto() {
+		int  total;
+		total=undef;
+		int valor=0, valor1=0, valor2=1;
 		
-		tipo = expCambioSigno(sim);
+		valor = ExpCambioSigno();
+		total=valor; 
 		if (la.kind == 39 || la.kind == 40) {
 			while (la.kind == 39 || la.kind == 40) {
 				if (la.kind == 39) {
 					Get();
+					valor1 = ExpCambioSigno();
+					total=total * valor1; 
 				} else {
 					Get();
+					valor2 = ExpCambioSigno();
+					total=total / valor2; 
 				}
-				tipo1 = expCambioSigno(sim);
-				
 			}
 		}
-		return tipoDev;
+		System.out.println("Valor de la primera parte"+total); 
+		return total;
 	}
 
-	int  expCambioSigno(Simbolo sim) {
-		int  tipoDev;
-		tipoDev=undef;
+	int  ExpCambioSigno() {
+		int  valor;
+		valor=0;
 		
+		if (la.kind == 2 || la.kind == 32) {
+			while (la.kind == 32) {
+				Get();
+			}
+		}
 		Expect(2);
-		sim.SetValor(Integer.parseInt(t.val));
+		System.out.println("Argumento entero:"+Integer.parseInt(t.val));
+		valor = Integer.parseInt(t.val);
 		//			t.val=Integer.parseInt(t.val); 	
 		
-		return tipoDev;
+		return valor;
 	}
 
 	int  Expresion4() {
@@ -905,7 +929,7 @@ public class Parser {
 				SemErr("OpNegAritmetico: Error argumento.");
 			}
 			
-		} else if (StartOf(12)) {
+		} else if (StartOf(13)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
 		} else SynErr(80);
@@ -917,7 +941,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(13)) {
+		if (StartOf(14)) {
 			Operador_Aritmetico();
 			type = Expresion4();
 			type1 = Expresion31();
@@ -1028,7 +1052,7 @@ public class Parser {
 			} else {
 				Get();
 			}
-			if (StartOf(13)) {
+			if (StartOf(14)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
@@ -1036,7 +1060,7 @@ public class Parser {
 			Get();
 			Expresion_Entera();
 			Expect(38);
-			if (StartOf(13)) {
+			if (StartOf(14)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
@@ -1060,6 +1084,7 @@ public class Parser {
 		{x,x,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
