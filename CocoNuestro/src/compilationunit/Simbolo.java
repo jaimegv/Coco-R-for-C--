@@ -25,8 +25,8 @@ public class Simbolo {
 	private int column;		// columna dónde se encontró el símbolo
 	private int nparametros; // En caso de ser una función, indica cuántos parámetros tiene
 							// Si no fuera una función siempre estará a 0.
-	private Vector tipo_parametros; //Vector en el que se almacenarán los tipos de los parámetros
 	private Vector parametros; //Vector en el que se almacenarán los nombres de los parámetros
+							   //Los parametros se almacenarán como nuevos símbolos
 	private int visible;    // Público o privado.
 	private int tiporetorno; //Si es una función esto indicará el tipo de valor devuelto
 	
@@ -45,7 +45,6 @@ public Simbolo(String nombre, int type, int kind){
 	   if (this.kind == funcion)
 	   		{
 		    parametros = new Vector();
-		    tipo_parametros = new Vector();
 	   		}
 	}
 
@@ -152,15 +151,11 @@ public Object GetValor()
 	return this.valor.elementAt(0);
 	}
 
-public Vector GetTipoParametros()
+public Vector GetParametros()
 	{
-	return this.tipo_parametros;
+	return this.parametros;
 	}
 
-public Vector GetNombreParametros()
-	{
-	return parametros;
-	}
 
 public Vector GetPosicionesVector()
 	{
@@ -177,15 +172,10 @@ public Object GetPosicionVector(int posicion)
 
 //************************************************//////
 
-public void AnadirTipoParametro (int tipo)
+public void AnadirParametro (Simbolo simbolo)
 	{
 	this.nparametros = this.nparametros + 1;
-	this.tipo_parametros.addElement(tipo);
-	}
-
-public void AnadirNombreParametro (int tipo)
-	{
-	this.parametros.addElement(tipo);
+	this.parametros.addElement(simbolo);
 	}
 
 
