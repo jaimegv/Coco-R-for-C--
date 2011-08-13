@@ -174,7 +174,7 @@ public class Parser {
 				Get();
 			}
 			if (la.kind == 25) {
-				Main();
+				Main(type);
 			} else if (la.kind == 1) {
 				Get();
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
@@ -278,9 +278,12 @@ public class Parser {
 		return type;
 	}
 
-	void Main() {
-		Simbolo simbolo = new Simbolo("main",0,funcion);
+	void Main(int type) {
+		Simbolo simbolo = new Simbolo("main",type,funcion);
 		Expect(25);
+		tabla.NuevoAmbito();
+		simbolo.SetKind (funcion);
+		simbolo.SetTipoRetorno(simbolo.GetType());
 		Expect(31);
 		if (StartOf(1)) {
 			Parametros(simbolo);
@@ -302,6 +305,7 @@ public class Parser {
 		Expect(38);
 		Expect(29);
 		Cuerpo();
+		tabla.CerrarAmbito(); 
 		Expect(36);
 	}
 

@@ -154,7 +154,7 @@ CEMASMAS
 =
 	DecClase CEMASMAS
 			 | ((Ttipo<out type> | voidd)
-			 		(Main| ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 		(Main <type>| ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
 			 						   
@@ -222,8 +222,11 @@ Param_Cab = (. int type;
 DecMetodo = (. Simbolo sim = new Simbolo("no def", 0, 0);.) 
 dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_ce.
 
-Main = (. Simbolo simbolo = new Simbolo("main",0,funcion);.)
-	   main parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce.
+Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
+	   main   (.tabla.NuevoAmbito();
+			  simbolo.SetKind (funcion);
+			  simbolo.SetTipoRetorno(simbolo.GetType());.)   
+	   parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce.
 
 Cuerpo 	(. int type = undef;
 			// borrar cuando sigas
@@ -291,7 +294,8 @@ corchete_ab [ExpAritmetica <out type, sim> (. ((Number)sim.GetValor()).intValue(
 Subprograma <Simbolo simbolo> = (.  tabla.NuevoAmbito();
 									simbolo.SetKind (funcion);
 									simbolo.SetTipoRetorno(simbolo.GetType());  .) 
-parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce.
+parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo (. tabla.CerrarAmbito(); .)
+ llave_ce.
 
 
 
