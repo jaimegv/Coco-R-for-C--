@@ -195,6 +195,7 @@ public class Parser {
 					Subprograma(simbolo);
 				} else if (la.kind == 30) {
 					Vector(simbolo);
+					Expect(42);
 				} else if (la.kind == 41 || la.kind == 42) {
 					type1 = DecVar(simbolo);
 					if (type1==type) {
@@ -461,6 +462,7 @@ public class Parser {
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
 						Vector(simbolo);
+						Expect(42);
 					} else {
 						type = DecVar(simbolo);
 					}

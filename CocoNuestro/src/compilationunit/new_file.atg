@@ -170,7 +170,7 @@ CEMASMAS
 			 						.)
 			 					  	(Subprograma <simbolo>
 			 					  	
-			 					  	| Vector<simbolo> | DecVar<out type1, simbolo> 
+			 					  	| Vector<simbolo> puntoComa | DecVar<out type1, simbolo> 
 		 					  											(. 	if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
 		 																}
@@ -245,7 +245,7 @@ Cuerpo 	(. int type = undef;
 			 							   		}	
 			 							   	.) 
 			(Subprograma <simbolo>
-		 | (Vector<simbolo> | DecVar<out type, simbolo> ))}
+		 | (Vector<simbolo> puntoComa | DecVar<out type, simbolo> ))}
 .
 
 
