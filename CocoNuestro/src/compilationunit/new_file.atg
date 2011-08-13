@@ -492,22 +492,27 @@ ExpAritmetica <out int tipoDev, Simbolo sim>
 .)
 =	ExpProducto<out valor> 	(. sim.SetValor(valor); .)
 								[{ op_mas ExpProducto<out valor1>
-									(. sim.SetValor(((Number) sim.GetValor()).intValue() + valor1); .)
-								| | op_menos ExpProducto<out valor2>
-									(. sim.SetValor(((Number) sim.GetValor()).intValue() - valor2); .)
+									(. 	System.out.println("sumando!");
+										sim.SetValor(((Number) sim.GetValor()).intValue() + valor1); .)
+								| (.System.out.println("antes de restar!");.)
+										op_menos ExpProducto<out valor2>
+									(. 	System.out.println("restando!");
+										sim.SetValor(((Number) sim.GetValor()).intValue() - valor2); .)
 								}]
 .
 
 ExpProducto <out int total>
 (.	total=undef;
 	int valor=0, valor1=0, valor2=1;
-	System.out.println("Estas en expProducto");
+	System.out.println("Estas en expProducto"+la.val);
 .)
 = ExpCambioSigno<out valor> (.	total=valor; .)
                 [{ op_producto ExpCambioSigno<out valor1> 
-                				(. total=total * valor1; .)
+                				(. System.out.println("multiplicaste!");
+                					total=total * valor1; .)
                 	| op_division ExpCambioSigno<out valor2>
-                				(. total=total / valor2; .)
+                				(. System.out.println("dividiste!");
+                					total=total / valor2; .)
 				}]
     			(. System.out.println("Valor de la primera parte"+total); .)
 .
@@ -518,16 +523,57 @@ ExpCambioSigno <out int valor>
 	System.out.println("Entraste en camb Signo");
 .)
 =  
-(op_menos (. valor=-valor;/*cambio signo*/ .)
-	| op_menosmenos)
- ExpCambioSigno<out valor1>	(. valor = valor * valor1;
-								System.out.println("Negacion!:"+valor+" negado de "+valor1);
-							.)
-	|  enteros (.	valor = Integer.parseInt(t.val);
-					System.out.println("Argumento entero:"+valor);
+op_menos (. valor=-valor;/*cambio signo*/ .)
+	ExpCambioSigno<out valor1>	(. valor = valor * valor1;
+									System.out.println("Negacion!:"+valor+" negado de "+valor1);
+								.)
+	| parent_ab ExpCambioSigno<out valor1> parent_ce 	(. valor=valor1; 	System.out.println("Parentesis!!");.)
+	| ident	(. if (tabla.EstaEnActual(t.val)) {	// busco si esta el simbolo
+					Simbolo sim = tabla.GetSimboloRecur(t.val);					
+					if (sim.GetKind()==var) {	// Es var. entera
+						System.out.println("es entero!");
+					} else if (((sim.GetKind()==funcion) || (sim.GetKind()==metodo))	// funcion o metodo 
+									&& (sim.GetTipoRetorno()==entera)) {	// Devuelve un entero
+						System.out.println("Identificador de una funcion o metodo que devuelve un entero, ok!");
+						
+					} else {	// sino valor entero->error"
+						SemErr("Identificador no devuelve Entero!");
+					}
+				} else {
+					SemErr("Error: Identificador no existe");
+					System.out.println("no esta");
+				}
+					System.out.println("jarl");
+			.)
+/*	| enteros (.	valor = Integer.parseInt(t.val);
+					System.out.println("Argumento entero:"+valor+"token ahead"+la.val);
 				.)
+*/
+	| ExpOperadores<out valor> (. 	if (valor==entera)	{
+										System.out.println("es entero");
+									} else {
+										SemErr("No es entero!");
+									}
+								.)
 .
 
+ExpOperadores <out int tipoDev> 
+(.  tipoDev=undef;
+	int type1, type;
+	System.out.println("estas en expoperadores");
+.)
+= 
+/*"(" Expresion <out type1> ")"	(. tipoDev=type1; .)
+| "new" ident "("Argumentos")"       /*Constructor*/
+| ident ["."ident ["("Argumentos")"] 
+	| "("Argumentos")"
+	| "["Expresion <out type> "]" (. tipoDev=type;.)]
+*/
+| enteros		(. tipoDev=entera;	.)
+| cadenaCar		(. tipoDev=cadena;	.) 
+| "true"		(. tipoDev=bool;	.)
+| "false"		(. tipoDev=bool;	.)
+.
 
 /****************************************************/
 Expresion3 <out int tipoDev>
@@ -610,7 +656,9 @@ Expresion5 <out int tipoDev>
 = 
 "(" Expresion <out type1> ")"	(. tipoDev=type1; .)
 | "new" ident "("Argumentos")"       /*Constructor*/
-| ident ["."ident ["("Argumentos")"] | "("Argumentos")"| "["Expresion <out type> "]" (. tipoDev=type;.)]
+| ident ["."ident ["("Argumentos")"] 
+	| "("Argumentos")"
+	| "["Expresion <out type> "]" (. tipoDev=type;.)]
 | enteros		(. tipoDev=entera;	.)
 | cadenaCar		(. tipoDev=cadena;	.) 
 | "true"		(. tipoDev=bool;	.)
