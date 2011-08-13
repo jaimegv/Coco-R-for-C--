@@ -195,10 +195,15 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 	| charr [op_producto] 	(. type = cadena; .)
 ).
 
+//******************************************************************//
+
 
 DecClase	(. int type; .) // Dec Variable
-=
-[publicc | privatte] classs ident llave_ab 
+= (. Simbolo simbolo = new Simbolo ("undef", 0, clase); .)
+[publicc (. simbolo.SetVisibilidad(1); .) | privatte (. simbolo.SetVisibilidad(0); .)]
+ classs ident (. simbolo.SetNombre(t.val);
+ 				 tabla.InsertarEnActual(simbolo); .)
+ 			 llave_ab 
 							Cuerpo_Clase
 							[(publicc dosPuntos Cuerpo_Clase [privatte dosPuntos Cuerpo_Clase])
 							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]		
@@ -221,6 +226,15 @@ Param_Cab = (. int type;
 
 DecMetodo = (. Simbolo sim = new Simbolo("no def", 0, 0);.) 
 dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_ce.
+
+
+
+//******************************************************************//
+
+
+
+
+
 
 Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
 	   main   (.tabla.NuevoAmbito();
@@ -335,18 +349,20 @@ InstIfElse
 	Simbolo simbolo = new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 .) 
 =
-		iff Expresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");} .) 
-	((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma <simbolo>
-	 | ([Vector<simbolo>] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)])))) [Else]
+		iff Expresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
+								 .) 
+	((llave_ab (. tabla.NuevoAmbito(); .) Cuerpo (. tabla.CerrarAmbito(); .) llave_ce) 
+	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
+	| Instruccion) 
+		 [Else]
 .
 
 Else	(. int type;
 	Simbolo sim = new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 .) 
 =
-	elsse ((llave_ab Cuerpo llave_ce) | (Instruccion | Ttipo<out type>ident (Subprograma <sim>
-				 | ([Vector<sim>] DecVar<out type, sim> [op_asig (ident | enteros | cadenaCar)]))))
-.
+	elsse ((llave_ab (. tabla.NuevoAmbito(); .) Cuerpo (. tabla.CerrarAmbito(); .) llave_ce) 
+			| Instruccion) .
 
 /***************************************************/
 
