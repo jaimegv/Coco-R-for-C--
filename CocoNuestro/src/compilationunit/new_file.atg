@@ -262,6 +262,8 @@ DecVar <out int type, Simbolo simbolo>
 
 Parametros <Simbolo simbolo_nombre_funcion>	(. int type; .) 
 = 	Ttipo<out type>ident (. Simbolo simbolo_parametro = new Simbolo(t.val, type, parametro);
+							simbolo_parametro.SetLine(t.line);
+							simbolo_parametro.SetColumn(t.col);
 							simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
 							tabla.InsertarEnActual(simbolo_parametro); .) 
 				[Vector <simbolo_parametro>]

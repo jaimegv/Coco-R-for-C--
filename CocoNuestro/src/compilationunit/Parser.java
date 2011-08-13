@@ -407,6 +407,8 @@ public class Parser {
 			type = Ttipo();
 			Expect(1);
 			Simbolo simbolo_parametro = new Simbolo(t.val, type, parametro);
+			simbolo_parametro.SetLine(t.line);
+			simbolo_parametro.SetColumn(t.col);
 			simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
 			tabla.InsertarEnActual(simbolo_parametro); 
 			if (la.kind == 30) {
