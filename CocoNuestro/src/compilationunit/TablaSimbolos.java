@@ -70,8 +70,6 @@ public class TablaSimbolos {
 				{
 				return true;
 				}
-			else
-				System.out.println("Pues no");
 		
 			}
 		return false;

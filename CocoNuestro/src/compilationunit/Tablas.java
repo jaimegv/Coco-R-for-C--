@@ -13,6 +13,11 @@ public class Tablas {
 		ambito_global = new TablaSimbolos();
 		ambito_actual = ambito_global;
 		}
+	public void Destruir()	
+		{
+		ambito_global = null;
+		ambito_actual = null;
+		}
 	
 	public TablaSimbolos GetAmbitoActual ()
 		{

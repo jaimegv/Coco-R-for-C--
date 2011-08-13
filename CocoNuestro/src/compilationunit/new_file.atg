@@ -160,13 +160,11 @@ CEMASMAS
 			 						   
 			 						   if (tabla.EstaEnActual(simbolo.GetNombre()))
 			 						   		{
-			 						   		System.out.println("ohhh");
 			 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
 			 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 			 						   		}
 			 						   	else
 			 						   	   {
-			 						   	   System.out.println(t.val + " mierda");
 			 							   tabla.InsertarEnActual(simbolo);
 			 							   }
 			 						.)
@@ -232,9 +230,22 @@ Cuerpo 	(. int type = undef;
  .) 
 =
 	{Instruccion 
-		| (Ttipo<out type>|voidd) ident (.Simbolo sim = new Simbolo(t.val, type, 0);.) 
-			(Subprograma <sim>
-		 | (Vector<sim> | DecVar<out type, sim> ))}
+		| (Ttipo<out type>|voidd) ident (.Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 						 	  simbolo.SetLine(t.line);
+			 						   	  simbolo.SetColumn(t.col);
+			 						   
+			 						   	  if (tabla.EstaEnActual(simbolo.GetNombre()))
+			 						   			{
+			 						   			Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
+			 						   			SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
+			 						   			}
+			 						   	  else
+			 						   	  		{
+			 							   		tabla.InsertarEnActual(simbolo);
+			 							   		}	
+			 							   	.) 
+			(Subprograma <simbolo>
+		 | (Vector<simbolo> | DecVar<out type, simbolo> ))}
 .
 
 
@@ -242,7 +253,7 @@ Cuerpo 	(. int type = undef;
 
 DecVar <out int type, Simbolo simbolo>
 = (. int type1=undef;
-System.out.println("Estas en DecVar");
+//System.out.println("Estas en DecVar");
 .)
 [op_asig ExpAritmetica<out type1, simbolo> (. System.out.println("Variable inicializada a " + simbolo.GetValor()); .)
 					] puntoComa	(. type=type1; .)//Expresion<out type1, sim>] puntoComa	(.	type=type1;.)
@@ -276,7 +287,8 @@ corchete_ab [ExpAritmetica <out type, sim> (. ((Number)sim.GetValor()).intValue(
 
 
 Subprograma <Simbolo simbolo> = (.  tabla.NuevoAmbito();
-									simbolo.SetKind (funcion);  .) 
+									simbolo.SetKind (funcion);
+									simbolo.SetTipoRetorno(simbolo.GetType());  .) 
 parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce.
 
 

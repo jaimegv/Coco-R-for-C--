@@ -183,13 +183,11 @@ public class Parser {
 				
 				if (tabla.EstaEnActual(simbolo.GetNombre()))
 						{
-						System.out.println("ohhh");
 						Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
 						SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 						}
 					else
 					   {
-					   System.out.println(t.val + " mierda");
 				 tabla.InsertarEnActual(simbolo);
 				 }
 				
@@ -294,7 +292,8 @@ public class Parser {
 
 	void Subprograma(Simbolo simbolo) {
 		tabla.NuevoAmbito();
-		simbolo.SetKind (funcion);  
+		simbolo.SetKind (funcion);
+		simbolo.SetTipoRetorno(simbolo.GetType());  
 		Expect(31);
 		if (StartOf(1)) {
 			Parametros(simbolo);
@@ -321,7 +320,7 @@ public class Parser {
 	int  DecVar(Simbolo simbolo) {
 		int  type;
 		int type1=undef;
-		System.out.println("Estas en DecVar");
+		//System.out.println("Estas en DecVar");
 		
 		if (la.kind == 41) {
 			Get();
@@ -444,14 +443,26 @@ public class Parser {
 					Get();
 				}
 				Expect(1);
-				Simbolo sim = new Simbolo(t.val, type, 0);
+				Simbolo simbolo = new Simbolo(t.val, type, 0);
+				simbolo.SetLine(t.line);
+				  simbolo.SetColumn(t.col);
+							 						   	  if (tabla.EstaEnActual(simbolo.GetNombre()))
+						{
+						Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
+						SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
+						}
+				  else
+				  		{
+						tabla.InsertarEnActual(simbolo);
+						}	
+					
 				if (la.kind == 31) {
-					Subprograma(sim);
+					Subprograma(simbolo);
 				} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 					if (la.kind == 30) {
-						Vector(sim);
+						Vector(simbolo);
 					} else {
-						type = DecVar(sim);
+						type = DecVar(simbolo);
 					}
 				} else SynErr(67);
 			}
