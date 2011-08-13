@@ -42,11 +42,7 @@ public Simbolo(String nombre, int type, int kind){
 	   this.es_vector = false;
 	   this.tamano = 1;
 	   this.valor = new Vector();
-
-	   if (this.kind == funcion)
-	   		{
-		    parametros = new Vector();
-	   		}
+	   this.parametros = new Vector();
 	}
 
 //*****************MODIFICADORES*******************///
