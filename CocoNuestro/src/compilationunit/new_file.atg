@@ -272,7 +272,7 @@ DecVar <out int type, Simbolo simbolo>
 = (. int type1=undef;
 //System.out.println("Estas en DecVar");
 .)
-[op_asig ExpAritmetica<out type1, simbolo> (. System.out.println("Variable inicializada a " + simbolo.GetValor()); .)
+[op_asig Exp<out type1, simbolo> (. System.out.println("Variable inicializada a " + simbolo.GetValor()); .)
 					] puntoComa	(. type=type1; .)//Expresion<out type1, sim>] puntoComa	(.	type=type1;.)
 .
 
@@ -295,7 +295,7 @@ Parametros <Simbolo simbolo_nombre_funcion>	(. int type; .)
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();
 							  Simbolo sim = new Simbolo ("Temp", 0,0);
 							  int type;.)
-corchete_ab [ExpAritmetica <out type, sim> (. ((Number)sim.GetValor()).intValue();
+corchete_ab [Exp <out type, sim> (. ((Number)sim.GetValor()).intValue();
 											 System.out.println("El tamano del vector es " + (Number)sim.GetValor());.)
 ] corchete_ce.
 
@@ -485,25 +485,49 @@ Expresion21 <out int tipoDev>
 .
 
 /***********PRUEBAS_PRECEDENCIA_OP*******************/
-ExpAritmetica <out int tipoDev, Simbolo sim>
-(.	tipoDev=undef;
-	int valor, valor1, valor2;
+Exp <out int tipoDev, Simbolo sim>
+(.	tipoDev=undef;				// Si devuelvo este tipo es q algo fue mal!
+	int valor=0, suma;
+	int numErr=errors.count;	// Numero de errores actuales
+.)
+= { ExpAritmetica<out suma>		(. if (numErr == errors.count) {	// todo fue ok!
+										System.out.println("vas a sumar a "+valor+" el valor de"+suma);
+										valor=suma+valor; 
+								} .)
+	}
+	(. sim.SetValor(valor); .)
+.
+
+ExpAritmetica <out int suma>
+(.	int numErr=errors.count;	// Numero de errores actuales
+	int valor=0, valor1=0, valor2=0;		// inicializo
+	suma=0;
 	System.out.println("Estas en ExpArirmetica!");
 .)
-=	ExpProducto<out valor> 	(. sim.SetValor(valor); .)
+=	ExpProducto<out valor> 	(. if (numErr == errors.count) {	// todo fue ok!
+									System.out.println("Una parte vale"+valor);
+									suma= valor;
+								} .)
 								[{ op_mas ExpProducto<out valor1>
-									(. 	System.out.println("sumando!");
-										sim.SetValor(((Number) sim.GetValor()).intValue() + valor1); .)
+									(. if (numErr == errors.count) {	// todo fue ok! 	
+										System.out.println("sumando! a "+suma+"el nuevo "+valor1);
+									//	sim.SetValor(((Number) sim.GetValor()).intValue() + valor1);
+										suma= suma+valor1; 
+										} .)
 								| (.System.out.println("antes de restar!");.)
 										op_menos ExpProducto<out valor2>
-									(. 	System.out.println("restando!");
-										sim.SetValor(((Number) sim.GetValor()).intValue() - valor2); .)
+									(. 	if (numErr == errors.count) {	// todo fue ok!
+										System.out.println("restando!");
+										//sim.SetValor(((Number) sim.GetValor()).intValue() - valor2);
+										suma= suma-valor2; 
+										} .)
 								}]
+(. System.out.println("Simbolo sale con valor:"+suma); .)
 .
 
 ExpProducto <out int total>
-(.	total=undef;
-	int valor=0, valor1=0, valor2=1;
+(.	int valor=0, valor1=0, valor2=1;
+	total=0;
 	System.out.println("Estas en expProducto"+la.val);
 .)
 = ExpCambioSigno<out valor> (.	total=valor; .)
@@ -514,22 +538,26 @@ ExpProducto <out int total>
                 				(. System.out.println("dividiste!");
                 					total=total / valor2; .)
 				}]
-    			(. System.out.println("Valor de la primera parte"+total); .)
+    			(. System.out.println("Valor de una parte"+total); .)
 .
  
 ExpCambioSigno <out int valor>
-(.	int valor1=0;
-	valor=1;
+(.	int valor1=0;	// inicializo
+	int sum=0;
+	valor=0;		// Inicialiazo
 	System.out.println("Entraste en camb Signo");
 .)
 =  
-op_menos (. valor=-valor;/*cambio signo*/ .)
-	ExpCambioSigno<out valor1>	(. valor = valor * valor1;
+op_menos
+	ExpCambioSigno<out valor1>	(. 	valor = -valor1;
 									System.out.println("Negacion!:"+valor+" negado de "+valor1);
 								.)
-	| parent_ab ExpCambioSigno<out valor1> parent_ce 	(. valor=valor1; 	System.out.println("Parentesis!!");.)
+	| parent_ab ExpAritmetica<out int suma> parent_ce 	
+								(. 	valor=suma;
+									System.out.println("Parentesis!!");
+								.)
 	| ident	(. if (tabla.EstaEnActual(t.val)) {	// busco si esta el simbolo
-					Simbolo sim = tabla.GetSimboloRecur(t.val);					
+					Simbolo sim = tabla.GetSimboloRecur(t.val);
 					if (sim.GetKind()==var) {	// Es var. entera
 						System.out.println("es entero!");
 					} else if (((sim.GetKind()==funcion) || (sim.GetKind()==metodo))	// funcion o metodo 
@@ -545,14 +573,13 @@ op_menos (. valor=-valor;/*cambio signo*/ .)
 				}
 					System.out.println("jarl");
 			.)
-/*	| enteros (.	valor = Integer.parseInt(t.val);
+	| enteros (.	valor = Integer.parseInt(t.val);
 					System.out.println("Argumento entero:"+valor+"token ahead"+la.val);
 				.)
-*/
 	| ExpOperadores<out valor> (. 	if (valor==entera)	{
 										System.out.println("es entero");
 									} else {
-										SemErr("No es entero!");
+										SemErr("No es entero!es un:"+t.val);
 									}
 								.)
 .
@@ -569,7 +596,6 @@ ExpOperadores <out int tipoDev>
 	| "("Argumentos")"
 	| "["Expresion <out type> "]" (. tipoDev=type;.)]
 */
-| enteros		(. tipoDev=entera;	.)
 | cadenaCar		(. tipoDev=cadena;	.) 
 | "true"		(. tipoDev=bool;	.)
 | "false"		(. tipoDev=bool;	.)
