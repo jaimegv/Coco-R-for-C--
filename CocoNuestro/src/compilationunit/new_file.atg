@@ -220,11 +220,14 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 
 DecClase	(. int type; .) // Dec Variable
 = (. Simbolo simbolo = new Simbolo ("undef", 0, clase); .)
-[publicc (. simbolo.SetVisibilidad(1); .) | privatte (. simbolo.SetVisibilidad(0); .)]
- classs ident (. simbolo.SetNombre(t.val);
- 				 tabla.InsertarEnActual(simbolo); .)
- 			 llave_ab 
-							Cuerpo_Clase
+	[publicc (. simbolo.SetVisibilidad(1); .) 
+		| privatte (. simbolo.SetVisibilidad(0); .)]
+ 	classs ident (. simbolo.SetNombre(t.val);	// Modifico el nombre del Simbolo
+					tabla.InsertarEnActual(simbolo); .)
+			llave_ab
+ 			 	(.	tabla.NuevoAmbito();		// Nuevo ambito para meter metodos
+				.)								// y variables de la clase.
+				Cuerpo_Clase
 							[(publicc dosPuntos Cuerpo_Clase [privatte dosPuntos Cuerpo_Clase])
 							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]		
 			llave_ce puntoComa
@@ -233,7 +236,8 @@ DecClase	(. int type; .) // Dec Variable
 Cuerpo_Clase	(. int type; .) 
 = [{(Ttipo<out type> ident (. Simbolo sim = new Simbolo(t.val, 0, 0); .)	// Creacion del simbolo  
 						(DecVar<out type, sim> | DecCabMet))
-							  | voidd ident DecCabMet}].
+							  | voidd ident DecCabMet}]
+.
 
 
 DecCabMet	(. int type; .) 
@@ -247,7 +251,7 @@ Param_Cab = (. int type;
 .
 
 DecMetodo 
-= (. Simbolo sim = new Simbolo("no def", 0, 0);
+= (. Simbolo sim = new Simbolo("no def", 0, 0);		// Añado metodo al ambito actual
 	 System.out.println("Estas en declaracion Metodo");
 .) 
 	dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce 
