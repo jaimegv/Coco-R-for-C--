@@ -165,7 +165,7 @@ CEMASMAS
 							 							   tabla.InsertarEnActual(simbolo);
 														}
 	 											.)	) //Parentedid de Ttipo|voidd|ident
-			 		(Main <type>| ident  	
+			 			(Main <type>| ident  	
 			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
@@ -183,7 +183,8 @@ CEMASMAS
 			 					  	(Subprograma <simbolo>
 			 					  	
 			 					  	| Vector<simbolo> puntoComa | DecVar<out type1, simbolo> 
-		 					  											(. 	if (type1==type) {
+		 					  											(. 
+		 					  											if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
 		 																}
 																		else if (type1==undef) {
@@ -195,7 +196,7 @@ CEMASMAS
 																		//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 																		.)
 									 
-								| DecMetodo (.System.out.println("Entraste en metodo");.)) CEMASMAS))
+								| DecMetodo (.System.out.println("Entraste en metodo"); .)) CEMASMAS))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo
@@ -233,22 +234,19 @@ DecCabMet	(. int type; .)
 .
 
 Param_Cab = (. int type;
-			   Simbolo sim = new Simbolo("Temo",0,0); .) 
+			   Simbolo sim = new Simbolo("Temo",0,0);
+			   .) 
 	[Ttipo<out type> [Vector<sim>] [{comma Ttipo<out type> [Vector<sim>]}] | voidd]
 .
 
-DecMetodo = (. Simbolo sim = new Simbolo("no def", 0, 0);.) 
-dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_ce.
+DecMetodo 
+= (. Simbolo sim = new Simbolo("no def", 0, 0); .) 
+	dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_ce
+.
 
 
 
 //******************************************************************//
-
-
-
-
-
-
 Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
 	   main   (.tabla.NuevoAmbito();
 			  simbolo.SetKind (funcion);
