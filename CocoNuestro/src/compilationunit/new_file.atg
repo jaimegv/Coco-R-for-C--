@@ -153,8 +153,20 @@ CEMASMAS
 .)
 =
 	DecClase CEMASMAS
-			 | ((Ttipo<out type> | voidd)
-			 		(Main <type>| ident  	(. Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 | ((Ttipo<out type> | voidd | ident	(.	// En caso de declarar un Objeto de una clase
+			 										   Simbolo simbolo = new Simbolo(t.val, type, 0);
+							 						   simbolo.SetLine(t.line);
+							 						   simbolo.SetColumn(t.col);
+
+							 						   if (tabla.EstaEnActual(simbolo.GetNombre())) {
+							 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
+							 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
+							 						   	} else {
+							 							   tabla.InsertarEnActual(simbolo);
+														}
+	 											.)	) //Parentedid de Ttipo|voidd|ident
+			 		(Main <type>| ident  	
+			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
 			 						   
@@ -183,7 +195,7 @@ CEMASMAS
 																		//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 																		.)
 									 
-								| DecMetodo) CEMASMAS))
+								| DecMetodo (.System.out.println("Entraste en metodo");.)) CEMASMAS))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo
@@ -207,11 +219,12 @@ DecClase	(. int type; .) // Dec Variable
 							Cuerpo_Clase
 							[(publicc dosPuntos Cuerpo_Clase [privatte dosPuntos Cuerpo_Clase])
 							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]		
-								  llave_ce puntoComa.
+			llave_ce puntoComa
+.
 
-Cuerpo_Clase	(. int type;
-			Simbolo sim = new Simbolo(t.val, 0, 0);.) // Dec Variable// borrar cuando sigas 
-= [{(Ttipo<out type> ident (DecVar<out type, sim> | DecCabMet))
+Cuerpo_Clase	(. int type; .) 
+= [{(Ttipo<out type> ident (. Simbolo sim = new Simbolo(t.val, 0, 0); .)	// Creacion del simbolo  
+						(DecVar<out type, sim> | DecCabMet))
 							  | voidd ident DecCabMet}].
 
 
@@ -605,12 +618,6 @@ ExpOperadores <out int tipoDev>
 	System.out.println("estas en expoperadores");
 .)
 = 
-/*"(" Expresion <out type1> ")"	(. tipoDev=type1; .)
-| "new" ident "("Argumentos")"       /*Constructor*/
-| ident ["."ident ["("Argumentos")"] 
-	| "("Argumentos")"
-	| "["Expresion <out type> "]" (. tipoDev=type;.)]
-*/
 | cadenaCar		(. tipoDev=cadena;	.) 
 | "true"		(. tipoDev=bool;	.)
 | "false"		(. tipoDev=bool;	.)
