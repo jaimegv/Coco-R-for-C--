@@ -240,7 +240,8 @@ Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
 	   main   (.tabla.NuevoAmbito();
 			  simbolo.SetKind (funcion);
 			  simbolo.SetTipoRetorno(simbolo.GetType());.)   
-	   parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce.
+	   parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce
+.
 
 Cuerpo 	(. int type = undef;
 			// borrar cuando sigas
