@@ -319,8 +319,8 @@ public class Parser {
 		Simbolo sim = new Simbolo ("Temp", 0,0);
 		int type;
 		Expect(30);
-		if (la.kind == 2 || la.kind == 32 || la.kind == 33) {
-			type = ExpAritmetica(sim);
+		if (StartOf(3)) {
+			type = Exp(sim);
 			((Number)sim.GetValor()).intValue();
 			System.out.println("El tamano del vector es " + (Number)sim.GetValor());
 		}
@@ -334,7 +334,7 @@ public class Parser {
 		
 		if (la.kind == 41) {
 			Get();
-			type1 = ExpAritmetica(simbolo);
+			type1 = Exp(simbolo);
 			System.out.println("Variable inicializada a " + simbolo.GetValor()); 
 		}
 		Expect(42);
@@ -445,8 +445,8 @@ public class Parser {
 		int type = undef;
 		// borrar cuando sigas
 		
-		while (StartOf(3)) {
-			if (StartOf(4)) {
+		while (StartOf(4)) {
+			if (StartOf(5)) {
 				Instruccion();
 			} else {
 				if (StartOf(2)) {
@@ -497,28 +497,23 @@ public class Parser {
 		} else SynErr(68);
 	}
 
-	int  ExpAritmetica(Simbolo sim) {
+	int  Exp(Simbolo sim) {
 		int  tipoDev;
-		tipoDev=undef;
-		int valor, valor1, valor2;
-		System.out.println("Estas en ExpArirmetica!");
+		tipoDev=undef;				// Si devuelvo este tipo es q algo fue mal!
+		int valor=0, suma;
+		int numErr=errors.count;	// Numero de errores actuales
 		
-		valor = ExpProducto();
-		sim.SetValor(valor); 
-		if (la.kind == 32 || la.kind == 34) {
-			while (la.kind == 32 || la.kind == 34) {
-				if (la.kind == 34) {
-					Get();
-					valor1 = ExpProducto();
-					sim.SetValor(((Number) sim.GetValor()).intValue() + valor1); 
-				} else if (StartOf(5)) {
-				} else {
-					Get();
-					valor2 = ExpProducto();
-					sim.SetValor(((Number) sim.GetValor()).intValue() - valor2); 
-				}
-			}
+		if (StartOf(6)) {
+			suma = ExpAritmetica();
+			if (numErr == errors.count) {	// todo fue ok!
+			System.out.println("vas a sumar a "+valor+" el valor de"+suma);
+			valor=suma+valor; 
+			} 
 		}
+		if (numErr == errors.count) {
+		sim.SetValor(valor);
+		tipoDev=entera;
+		} 
 		return tipoDev;
 	}
 
@@ -532,7 +527,7 @@ public class Parser {
 				Expect(38);
 			} else {
 				Get();
-				while (StartOf(6)) {
+				while (StartOf(7)) {
 					Argumentos();
 				}
 				Expect(38);
@@ -542,7 +537,7 @@ public class Parser {
 
 	void Argumentos() {
 		int type=undef; 
-		if (StartOf(7)) {
+		if (StartOf(8)) {
 			type = Expresion();
 			while (la.kind == 27) {
 				Get();
@@ -556,7 +551,7 @@ public class Parser {
 		tipoDev = undef;
 		int type; 
 		Expect(18);
-		if (StartOf(7)) {
+		if (StartOf(8)) {
 			type = Expresion();
 			tipoDev= type; 
 		}
@@ -588,6 +583,9 @@ public class Parser {
 	void InstExpresion() {
 		int type=undef; 
 		Expect(1);
+		if (tabla.EstaRecur(t.val) == false)
+		SemErr(t.val + " no ha sido declarado.");
+		
 		if (la.kind == 28) {
 			Get();
 			Expect(1);
@@ -597,7 +595,7 @@ public class Parser {
 			Argumentos();
 			Expect(38);
 			Expect(42);
-		} else if (StartOf(8)) {
+		} else if (StartOf(9)) {
 			switch (la.kind) {
 			case 41: {
 				Get();
@@ -644,7 +642,7 @@ public class Parser {
 			Cuerpo();
 			tabla.CerrarAmbito(); 
 			Expect(36);
-		} else if (StartOf(4)) {
+		} else if (StartOf(5)) {
 			Instruccion();
 		} else SynErr(70);
 		if (la.kind == 24) {
@@ -681,7 +679,7 @@ public class Parser {
 			Cuerpo();
 			tabla.CerrarAmbito(); 
 			Expect(36);
-		} else if (StartOf(4)) {
+		} else if (StartOf(5)) {
 			Instruccion();
 		} else SynErr(71);
 	}
@@ -689,19 +687,46 @@ public class Parser {
 	int  Arg_io() {
 		int  tipoDev;
 		tipoDev=undef;
-		Simbolo sim; 
+		Simbolo sim = new Simbolo("Temp",0,0);
+		int posicion; 
 		if (la.kind == 1) {
-			sim = new Simbolo("Temp", 0, 0); 
 			Get();
+			if (!(tabla.EstaRecur(t.val)))
+			SemErr(t.val + " no esta definido");
+			else if (sim.GetKind() == clase)
+				SemErr(t.val + " es una clase");
+			else
+				{
+				sim = null;
+				sim = tabla.GetSimboloRecur(t.val);
+				tipoDev = sim.GetType();
+				} 
 			if (la.kind == 30) {
-				Vector(sim);
+				posicion = DarPosVector(sim);
 			}
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena; 
-		} else if (la.kind == 21 || la.kind == 42) {
+		} else if (StartOf(10)) {
+			tipoDev = Exp(sim);
+			tipoDev = entera; 
 		} else SynErr(72);
 		return tipoDev;
+	}
+
+	int  DarPosVector(Simbolo sim) {
+		int  posicion;
+		Simbolo simbolo_nuevo = new Simbolo("temp", 0, 0);
+		int tipoDev; 
+		Expect(30);
+		if (!(sim.Es_Vector()))
+		SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+		tipoDev = Exp(simbolo_nuevo);
+		Expect(37);
+		if (tipoDev != entera)
+		SemErr("La posicion del vector debe ser una expresion de tipo entero");
+		posicion = ((Number) simbolo_nuevo.GetValor()).intValue(); 
+		return posicion;
 	}
 
 	int  Expresion2() {
@@ -770,7 +795,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(9)) {
+		if (StartOf(11)) {
 			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 				Operador_Logico();
 				type = Expresion3();
@@ -789,8 +814,8 @@ public class Parser {
 				}
 				
 			}
-		} else if (StartOf(10)) {
-			if (StartOf(11)) {
+		} else if (StartOf(12)) {
+			if (StartOf(13)) {
 				Operador_Relacional();
 				type = Expresion3();
 				type1 = Expresion21();
@@ -852,11 +877,49 @@ public class Parser {
 		}
 	}
 
+	int  ExpAritmetica() {
+		int  suma;
+		int numErr=errors.count;	// Numero de errores actuales
+		int valor=0, valor1=0, valor2=0;		// inicializo
+		suma=0;
+		System.out.println("Estas en ExpArirmetica!");
+		
+		valor = ExpProducto();
+		if (numErr == errors.count) {	// todo fue ok!
+		System.out.println("Una parte vale"+valor);
+		suma= valor;
+		} 
+		if (la.kind == 32 || la.kind == 34) {
+			while (la.kind == 32 || la.kind == 34) {
+				if (la.kind == 34) {
+					Get();
+					valor1 = ExpProducto();
+					if (numErr == errors.count) {	// todo fue ok! 	
+					System.out.println("sumando! a "+suma+"el nuevo "+valor1);
+					//	sim.SetValor(((Number) sim.GetValor()).intValue() + valor1);
+						suma= suma+valor1; 
+						} 
+				} else {
+					System.out.println("antes de restar!");
+					Get();
+					valor2 = ExpProducto();
+					if (numErr == errors.count) {	// todo fue ok!
+					System.out.println("restando!");
+					//sim.SetValor(((Number) sim.GetValor()).intValue() - valor2);
+					suma= suma-valor2; 
+					} 
+				}
+			}
+		}
+		System.out.println("Simbolo sale con valor:"+suma); 
+		return suma;
+	}
+
 	int  ExpProducto() {
 		int  total;
-		total=undef;
 		int valor=0, valor1=0, valor2=1;
-		System.out.println("Estas en expProducto");
+		total=0;
+		System.out.println("Estas en expProducto"+la.val);
 		
 		valor = ExpCambioSigno();
 		total=valor; 
@@ -865,42 +928,86 @@ public class Parser {
 				if (la.kind == 39) {
 					Get();
 					valor1 = ExpCambioSigno();
+					System.out.println("multiplicaste!");
 					total=total * valor1; 
 				} else {
 					Get();
 					valor2 = ExpCambioSigno();
+					System.out.println("dividiste!");
 					total=total / valor2; 
 				}
 			}
 		}
-		System.out.println("Valor de la primera parte"+total); 
+		System.out.println("Valor de una parte"+total); 
 		return total;
 	}
 
 	int  ExpCambioSigno() {
 		int  valor;
-		int valor1=0;
-		valor=1;
+		int valor1=0;	// inicializo
+		int sum=0;
+		valor=0;		// Inicialiazo
 		System.out.println("Entraste en camb Signo");
 		
-		if (la.kind == 32 || la.kind == 33) {
-			if (la.kind == 32) {
-				Get();
-				valor=-valor;/*cambio signo*/ 
-			} else {
-				Get();
-			}
+		if (la.kind == 32) {
+			Get();
 			valor1 = ExpCambioSigno();
-			valor = valor * valor1;
-			System.out.println("Negacion!:"+valor+" negado de "+valor1);
+			valor = -valor1; 
+		} else if (la.kind == 31) {
+			Get();
+			int suma = ExpAritmetica();
+			Expect(38);
+			valor=suma;		
+		} else if (la.kind == 1) {
+			Get();
+			if (tabla.EstaEnActual(t.val)) {	// busco si esta el simbolo
+			Simbolo sim = tabla.GetSimboloRecur(t.val);
+			if (sim.GetKind()==var) {	// Es var. entera
+				valor = ((Number) sim.GetValor()).intValue();	// asigno el val del ident
+			} else if (((sim.GetKind()==funcion) || (sim.GetKind()==metodo))	// funcion o metodo 
+							&& (sim.GetTipoRetorno()==entera)) {	// Devuelve un entero
+				System.out.println("NO HAY ASIGNACION TODAVIA");
+				System.out.println("Identificador de una funcion o metodo que devuelve un entero, ok!");
+			} else {	// sino valor entero->error"
+				SemErr("Identificador no devuelve Entero!");
+			}
+			} else {
+				SemErr("Error: Identificador no existe");
+			}
 			
 		} else if (la.kind == 2) {
 			Get();
-			valor = Integer.parseInt(t.val);
-			System.out.println("Argumento entero:"+valor);
+			valor = Integer.parseInt(t.val); 
+		} else if (StartOf(14)) {
+			valor = ExpOperadores();
+			if (valor==entera)	{
+			System.out.println("es entero");
+			} else {
+				SemErr("No es entero!es un:"+t.val);
+			}
 			
 		} else SynErr(76);
 		return valor;
+	}
+
+	int  ExpOperadores() {
+		int  tipoDev;
+		tipoDev=undef;
+		int type1, type;
+		System.out.println("estas en expoperadores");
+		
+		if (StartOf(15)) {
+		} else if (la.kind == 3) {
+			Get();
+			tipoDev=cadena;	
+		} else if (la.kind == 13) {
+			Get();
+			tipoDev=bool;	
+		} else if (la.kind == 8) {
+			Get();
+			tipoDev=bool;	
+		} else SynErr(77);
+		return tipoDev;
 	}
 
 	int  Expresion4() {
@@ -926,10 +1033,10 @@ public class Parser {
 				SemErr("OpNegAritmetico: Error argumento.");
 			}
 			
-		} else if (StartOf(12)) {
+		} else if (StartOf(16)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
-		} else SynErr(77);
+		} else SynErr(78);
 		return tipoDev;
 	}
 
@@ -938,7 +1045,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(13)) {
+		if (StartOf(17)) {
 			Operador_Aritmetico();
 			type = Expresion4();
 			type1 = Expresion31();
@@ -969,7 +1076,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(78);
+		} else SynErr(79);
 	}
 
 	int  Expresion5() {
@@ -1037,7 +1144,7 @@ public class Parser {
 			tipoDev=bool;	
 			break;
 		}
-		default: SynErr(79); break;
+		default: SynErr(80); break;
 		}
 		return tipoDev;
 	}
@@ -1049,7 +1156,7 @@ public class Parser {
 			} else {
 				Get();
 			}
-			if (StartOf(13)) {
+			if (StartOf(17)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
@@ -1057,11 +1164,11 @@ public class Parser {
 			Get();
 			Expresion_Entera();
 			Expect(38);
-			if (StartOf(13)) {
+			if (StartOf(17)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
-		} else SynErr(80);
+		} else SynErr(81);
 	}
 
 
@@ -1079,15 +1186,19 @@ public class Parser {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,T,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,T, T,x,x,x, x,T,T,x, x,x,T,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,T, T,x,x,x, x,T,T,x, x,x,T,x, T,x,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
+		{x,x,x,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
@@ -1191,10 +1302,11 @@ class Errors {
 			case 74: s = "invalid Operador_Logico"; break;
 			case 75: s = "invalid Operador_Relacional"; break;
 			case 76: s = "invalid ExpCambioSigno"; break;
-			case 77: s = "invalid Expresion4"; break;
-			case 78: s = "invalid Operador_Aritmetico"; break;
-			case 79: s = "invalid Expresion5"; break;
-			case 80: s = "invalid Expresion_Entera"; break;
+			case 77: s = "invalid ExpOperadores"; break;
+			case 78: s = "invalid Expresion4"; break;
+			case 79: s = "invalid Operador_Aritmetico"; break;
+			case 80: s = "invalid Expresion5"; break;
+			case 81: s = "invalid Expresion_Entera"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);

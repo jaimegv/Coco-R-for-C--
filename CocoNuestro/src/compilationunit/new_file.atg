@@ -329,7 +329,10 @@ Instruccion
 
 InstExpresion
 =	(. int type=undef; .)
-		ident[punto ident] ((parent_ab Argumentos parent_ce puntoComa)
+		ident (. if (tabla.EstaRecur(t.val) == false)
+			     	SemErr(t.val + " no ha sido declarado.");
+			  .)
+			[punto ident] ((parent_ab Argumentos parent_ce puntoComa)
 				| ((op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													Expresion<out type> puntoComa))
@@ -387,14 +390,31 @@ InstCin
 
 Arg_io<out int tipoDev>
 (. tipoDev=undef;
-   Simbolo sim; .)
-= (. sim = new Simbolo("Temp", 0, 0); .)
-	ident [Vector <sim>]
+   Simbolo sim = new Simbolo("Temp",0,0);
+   int posicion; .)
+=	ident (. if (!(tabla.EstaRecur(t.val)))
+			 	SemErr(t.val + " no esta definido");
+			 else if (sim.GetKind() == clase)
+			 	SemErr(t.val + " es una clase");
+			 else
+			 	{
+			 	sim = null;
+			 	sim = tabla.GetSimboloRecur(t.val);
+			 	tipoDev = sim.GetType();
+			 	} .) 
+		[DarPosVector <out posicion, sim>]
 		| cadenaCar (. tipoDev = cadena; .)
-			|
+		| Exp<out tipoDev, sim> (. tipoDev = entera; .)
 .
 
-
+DarPosVector <out int posicion, Simbolo sim> (. Simbolo simbolo_nuevo = new Simbolo("temp", 0, 0);
+												int tipoDev; .)
+= corchete_ab (. if (!(sim.Es_Vector()))
+	 	SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");.)
+ Exp<out tipoDev, simbolo_nuevo> corchete_ce (. if (tipoDev != entera)
+ 														  	SemErr("La posicion del vector debe ser una expresion de tipo entero");
+ 														  posicion = ((Number) simbolo_nuevo.GetValor()).intValue(); .)
+.
 
 /******************EXPRESIONES*****************************/
 /*
