@@ -490,12 +490,15 @@ Exp <out int tipoDev, Simbolo sim>
 	int valor=0, suma;
 	int numErr=errors.count;	// Numero de errores actuales
 .)
-= { ExpAritmetica<out suma>		(. if (numErr == errors.count) {	// todo fue ok!
+= [ ExpAritmetica<out suma>		(. if (numErr == errors.count) {	// todo fue ok!
 										System.out.println("vas a sumar a "+valor+" el valor de"+suma);
 										valor=suma+valor; 
 								} .)
-	}
-	(. sim.SetValor(valor); .)
+	]
+	(. if (numErr == errors.count) {
+			sim.SetValor(valor);
+			tipoDev=entera;
+		} .)
 .
 
 ExpAritmetica <out int suma>
@@ -549,13 +552,8 @@ ExpCambioSigno <out int valor>
 .)
 =  
 op_menos
-	ExpCambioSigno<out valor1>	(. 	valor = -valor1;
-									System.out.println("Negacion!:"+valor+" negado de "+valor1);
-								.)
-	| parent_ab ExpAritmetica<out int suma> parent_ce 	
-								(. 	valor=suma;
-									System.out.println("Parentesis!!");
-								.)
+	ExpCambioSigno<out valor1>							(. valor = -valor1; .)
+	| parent_ab ExpAritmetica<out int suma> parent_ce 	(. valor=suma;		.)
 	| ident	(. if (tabla.EstaEnActual(t.val)) {	// busco si esta el simbolo
 					Simbolo sim = tabla.GetSimboloRecur(t.val);
 					if (sim.GetKind()==var) {	// Es var. entera
