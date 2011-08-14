@@ -557,23 +557,19 @@ op_menos
 	| ident	(. if (tabla.EstaEnActual(t.val)) {	// busco si esta el simbolo
 					Simbolo sim = tabla.GetSimboloRecur(t.val);
 					if (sim.GetKind()==var) {	// Es var. entera
-						System.out.println("es entero!");
+						valor = ((Number) sim.GetValor()).intValue();	// asigno el val del ident
 					} else if (((sim.GetKind()==funcion) || (sim.GetKind()==metodo))	// funcion o metodo 
 									&& (sim.GetTipoRetorno()==entera)) {	// Devuelve un entero
+						System.out.println("NO HAY ASIGNACION TODAVIA");
 						System.out.println("Identificador de una funcion o metodo que devuelve un entero, ok!");
-						
 					} else {	// sino valor entero->error"
 						SemErr("Identificador no devuelve Entero!");
 					}
 				} else {
 					SemErr("Error: Identificador no existe");
-					System.out.println("no esta");
 				}
-					System.out.println("jarl");
 			.)
-	| enteros (.	valor = Integer.parseInt(t.val);
-					System.out.println("Argumento entero:"+valor+"token ahead"+la.val);
-				.)
+	| enteros (. valor = Integer.parseInt(t.val); .)
 	| ExpOperadores<out valor> (. 	if (valor==entera)	{
 										System.out.println("es entero");
 									} else {
