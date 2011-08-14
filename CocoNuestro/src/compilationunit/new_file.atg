@@ -165,24 +165,30 @@ CEMASMAS
 							 							   tabla.InsertarEnActual(simbolo);
 														}
 	 											.)	) //Parentedid de Ttipo|voidd|ident
-			 			(Main <type>| ident  	
+			 			(Main <type>
+			 				| ident  	
 			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
+			 						   System.out.println("Esto toca ahora "+t.val+" y esto luego "+la.val);
 			 						   
-			 						   if (tabla.EstaEnActual(simbolo.GetNombre()))
-			 						   		{
+			 						   // Metodo de una clase: Persona::daAnio
+			 						   if (la.val.equals((String) "::")) { // casting, si el siguiente es metodo, caso especial
+			 						   		if (tabla.EstaEnActual(simbolo.GetNombre())) {	
+			 						   			System.out.println("Metodo de una clase existente!");
+			 						   		} else {
+			 						   			SemErr("No existe la clase: "+t.val);
+			 						   		}
+			 						   } else if (tabla.EstaEnActual(simbolo.GetNombre())) {
 			 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
 			 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
-			 						   		}
-			 						   	else
-			 						   	   {
+										} else {
 			 							   tabla.InsertarEnActual(simbolo);
-			 							   }
+										}
 			 						.)
 			 					  	(Subprograma <simbolo>
-			 					  	
-			 					  	| Vector<simbolo> puntoComa | DecVar<out type1, simbolo> 
+			 					  		| Vector<simbolo> puntoComa 
+			 					  			| DecVar<out type1, simbolo> 
 		 					  											(. 
 		 					  											if (type1==type) {
 			 																//System.out.println("tipos ok!"+type+" "+type1);
@@ -195,8 +201,9 @@ CEMASMAS
 																		}
 																		//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 																		.)
-									 
-								| DecMetodo (.System.out.println("Entraste en metodo"); .)) CEMASMAS))
+												| DecMetodo (.System.out.println("Entraste en metodo"); .)
+									)
+								CEMASMAS))
 .
 
 Ttipo<out int type>	// Devolvemo un entero con el tipo
@@ -240,7 +247,9 @@ Param_Cab = (. int type;
 .
 
 DecMetodo 
-= (. Simbolo sim = new Simbolo("no def", 0, 0); .) 
+= (. Simbolo sim = new Simbolo("no def", 0, 0);
+	 System.out.println("Estas en declaracion Metodo");
+.) 
 	dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_ce
 .
 
