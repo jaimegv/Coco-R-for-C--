@@ -250,7 +250,10 @@ DecMetodo
 = (. Simbolo sim = new Simbolo("no def", 0, 0);
 	 System.out.println("Estas en declaracion Metodo");
 .) 
-	dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce llave_ab Cuerpo llave_ce
+	dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce 
+		llave_ab 
+			Cuerpo 
+		llave_ce
 .
 
 
