@@ -240,28 +240,35 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 
 
 DecClase	(. int type;
-				int visible=privado; .) // Dec Variable, por defecto PRIVADO
+				int visible=privado; .) // Visibilidad del contenido, por defecto PRIVADO
 = (. Simbolo simbolo = new Simbolo ("undef", 0, clase); System.out.println("DecClase!");.)
 	[publicc (. simbolo.SetVisibilidad(1); .) 
 		| privatte (. simbolo.SetVisibilidad(0); .)]
  	classs ident (. simbolo.SetNombre(t.val);	// Modifico el nombre del Simbolo
+					simbolo.SetLine(t.line);
+					simbolo.SetColumn(t.col);
 					if ((tabla.EstaEnActual(t.val)) &&
 							(tabla.GetSimboloRecur(t.val) != null) &&
-							(tabla.GetSimboloRecur(t.val).GetKind()==clase) ) {
-						// FALTA mensaje con la linea de la clase erronea, es decir, esta!
-						// Comprobrar si ese simbolo es una clase
-						SemErr("Esta clase ya fue definida anteriormente");
+								(tabla.GetSimboloRecur(t.val).GetKind()==clase) ) {
+						SemErr("Clase "+ t.val +" ya definida en línea "+tabla.GetSimboloRecur(t.val).GetLine()+
+									" y columna:"+ tabla.GetSimboloRecur(t.val).GetColumn());
+				.)
+					{ANY (. System.out.println("Imprimiendo ANY!"+t.val); .)} | llave_ce puntoComa
+				(.		
 					} else {	// Nueva clase!
 						tabla.InsertarEnActual(simbolo);
 						tabla.NuevoAmbito();		// Nuevo ambito para meter metodos
-					}
 				.)
-			llave_ab						// y variables de la clase.
+			llave_ab	// y variables de la clase.
 				Cuerpo_Clase<visible>
 							[(publicc dosPuntos Cuerpo_Clase<visible> [privatte dosPuntos Cuerpo_Clase<visible>])
-							| (privatte dosPuntos Cuerpo_Clase<visible> [publicc dosPuntos Cuerpo_Clase<visible>])]						
-			llave_ce 
-	puntoComa	(. tabla.CerrarAmbito(); .)
+							| (privatte dosPuntos Cuerpo_Clase<visible> [publicc dosPuntos Cuerpo_Clase<visible>])]						 
+				(.		
+						tabla.CerrarAmbito();
+					}	// fin else, para el ambito de nua clase OK! 
+				.)
+			llave_ce
+	puntoComa
 .
 
 Cuerpo_Clase <int visible>
