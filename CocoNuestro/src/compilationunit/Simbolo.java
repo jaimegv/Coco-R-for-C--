@@ -30,6 +30,10 @@ public class Simbolo {
 							   //Los parametros se almacenarán como nuevos símbolos
 	private int visible;    // Público o privado.
 	private int tiporetorno; //Si es una función esto indicará el tipo de valor devuelto
+	private Simbolo clase_perteneciente; //Si es una variable, indica la clase a la que pertenece y type será "identificador"
+										 //Si es un método, indica la clase perteneciente.
+	private Simbolo clase_devuelta;
+										 
 	
 
 
@@ -43,6 +47,7 @@ public Simbolo(String nombre, int type, int kind){
 	   this.tamano = 1;
 	   this.valor = new Vector();
 	   this.parametros = new Vector();
+	   clase_perteneciente = null;
 	}
 
 //*****************MODIFICADORES*******************///
@@ -95,6 +100,11 @@ public void SetValor(Object valor)
 {
 	this.valor.insertElementAt(valor, 0);
 	this.inicializada = true;
+}
+
+public void SetClase(Simbolo simbolo)
+{
+	clase_perteneciente = simbolo;
 }
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){

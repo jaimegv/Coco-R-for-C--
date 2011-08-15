@@ -165,7 +165,7 @@ CEMASMAS
 											if (tabla.EstaEnActual(simbolo.GetNombre())) {
 												tabla.InsertarEnActual(simbolo);
 											} else {
-												SemErr(t.val + " No declarado anteriorment");
+												SemErr(t.val + " No declarado anteriormente");
 											}
 										}
 			 						.)
@@ -334,11 +334,36 @@ Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
 .
 
 Cuerpo 	(. int type = undef; .) 
-=
+= (. Simbolo simbolo_anterior = null;
+	 boolean estaba_declarado = false;.)
 	{Instruccion 
-		| (Ttipo<out type>|voidd) ident (.Simbolo simbolo = new Simbolo(t.val, type, 0);
+		| ((Ttipo<out type> | voidd) (. if (type == identificador)
+											 {
+											 if (!(tabla.EstaRecur(t.val)))
+											 	{
+											 	SemErr(t.val + " no ha sido declarado previamente");
+											 	}
+											 else
+											 	{
+											 	simbolo_anterior = tabla.GetSimboloRecur(t.val);
+											 	estaba_declarado = true;
+											 	}
+											 }
+									 .)
+											 	)
+									 (InstExpresion <simbolo_anterior> |
+										  (ident (.
+										  if (estaba_declarado)
+										  	{
+										  	if (simbolo_anterior.GetKind() != clase) 
+										 		{
+										 		SemErr("Se esperaba un tipo o un identificador declarado como una clase: " + t.val + " declarado en la linea " + simbolo_anterior.GetLine() + " columna " + simbolo_anterior.GetColumn() + " no corresponde a una clase");
+										  		}
+										  	} 
+										  Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						 	  simbolo.SetLine(t.line);
 			 						   	  simbolo.SetColumn(t.col);
+			 						   	  simbolo.SetClase(simbolo_anterior);
 			 						   
 			 						   	  if (tabla.EstaEnActual(simbolo.GetNombre()))
 			 						   			{
@@ -351,7 +376,7 @@ Cuerpo 	(. int type = undef; .)
 			 							   		}	
 			 							   	.) 
 			(Subprograma <simbolo>
-		 | (Vector<simbolo> puntoComa | DecVar<out type, simbolo> ))}
+		 | (Vector<simbolo> puntoComa | DecVar<out type, simbolo> ))))}
 .
 
 
@@ -411,15 +436,12 @@ LlamMet = ident punto ident { parent_ab parent_ce | parent_ab {Argumentos} paren
 /******************INSTRUCCIONES****************************/
 Instruccion
 (. int type; .)
-=
-	InstReturn< out type > | InstCout | InstCin | InstExpresion | InstIfElse
+= (. System.out.println("Estamos en Instruccion");.)
+	InstReturn< out type > | InstCout | InstCin | InstIfElse
 .
 
-InstExpresion
+InstExpresion <Simbolo simbolo>
 =	(. int type=undef; .)
-		ident (. if (tabla.EstaRecur(t.val) == false)
-			     	SemErr(t.val + " no ha sido declarado.");
-			  .)
 			[punto ident] ((parent_ab Argumentos parent_ce puntoComa)
 				| ((op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
