@@ -239,8 +239,7 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 //******************************************************************//
 
 
-DecClase	(. int type;
-				int visible=privado; .) // Visibilidad del contenido, por defecto PRIVADO
+DecClase	(. int visible=privado; .) // Visibilidad del contenido, por defecto PRIVADO
 = (. Simbolo simbolo = new Simbolo ("undef", 0, clase); System.out.println("DecClase!");.)
 	[publicc (. simbolo.SetVisibilidad(1); .) 
 		| privatte (. simbolo.SetVisibilidad(0); .)]
@@ -262,8 +261,15 @@ DecClase	(. int type;
 				.)
 							llave_ab	// y variables de la clase.
 								Cuerpo_Clase<visible>
-											[(publicc dosPuntos Cuerpo_Clase<visible> [privatte dosPuntos Cuerpo_Clase<visible>])
-											| (privatte dosPuntos Cuerpo_Clase<visible> [publicc dosPuntos Cuerpo_Clase<visible>])]
+									[(publicc	(. visible=publico; .) 
+										dosPuntos Cuerpo_Clase<visible> 
+											[privatte dosPuntos (. visible=publico; .) 
+												Cuerpo_Clase<visible>])
+									|(privatte	(. visible=privado; .) 
+										dosPuntos Cuerpo_Clase<visible> 
+											[publicc dosPuntos 	(. visible=publico; .) 
+												Cuerpo_Clase<visible>])
+									]
 							llave_ce
 				(.		
 						tabla.CerrarAmbito();
@@ -297,13 +303,45 @@ Cuerpo_Clase <int visible>
 
 DecCabMet<Simbolo simbolo>
 	(. int type; .) 
-= parent_ab Param_Cab parent_ce puntoComa
+= parent_ab Param_Cab<simbolo> parent_ce
+  puntoComa
 .
 
-Param_Cab = (. int type;
-			   Simbolo sim = new Simbolo("Temo",0,0);
-			   .) 
-	[Ttipo<out type> [Vector<sim>] [{comma Ttipo<out type> [Vector<sim>]}] | voidd]
+Param_Cab <Simbolo simbolo>
+= (. int type;
+	 int nparam=0; .)
+	[Ttipo<out type> (.	Simbolo sim = new Simbolo("Arg_Metodo",0,0); .)
+						[Vector<sim>	(. System.out.println("Funcionalidad por hacer");.)]
+			(.	nparam=nparam+1;	// Un parametro mas	
+				sim.SetType(type);
+				simbolo.SetValor(sim);	// añado el simbolo al metodo	
+			.)	[ comma Param_Cab<simbolo> (. nparam=nparam+1; .)]
+/*		[{comma Ttipo<out type> (. Simbolo simbol = new Simbolo("Arg_Metodo",0,0); .) 
+						[Vector<simbol> (. System.out.println("Funcionalidad por hacer");.)]
+			(.	nparam=nparam+1;	// Un parametro mas	
+			System.out.println("jarl1");
+				simbol.SetType(type);
+				simbolo.SetValor(simbol);	// añado el simbolo al metodo
+			.) 
+		  | comma voidd
+		   	(.	Simbolo simb = new Simbolo("Arg_Metodo",0,0);
+		   				System.out.println("jarl2");
+				nparam=nparam+1;	// Un parametro mas	
+				simb.SetType(vacio);
+				simbolo.SetValor(simb);	// añado el simbolo al metodo
+		   	.)
+		   }]
+*/
+	| voidd (.	Simbolo simb1 = new Simbolo("Arg_Metodo",0,0);
+				nparam=nparam+1;	// Un parametro mas	
+				simb1.SetType(vacio);
+				simbolo.SetValor(simb1);	// añado el simbolo al metodo
+			.)	[ comma Param_Cab<simbolo> (. nparam=nparam+1; .)]
+		
+	]
+(. simbolo.SetNParametros(nparam);
+	System.out.println("Numero de argumentos del metodo:"+simbolo.GetNParametros());
+	.)	// Numero de param
 .
 
 DecMetodo 
