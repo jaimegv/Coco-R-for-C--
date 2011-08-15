@@ -16,7 +16,7 @@ import java.util.LinkedList;
 public class TablaSimbolos {
 	
 	// Declaracion de constantes para tipos
-	final int undef=0, entera=1, bool=2, cadena=3, vacio=4;
+	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5;
 	// Declaración de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3;
 	//Declaración de visibilidad

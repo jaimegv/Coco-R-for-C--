@@ -9,9 +9,11 @@ COMPILER CEMASMAS1
 //	import java.util.*;
 // Add auxiliary methods and declaration here.
 	// Declaracion de constantes para tipos
-	final int undef=0, entera=1, bool=2, cadena=3;
+	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5;
 	// Declaración de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3, parametro=4;
+	//Declaración de visibilidad
+	final int privado=0, publico=1;
 
 	// Tabla de simbolos global
 	public Tablas tabla;
@@ -215,12 +217,14 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 	| bool		(. type = bool; 	.)	// Entendemos que estos dos
 	| boool		(. type = bool; 	.)	// son el mismo tipo		
 	| charr [op_producto] 	(. type = cadena; .)
+	| ident		(. type = identificador; .)	// tipo identificador	
 ).
 
 //******************************************************************//
 
 
-DecClase	(. int type; .) // Dec Variable
+DecClase	(. int type;
+				int visible=privado; .) // Dec Variable
 = (. Simbolo simbolo = new Simbolo ("undef", 0, clase); .)
 	[publicc (. simbolo.SetVisibilidad(1); .) 
 		| privatte (. simbolo.SetVisibilidad(0); .)]
@@ -237,22 +241,37 @@ DecClase	(. int type; .) // Dec Variable
 					}
 				.)
 			llave_ab						// y variables de la clase.
-				Cuerpo_Clase
-							[(publicc dosPuntos Cuerpo_Clase [privatte dosPuntos Cuerpo_Clase])
-							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]						
+				Cuerpo_Clase<visible>
+							[(publicc dosPuntos Cuerpo_Clase<visible> [privatte dosPuntos Cuerpo_Clase<visible>])
+							| (privatte dosPuntos Cuerpo_Clase<visible> [publicc dosPuntos Cuerpo_Clase<visible>])]						
 			llave_ce 
 	puntoComa	(. tabla.CerrarAmbito(); .)
 .
 
-Cuerpo_Clase	(. int type; .) 
+Cuerpo_Clase <int visible>
+	(.	int type;
+	.)	// Recuerda! estas en un ambito clase 
 = [{(Ttipo<out type> ident (. 	Simbolo sim = new Simbolo(t.val, 0, 0);	// Creacion del simbolo
-								tabla.InsertarEnActual(sim);		.)  
-						(DecVar<out type, sim> | DecCabMet))
-							  | voidd ident DecCabMet}]
+								sim.SetVisibilidad(visible);
+								tabla.InsertarEnActual(sim);
+							.)
+						( 	(. /* Caso en que es una Declaracion de variable */
+								sim.SetKind(var);	// Es variable
+								sim.SetType(type);	// Su tipo
+								System.out.println("Falta poner mas propiedades: linea, col...");
+							.) 
+								DecVar<out type, sim> 
+							| (./* Caso Declaracion Cabecera de un metodo */
+								sim.SetKind(metodo);
+								sim.SetTipoRetorno(type);
+								.)
+								DecCabMet<sim> ))
+							  | (.Simbolo sim = new Simbolo(t.val, 0, 0);.) voidd ident DecCabMet<sim>}]
 .
 
 
-DecCabMet	(. int type; .) 
+DecCabMet<Simbolo simbolo>
+	(. int type; .) 
 = parent_ab Param_Cab parent_ce puntoComa
 .
 
@@ -266,7 +285,15 @@ DecMetodo
 = (. Simbolo sim = new Simbolo("no def", 0, 0);		// Añado metodo al ambito actual
 	 System.out.println("Estas en declaracion Metodo");
 .) 
-	dospuntos_dos ident parent_ab [Parametros<sim>] parent_ce 
+	dospuntos_dos ident	(.	System.out.println("Comprobando si el metodo-"+la.val+" pertenece a la clase");
+/*							if ((tabla.EstaEnActual(t.val)) &&
+								(tabla.GetSimboloRecur(t.val) != null) &&
+									(tabla.GetSimboloRecur(t.val).GetKind()==clase) ) {
+*/
+						.) 
+		parent_ab 
+			[Parametros<sim>]
+		parent_ce 
 		llave_ab 
 			Cuerpo 
 		llave_ce
@@ -282,9 +309,7 @@ Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
 	   parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce
 .
 
-Cuerpo 	(. int type = undef;
-			// borrar cuando sigas
- .) 
+Cuerpo 	(. int type = undef; .) 
 =
 	{Instruccion 
 		| (Ttipo<out type>|voidd) ident (.Simbolo simbolo = new Simbolo(t.val, type, 0);
