@@ -155,7 +155,21 @@ CEMASMAS
 .)
 =
 	DecClase CEMASMAS
-			 | ((Ttipo<out type> | voidd | ident	(.	// En caso de declarar un Objeto de una clase
+			 | ((Ttipo<out type>	// Existe este tipo ident¿?
+			 						(.	System.out.println("Hola!"+t.val);
+			 							if (type==identificador) {
+											Simbolo simbolo = new Simbolo(t.val, type, 0);
+											simbolo.SetLine(t.line);
+											simbolo.SetColumn(t.col);
+											
+											if (tabla.EstaEnActual(simbolo.GetNombre())) {
+												tabla.InsertarEnActual(simbolo);
+											} else {
+												SemErr(t.val + " No declarado anteriorment");
+											}
+										}
+			 						.)
+			 			| voidd | ident	(.	// En caso de declarar un Objeto de una clase
 			 										   Simbolo simbolo = new Simbolo(t.val, type, 0);
 							 						   simbolo.SetLine(t.line);
 							 						   simbolo.SetColumn(t.col);
@@ -187,8 +201,8 @@ CEMASMAS
 			 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
 			 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 										} else {
-											SemErr("No existe ningún objeto con este nombre");
-			 							   //tabla.InsertarEnActual(simbolo); // Estaba puesto antes...
+											//SemErr("No existe ningún objeto "+simbolo.GetNombre()+" creado.");
+											tabla.InsertarEnActual(simbolo); // Estaba puesto antes...
 										}
 			 						.)
 			 					  	( (. System.out.println("Entras a Subprograma"); .)
