@@ -172,14 +172,14 @@ CEMASMAS
 			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
-			 						   //System.out.println("Esto toca ahora "+t.val+" y esto luego "+la.val);
+			 						   System.out.println("Entraste en ident");
 			 						   
 			 						   Simbolo sim = tabla.GetSimboloRecur(t.val);
 			 						   // Metodo de una clase: Persona::daAnio
 			 						   if (la.val.equals((String) "::")) { // casting, si el siguiente es metodo, caso especial
 			 						   		if (tabla.EstaEnActual(simbolo.GetNombre())		// Existe
 			 						   					&& (sim!=null) && (sim.GetKind()==clase)) {	// y es de tipo clase
-			 						   			System.out.println("Metodo de una clase existente!(Clase:"+simbolo.GetNombre()+")");
+			 						   			System.out.println("Metodo de una clase existente!(Clase:"+simbolo.GetNombre()+"), todo ok!");
 			 						   		} else {
 			 						   			SemErr("No existe la clase: "+t.val);
 			 						   		}
@@ -187,10 +187,12 @@ CEMASMAS
 			 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
 			 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 										} else {
-			 							   tabla.InsertarEnActual(simbolo);
+											SemErr("No existe ningún objeto con este nombre");
+			 							   //tabla.InsertarEnActual(simbolo); // Estaba puesto antes...
 										}
 			 						.)
-			 					  	(Subprograma <simbolo> (. System.out.println("Subprograma"); .)
+			 					  	( (. System.out.println("Entras a Subprograma"); .)
+			 					  	 Subprograma <simbolo>
 			 					  		| Vector<simbolo> puntoComa 
 			 					  			| DecVar<out type1, simbolo> 
 		 					  											(. 
