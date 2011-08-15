@@ -190,7 +190,7 @@ CEMASMAS
 			 							   tabla.InsertarEnActual(simbolo);
 										}
 			 						.)
-			 					  	(Subprograma <simbolo>
+			 					  	(Subprograma <simbolo> (. System.out.println("Subprograma"); .)
 			 					  		| Vector<simbolo> puntoComa 
 			 					  			| DecVar<out type1, simbolo> 
 		 					  											(. 
@@ -224,8 +224,8 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 
 
 DecClase	(. int type;
-				int visible=privado; .) // Dec Variable
-= (. Simbolo simbolo = new Simbolo ("undef", 0, clase); .)
+				int visible=privado; .) // Dec Variable, por defecto PRIVADO
+= (. Simbolo simbolo = new Simbolo ("undef", 0, clase); System.out.println("DecClase!");.)
 	[publicc (. simbolo.SetVisibilidad(1); .) 
 		| privatte (. simbolo.SetVisibilidad(0); .)]
  	classs ident (. simbolo.SetNombre(t.val);	// Modifico el nombre del Simbolo
@@ -253,12 +253,13 @@ Cuerpo_Clase <int visible>
 	.)	// Recuerda! estas en un ambito clase 
 = [{(Ttipo<out type> ident (. 	Simbolo sim = new Simbolo(t.val, 0, 0);	// Creacion del simbolo
 								sim.SetVisibilidad(visible);
+								sim.SetLine(t.line);
+	 						    sim.SetColumn(t.col);
 								tabla.InsertarEnActual(sim);
 							.)
 						( 	(. /* Caso en que es una Declaracion de variable */
 								sim.SetKind(var);	// Es variable
 								sim.SetType(type);	// Su tipo
-								System.out.println("Falta poner mas propiedades: linea, col...");
 							.) 
 								DecVar<out type, sim> 
 							| (./* Caso Declaracion Cabecera de un metodo */
