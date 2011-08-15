@@ -1,0 +1,13 @@
+int edad;
+
+class Persona
+{       //atributos privados
+        char * nombre;  // el nombre es una cadena
+        int edad;
+public:
+        int ponEdad(int);
+};
+
+void main () {
+	return 2; 
+} 

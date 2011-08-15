@@ -1,0 +1,10 @@
+int adios= 2-(-2)+3;
+int hola=adios;
+
+void main () {
+juan juan;
+
+juan=2/2;
+
+return 3;
+}
