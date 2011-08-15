@@ -1,6 +1,6 @@
 //Nombre del paquete
 package compilationunit;
-import java.io.Console;
+//import java.io.Console;
 
 
 public class Main {
@@ -21,6 +21,7 @@ public class Main {
 		Parser parser = new Parser(scanner);
 		parser.Parse();
 		System.out.println(parser.errors.count + " errores detectados");
+		
 	}
 }
 

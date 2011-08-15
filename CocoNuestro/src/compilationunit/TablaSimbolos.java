@@ -50,7 +50,8 @@ public class TablaSimbolos {
             if ((this.tabla.elementAt(i) instanceof Simbolo) && 
             		(simbolo.GetNombre() == simbolito.GetNombre()))
             	{
-            	return -1;
+					System.out.println("YA existe este simbolo:"+simbolo.GetNombre());
+            		return -1;
             	}
 			}
 		tabla.addElement(simbolo);
@@ -63,9 +64,8 @@ public class TablaSimbolos {
 		Simbolo simbolito = null;
 		for(int i=0; i< this.tabla.size(); i++)
 			{
-			
 			simbolito = (Simbolo) this.tabla.elementAt(i);
-			
+			//System.out.println("Un simbolo a comparar con "+nombre+" es "+simbolito.GetNombre()+" kind:"+simbolito.GetKind());
 			if ((this.tabla.elementAt(i) instanceof Simbolo) && (nombre.contentEquals(simbolito.GetNombre())))
 				{
 				return true;

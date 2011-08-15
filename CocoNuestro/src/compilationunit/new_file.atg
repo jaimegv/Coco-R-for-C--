@@ -170,12 +170,14 @@ CEMASMAS
 			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
-			 						   System.out.println("Esto toca ahora "+t.val+" y esto luego "+la.val);
+			 						   //System.out.println("Esto toca ahora "+t.val+" y esto luego "+la.val);
 			 						   
+			 						   Simbolo sim = tabla.GetSimboloRecur(t.val);
 			 						   // Metodo de una clase: Persona::daAnio
 			 						   if (la.val.equals((String) "::")) { // casting, si el siguiente es metodo, caso especial
-			 						   		if (tabla.EstaEnActual(simbolo.GetNombre())) {	
-			 						   			System.out.println("Metodo de una clase existente!");
+			 						   		if (tabla.EstaEnActual(simbolo.GetNombre())		// Existe
+			 						   					&& (sim!=null) && (sim.GetKind()==clase)) {	// y es de tipo clase
+			 						   			System.out.println("Metodo de una clase existente!(Clase:"+simbolo.GetNombre()+")");
 			 						   		} else {
 			 						   			SemErr("No existe la clase: "+t.val);
 			 						   		}
@@ -223,18 +225,28 @@ DecClase	(. int type; .) // Dec Variable
 	[publicc (. simbolo.SetVisibilidad(1); .) 
 		| privatte (. simbolo.SetVisibilidad(0); .)]
  	classs ident (. simbolo.SetNombre(t.val);	// Modifico el nombre del Simbolo
-					tabla.InsertarEnActual(simbolo); .)
-			llave_ab
- 			 	(.	tabla.NuevoAmbito();		// Nuevo ambito para meter metodos
-				.)								// y variables de la clase.
+					if ((tabla.EstaEnActual(t.val)) &&
+							(tabla.GetSimboloRecur(t.val) != null) &&
+							(tabla.GetSimboloRecur(t.val).GetKind()==clase) ) {
+						// FALTA mensaje con la linea de la clase erronea, es decir, esta!
+						// Comprobrar si ese simbolo es una clase
+						SemErr("Esta clase ya fue definida anteriormente");
+					} else {	// Nueva clase!
+						tabla.InsertarEnActual(simbolo);
+						tabla.NuevoAmbito();		// Nuevo ambito para meter metodos
+					}
+				.)
+			llave_ab						// y variables de la clase.
 				Cuerpo_Clase
 							[(publicc dosPuntos Cuerpo_Clase [privatte dosPuntos Cuerpo_Clase])
-							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]		
-			llave_ce puntoComa
+							| (privatte dosPuntos Cuerpo_Clase [publicc dosPuntos Cuerpo_Clase])]						
+			llave_ce 
+	puntoComa	(. tabla.CerrarAmbito(); .)
 .
 
 Cuerpo_Clase	(. int type; .) 
-= [{(Ttipo<out type> ident (. Simbolo sim = new Simbolo(t.val, 0, 0); .)	// Creacion del simbolo  
+= [{(Ttipo<out type> ident (. 	Simbolo sim = new Simbolo(t.val, 0, 0);	// Creacion del simbolo
+								tabla.InsertarEnActual(sim);		.)  
 						(DecVar<out type, sim> | DecCabMet))
 							  | voidd ident DecCabMet}]
 .

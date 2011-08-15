@@ -33,7 +33,7 @@ public class Tablas {
 		{
 		// Nuevo ambito a desarrollar que será el actual
 		// su padre es el actual ambito
-		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);
+		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);	// pasamos como arg la tabla padre
 		ambito_actual = ambito_nuevo;
 		System.out.println("Nuevo ambito creado");
 		}
@@ -43,6 +43,7 @@ public class Tablas {
 		{
 		TablaSimbolos ambitopadre = this.ambito_actual.Ambito_Padre();
 		this.ambito_actual = ambitopadre;
+		System.out.println("Ambito actual cerrado");
 		}
 	
 	public int InsertarEnActual (Simbolo simbolo)
@@ -86,12 +87,12 @@ public class Tablas {
 		else
 			currentbusqueda = currentbusqueda.Ambito_Padre();
 		}
-	if (this.ambito_global.Esta(nombre))
-		return this.ambito_global.GetSimbolo(nombre);
-	else
-		return null;
-	
-	
+			if (this.ambito_global.Esta(nombre))
+				return this.ambito_global.GetSimbolo(nombre);
+			else {
+				System.out.println("Cuidado! devolviendo Null.object");
+				return null;
+			}
 		}
 	
 	public boolean EstaRecur (String nombre)
