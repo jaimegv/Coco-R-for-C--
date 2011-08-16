@@ -382,6 +382,7 @@ Cuerpo 	(. int type = undef; .)
 											 	{
 											 	simbolo_anterior = tabla.GetSimboloRecur(t.val);
 											 	estaba_declarado = true;
+											 	System.out.println("El simbolo estaba declarado en la TS");
 											 	}
 											 }
 									 .)
@@ -477,22 +478,23 @@ Instruccion
 .
 
 InstExpresion <Simbolo simbolo>
-=	(. int type=undef; .)
+=	(. int type=undef;
+	   System.out.println("Entramos en InstExpresion"); .)
 				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa
-				| [punto ident] ((parent_ab VArgumentos<simbolo, 0> parent_ce puntoComa)
-				| ((op_asig | op_asig_mas | op_asig_menos |
+				| punto ident (parent_ab VArgumentos<simbolo, 0> parent_ce puntoComa)
+				| (op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													VExpresion<out type>
 													(. if (simbolo.GetType() != type)
 													   		SemErr("El tipo del identificador no coincide con el tipo de la expresion");
-													.) puntoComa)))
+													.) puntoComa)
 .
 
 InstReturn <out int tipoDev>
 (.	tipoDev = undef;
 	int type; .)
-=
-(rreturn [Expresion<out type> (. tipoDev= type; .) ] puntoComa)
+= 	   (.System.out.println("Entramos en InstReturn");.)
+(rreturn [VExpresion<out type> (. tipoDev= type; .) ] puntoComa)
 .
 
 /****************************************************/
@@ -866,7 +868,7 @@ Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
 //******EXPRESIONES VERSIÓN DE VICTOR*************************************************************/
 
 VExpresion <out int tipoDev>
-= ValorFinalExp <out tipoDev>
+= (.System.out.println("Entramos en VExpresion");.)ValorFinalExp <out tipoDev>
 .
 
 
@@ -910,10 +912,11 @@ ValorFinalExp <out int tipoDev>
 
 VArgumentos <Simbolo simbolo, int pos>
 = (. int type=undef;
-	 Simbolo simbolo_nuevo = null; .)
-[Exp<out type, simbolo_nuevo> (. if  (pos >= simbolo.GetNParametros())
+	 Simbolo simbolo_nuevo = null; 
+	 System.out.println("Entramos en VArgumentos");.)
+[VExpresion<out type> (. if  (pos >= simbolo.GetNParametros())
 											{
-											SemErr("Número de parametros no coincidente");
+											SemErr("Numero de parametros no coincidente");
 											}
 										else
 											{ 
@@ -922,7 +925,7 @@ VArgumentos <Simbolo simbolo, int pos>
 												SemErr("Tipo de los parametros no coincidente");
 											}
 									  .)
-{"," VArgumentos <simbolo, pos + 1>}]
+["," VArgumentos <simbolo, pos + 1>]]
 .
 
 /**********************************************************/
