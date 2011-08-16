@@ -767,7 +767,7 @@ public class Parser {
 		Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 		
 		Expect(23);
-		type = Expresion();
+		type = VExpresion();
 		if (type != bool) {SemErr("La condicion de un if debe ser logica");}
 		simbolo = new Simbolo ("IF", 0, 0);
 		if (la.kind == 29) {
@@ -823,25 +823,85 @@ public class Parser {
 	int  VExpresion() {
 		int  tipoDev;
 		System.out.println("Entramos en VExpresion");
-		tipoDev = ValorFinalExp();
-		return tipoDev;
-	}
-
-	int  Expresion() {
-		int  tipoDev;
 		tipoDev=undef;
-		int type, type1;
-		
-		type = Expresion2();
-		type1 = Expresion1();
-		if (type==type1) {
-		tipoDev=type;
-		} else if (type1==undef) {
-			tipoDev=type;
-		} else {
-			SemErr("Error en Expresion");
-		}
-		
+		int type=undef;
+		if (StartOf(12)) {
+			tipoDev = ValorFinalExp();
+			if (StartOf(13)) {
+				if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
+					Operador_Logico();
+					type = VExpresion2();
+					if ((tipoDev != bool) || (type != bool))
+					SemErr("Error de tipos");
+				} else if (StartOf(14)) {
+					Operador_Aritmetico();
+					type = VExpresion2();
+					if ((tipoDev != entera) || (type != entera))
+					SemErr("Error de tipos");
+				} else {
+					Operador_Relacional();
+					type = VExpresion2();
+					if ((tipoDev != entera) || (type != entera))
+					SemErr("Error de tipos");
+					  else
+					  	tipoDev = bool;
+				}
+			}
+		} else if (la.kind == 32) {
+			Get();
+			tipoDev = ValorFinalExp();
+			if (tipoDev != entera)
+			SemErr("Error de tipos");
+			if (StartOf(13)) {
+				if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
+					Operador_Logico();
+					type = VExpresion2();
+					if ((tipoDev != bool) || (type != bool))
+					SemErr("Error de tipos");
+				} else if (StartOf(14)) {
+					Operador_Aritmetico();
+					type = VExpresion2();
+					if ((tipoDev != entera) || (type != entera))
+					SemErr("Error de tipos");
+				} else {
+					Operador_Relacional();
+					type = VExpresion2();
+					if ((tipoDev != entera) || (type != entera))
+					SemErr("Error de tipos");
+					  else
+					  	tipoDev = bool;
+				}
+			}
+		} else if (la.kind == 46) {
+			Get();
+			tipoDev = ValorFinalExp();
+			if (tipoDev != bool)
+			SemErr("Error de tipos");
+			if (StartOf(13)) {
+				if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
+					Operador_Logico();
+					type = VExpresion2();
+					if ((tipoDev != bool) || (type != bool))
+					SemErr("Error de tipos");
+				} else if (StartOf(14)) {
+					Operador_Aritmetico();
+					type = VExpresion2();
+					if ((tipoDev != entera) || (type != entera))
+					SemErr("Error de tipos");
+				} else {
+					Operador_Relacional();
+					type = VExpresion2();
+					if ((tipoDev != entera) || (type != entera))
+					SemErr("Error de tipos");
+					  else
+					  	tipoDev = bool;
+				}
+			}
+		} else if (la.kind == 31) {
+			Get();
+			tipoDev = VExpresion();
+			Expect(38);
+		} else SynErr(72);
 		return tipoDev;
 	}
 
@@ -858,7 +918,7 @@ public class Parser {
 			Expect(36);
 		} else if (StartOf(5)) {
 			Instruccion();
-		} else SynErr(72);
+		} else SynErr(73);
 	}
 
 	int  Arg_io() {
@@ -884,10 +944,10 @@ public class Parser {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena; 
-		} else if (StartOf(12)) {
+		} else if (StartOf(15)) {
 			tipoDev = Exp(sim);
 			tipoDev = entera; 
-		} else SynErr(73);
+		} else SynErr(74);
 		return tipoDev;
 	}
 
@@ -904,6 +964,24 @@ public class Parser {
 		SemErr("La posicion del vector debe ser una expresion de tipo entero");
 		posicion = ((Number) simbolo_nuevo.GetValor()).intValue(); 
 		return posicion;
+	}
+
+	int  Expresion() {
+		int  tipoDev;
+		tipoDev=undef;
+		int type, type1;
+		
+		type = Expresion2();
+		type1 = Expresion1();
+		if (type==type1) {
+		tipoDev=type;
+		} else if (type1==undef) {
+			tipoDev=type;
+		} else {
+			SemErr("Error en Expresion");
+		}
+		
+		return tipoDev;
 	}
 
 	int  Expresion2() {
@@ -972,7 +1050,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(13)) {
+		if (StartOf(16)) {
 			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 				Operador_Logico();
 				type = Expresion3();
@@ -991,8 +1069,8 @@ public class Parser {
 				}
 				
 			}
-		} else if (StartOf(14)) {
-			if (StartOf(15)) {
+		} else if (StartOf(17)) {
+			if (StartOf(18)) {
 				Operador_Relacional();
 				type = Expresion3();
 				type1 = Expresion21();
@@ -1010,7 +1088,7 @@ public class Parser {
 				}
 				
 			}
-		} else SynErr(74);
+		} else SynErr(75);
 		return tipoDev;
 	}
 
@@ -1021,7 +1099,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 46) {
 			Get();
-		} else SynErr(75);
+		} else SynErr(76);
 	}
 
 	void Operador_Relacional() {
@@ -1050,7 +1128,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(76); break;
+		default: SynErr(77); break;
 		}
 	}
 
@@ -1155,7 +1233,7 @@ public class Parser {
 		} else if (la.kind == 2) {
 			Get();
 			valor = Integer.parseInt(t.val); 
-		} else if (StartOf(16)) {
+		} else if (StartOf(19)) {
 			valor = ExpOperadores();
 			if (valor==entera)	{
 			System.out.println("es entero");
@@ -1163,7 +1241,7 @@ public class Parser {
 				SemErr("No es entero!es un:"+t.val);
 			}
 			
-		} else SynErr(77);
+		} else SynErr(78);
 		return valor;
 	}
 
@@ -1173,7 +1251,7 @@ public class Parser {
 		int type1, type;
 		System.out.println("estas en expoperadores");
 		
-		if (StartOf(17)) {
+		if (StartOf(20)) {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev=cadena;	
@@ -1183,7 +1261,7 @@ public class Parser {
 		} else if (la.kind == 8) {
 			Get();
 			tipoDev=bool;	
-		} else SynErr(78);
+		} else SynErr(79);
 		return tipoDev;
 	}
 
@@ -1210,10 +1288,10 @@ public class Parser {
 				SemErr("OpNegAritmetico: Error argumento.");
 			}
 			
-		} else if (StartOf(18)) {
+		} else if (StartOf(21)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
-		} else SynErr(79);
+		} else SynErr(80);
 		return tipoDev;
 	}
 
@@ -1222,7 +1300,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(19)) {
+		if (StartOf(14)) {
 			Operador_Aritmetico();
 			type = Expresion4();
 			type1 = Expresion31();
@@ -1253,7 +1331,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(80);
+		} else SynErr(81);
 	}
 
 	int  Expresion5() {
@@ -1321,7 +1399,7 @@ public class Parser {
 			tipoDev=bool;	
 			break;
 		}
-		default: SynErr(81); break;
+		default: SynErr(82); break;
 		}
 		return tipoDev;
 	}
@@ -1333,7 +1411,7 @@ public class Parser {
 			} else {
 				Get();
 			}
-			if (StartOf(19)) {
+			if (StartOf(14)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
@@ -1341,11 +1419,11 @@ public class Parser {
 			Get();
 			Expresion_Entera();
 			Expect(38);
-			if (StartOf(19)) {
+			if (StartOf(14)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
-		} else SynErr(82);
+		} else SynErr(83);
 	}
 
 	int  ValorFinalExp() {
@@ -1406,7 +1484,34 @@ public class Parser {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena;
-		} else SynErr(83);
+		} else SynErr(84);
+		return tipoDev;
+	}
+
+	int  VExpresion2() {
+		int  tipoDev;
+		System.out.println("Entramos en VExpresion2");
+		tipoDev=undef;
+		int type = undef;
+		if (StartOf(12)) {
+			tipoDev = ValorFinalExp();
+			if (StartOf(13)) {
+				if (StartOf(14)) {
+					Operador_Aritmetico();
+				} else if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
+					Operador_Logico();
+				} else {
+					Operador_Relacional();
+				}
+				type = VExpresion2();
+				if (tipoDev != type)
+				SemErr("Error de tipos");
+			}
+		} else if (la.kind == 31) {
+			Get();
+			tipoDev = VExpresion();
+			Expect(38);
+		} else SynErr(85);
 		return tipoDev;
 	}
 
@@ -1433,15 +1538,17 @@ public class Parser {
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,T, T,x,x,x, x,T,T,x, x,x,x,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,T,T, T,x,x,T, x,x,T,T, x,T,x,T, T,x,x,x, x,T,T,x, x,x,x,x, T,x,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,T, T,x,x,x, x,T,T,x, x,x,x,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,T, T,x,x,x, x,T,T,x, x,x,x,x, T,x,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
 		{x,x,x,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
 } // end Parser
@@ -1538,18 +1645,20 @@ class Errors {
 			case 69: s = "invalid Instruccion"; break;
 			case 70: s = "invalid InstExpresion"; break;
 			case 71: s = "invalid InstIfElse"; break;
-			case 72: s = "invalid Else"; break;
-			case 73: s = "invalid Arg_io"; break;
-			case 74: s = "invalid Expresion21"; break;
-			case 75: s = "invalid Operador_Logico"; break;
-			case 76: s = "invalid Operador_Relacional"; break;
-			case 77: s = "invalid ExpCambioSigno"; break;
-			case 78: s = "invalid ExpOperadores"; break;
-			case 79: s = "invalid Expresion4"; break;
-			case 80: s = "invalid Operador_Aritmetico"; break;
-			case 81: s = "invalid Expresion5"; break;
-			case 82: s = "invalid Expresion_Entera"; break;
-			case 83: s = "invalid ValorFinalExp"; break;
+			case 72: s = "invalid VExpresion"; break;
+			case 73: s = "invalid Else"; break;
+			case 74: s = "invalid Arg_io"; break;
+			case 75: s = "invalid Expresion21"; break;
+			case 76: s = "invalid Operador_Logico"; break;
+			case 77: s = "invalid Operador_Relacional"; break;
+			case 78: s = "invalid ExpCambioSigno"; break;
+			case 79: s = "invalid ExpOperadores"; break;
+			case 80: s = "invalid Expresion4"; break;
+			case 81: s = "invalid Operador_Aritmetico"; break;
+			case 82: s = "invalid Expresion5"; break;
+			case 83: s = "invalid Expresion_Entera"; break;
+			case 84: s = "invalid ValorFinalExp"; break;
+			case 85: s = "invalid VExpresion2"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);

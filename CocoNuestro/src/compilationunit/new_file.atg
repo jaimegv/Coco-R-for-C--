@@ -504,7 +504,7 @@ InstIfElse
 	Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 .) 
 =
-		iff Expresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
+		iff VExpresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
 								  simbolo = new Simbolo ("IF", 0, 0);.) 
 	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo (. tabla.CerrarAmbito(); .) llave_ce) 
 	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
@@ -868,9 +868,61 @@ Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
 //******EXPRESIONES VERSIÓN DE VICTOR*************************************************************/
 
 VExpresion <out int tipoDev>
-= (.System.out.println("Entramos en VExpresion");.)ValorFinalExp <out tipoDev>
+= (.System.out.println("Entramos en VExpresion");
+	tipoDev=undef;
+	int type=undef;.)
+   (
+    ValorFinalExp <out tipoDev> [(Operador_Logico VExpresion2 <out type> (.if ((tipoDev != bool) || (type != bool))
+    																	   		SemErr("Error de tipos");.)
+    							 |Operador_Aritmetico VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
+    																	   		SemErr("Error de tipos");.)
+    							 |Operador_Relacional VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
+    																	   		SemErr("Error de tipos");
+    																	   	   else
+    																	   	   	tipoDev = bool;.)
+    
+    )]
+   | op_menos ValorFinalExp <out tipoDev> (.if (tipoDev != entera)
+   									  		SemErr("Error de tipos");.)
+   								[(Operador_Logico VExpresion2 <out type> (.if ((tipoDev != bool) || (type != bool))
+    																	   		SemErr("Error de tipos");.)
+    							 |Operador_Aritmetico VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
+    																	   		SemErr("Error de tipos");.)
+    							 |Operador_Relacional VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
+    																	   		SemErr("Error de tipos");
+    																	   	   else
+    																	   	   	tipoDev = bool;.)
+    
+    )]
+   								
+   | "!" ValorFinalExp <out tipoDev> (.if (tipoDev != bool)
+   									  		SemErr("Error de tipos");.)
+   								[(Operador_Logico VExpresion2 <out type> (.if ((tipoDev != bool) || (type != bool))
+    																	   		SemErr("Error de tipos");.)
+    							 |Operador_Aritmetico VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
+    																	   		SemErr("Error de tipos");.)
+    							 |Operador_Relacional VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
+    																	   		SemErr("Error de tipos");
+    																	   	   else
+    																	   	   	tipoDev = bool;.)
+    
+    )]
+   | parent_ab VExpresion<out tipoDev> parent_ce
+   )
 .
 
+VExpresion2 <out int tipoDev>
+= (.System.out.println("Entramos en VExpresion2");
+	tipoDev=undef;
+	int type = undef;.)
+	(
+	ValorFinalExp<out tipoDev> [(Operador_Aritmetico |Operador_Logico | Operador_Relacional) VExpresion2<out type>
+					(.if (tipoDev != type)
+						SemErr("Error de tipos");.)
+	]
+	|  parent_ab VExpresion<out tipoDev> parent_ce
+	)
+.
 
 ValorFinalExp <out int tipoDev>
 = (. tipoDev = undef;
