@@ -181,12 +181,21 @@ public Vector GetParametros()
 	return this.parametros;
 	}
 
+public Simbolo GetParametros(int pos)
+	{
+	return (Simbolo)this.parametros.elementAt(pos);
+	}
+
 
 public Vector GetPosicionesVector()
 	{
 	return this.valor;
 	}
 
+public Simbolo GetClase()
+	{
+	return this.clase_perteneciente;
+	}
 
 //************************************************//////
 
