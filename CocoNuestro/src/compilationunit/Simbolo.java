@@ -47,7 +47,8 @@ public Simbolo(String nombre, int type, int kind){
 	   this.tamano = 1;
 	   this.valor = new Vector();
 	   this.parametros = new Vector();
-	   clase_perteneciente = null;
+	   this.clase_perteneciente = null;
+	   this.ambito_asociado = null;
 
 	}
 

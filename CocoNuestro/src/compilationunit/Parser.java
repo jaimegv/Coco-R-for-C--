@@ -250,7 +250,7 @@ public class Parser {
 				} else if (la.kind == 17) {
 					System.out.println("Entraste en DecMetodo: "+t.val+" con metodo "+la.val);
 					String Clase= (String) t.val; 
-					DecMetodo(Clase);
+					DecMetodo(Clase, type);
 				} else SynErr(61);
 				CEMASMAS();
 			} else SynErr(62);
@@ -407,19 +407,36 @@ public class Parser {
 		return type;
 	}
 
-	void DecMetodo(String Clase) {
+	void DecMetodo(String Clase, int tipoRetorno) {
 		Simbolo sim = new Simbolo("no def", 0, 0);		// AÃ±ado metodo al ambito actual
 		System.out.println("Estas en declaracion Metodo");
 		
 		Expect(17);
 		Expect(1);
 		System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
-		if ((tabla.EstaEnActual(Clase) &&
-			(tabla.GetSimboloRecur(Clase) != null)) &&
-				(tabla.GetSimboloRecur(Clase).GetKind()==clase) ) {
-			System.out.println("Clase existe todo ok!");
+		if ((tabla.GetSimboloRecur(Clase) != null) &&	// clase existe?Â¿
+				(tabla.GetSimboloRecur(Clase).GetKind()==clase)) {
+					//clase y metodo existen!
+				if (tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().Esta(t.val)) {	// metodo asoc a claseÂ¿?
+					// Cojo el simbolo
+					Simbolo simMetodo=tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().GetSimbolo(t.val);
+					// Comprobacion tipoRetoron y argumentos son iguales
+					if (simMetodo.GetTipoRetorno()==tipoRetorno) {
+						System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
+						
+		Expect(31);
+		if (StartOf(1)) {
+			Parametros(sim);
+		}
+		Expect(38);
 		} else {
-			SemErr("No existe una clase con este mÃ©todo asociado");
+		SemErr("DeclaraciÃ³n metodo devuelve un tipo diferente a la declaraciÃ³n en la Clase: "+Clase+", en linea-col:"+simMetodo.GetColumn()+"-"+simMetodo.GetColumn());
+		}
+		} else {
+			SemErr("Existe la clase: "+Clase+", pero no tiene ningun metodo asociado: "+t.val);
+		}
+		} else {
+			SemErr("No existe dicha clase: "+Clase);
 		}
 		
 		Expect(31);
@@ -459,10 +476,10 @@ public class Parser {
 						DecCabMet(sim);
 					} else SynErr(65);
 				} else {
-					Simbolo sim = new Simbolo(t.val, 0, 0);
+					Simbolo simbol = new Simbolo(t.val, 0, 0);
 					Get();
 					Expect(1);
-					DecCabMet(sim);
+					DecCabMet(simbol);
 				}
 			}
 		}
@@ -573,7 +590,9 @@ public class Parser {
 					}
 				}
 				
-				if (StartOf(6)) {
+				if (la.kind == 28) {
+					Llamada(simbolo_anterior);
+				} else if (StartOf(6)) {
 					InstExpresion(simbolo_anterior);
 				} else if (la.kind == 1) {
 					Get();
@@ -626,6 +645,50 @@ public class Parser {
 		} else if (la.kind == 23) {
 			InstIfElse();
 		} else SynErr(69);
+	}
+
+	void Llamada(Simbolo simbolo_objeto) {
+		TablaSimbolos ambito_clase = null;
+		Simbolo simbolo_metodoargumento = null; 
+		Expect(28);
+		Expect(1);
+		if (simbolo_objeto != null)
+		{
+		Simbolo simbolo_clase =  simbolo_objeto.GetClase();
+		if (simbolo_clase == null)
+			SemErr("El identificador " + simbolo_objeto.GetNombre() + " no ha sido declarado perteneciente a ninguna clase.");
+		else
+			{
+			ambito_clase = simbolo_clase.GetAmbitoAsociado();
+			if (ambito_clase == null)
+				SemErr("El ambito asociado a la clase " + simbolo_clase.GetNombre() + " no tiene ningun ambito asociado");
+			else
+				{
+				if (!(ambito_clase.Esta(t.val)))
+					SemErr("El identificador " + t.val + " no se ha encontrado declarado en la clase " + simbolo_clase.GetNombre());
+				else
+					{
+					simbolo_metodoargumento = ambito_clase.GetSimbolo(t.val);
+					if (simbolo_metodoargumento.GetVisibilidad() == privado)
+						SemErr(simbolo_metodoargumento.GetNombre() + " no es publico.");
+					System.out.println("Todas las comprobaciones han sido satisfactorias");
+					}
+				}
+			} 
+		}
+		if (la.kind == 31) {
+			Get();
+			if (simbolo_metodoargumento != null)
+			{
+			if (simbolo_metodoargumento.GetType() != metodo) //Si hay un parÃ©ntesis tiene que ser un mÃ©todo, y debe ser pÃºblico.
+				SemErr(simbolo_metodoargumento.GetNombre() + " no ha sido declarado como un metodo.");
+			else if (simbolo_metodoargumento.GetVisibilidad() == privado)
+			 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
+				}
+				
+			VArgumentos(simbolo_metodoargumento, 0);
+			Expect(38);
+		}
 	}
 
 	void InstExpresion(Simbolo simbolo) {
@@ -698,6 +761,34 @@ public class Parser {
 		return tipoDev;
 	}
 
+	void VArgumentos(Simbolo simbolo, int pos) {
+		int type=undef;
+		Simbolo simbolo_nuevo = null; 
+		System.out.println("Entramos en VArgumentos");
+			
+		if (StartOf(9)) {
+			type = VExpresion();
+			if (simbolo != null)
+			{
+			if  (pos >= simbolo.GetNParametros())
+							{
+							SemErr("Numero de parametros no coincidente");
+							}
+						else
+							{ 
+							simbolo_nuevo = simbolo.GetParametros(pos);
+							if (simbolo_nuevo.GetType() != type)
+								SemErr("Tipo de los parametros no coincidente");
+							}
+			}
+					  
+			if (la.kind == 27) {
+				Get();
+				VArgumentos(simbolo, pos + 1);
+			}
+		}
+	}
+
 	void LlamMet() {
 		Expect(1);
 		Expect(28);
@@ -708,7 +799,7 @@ public class Parser {
 				Expect(38);
 			} else {
 				Get();
-				while (StartOf(9)) {
+				while (StartOf(10)) {
 					Argumentos();
 				}
 				Expect(38);
@@ -718,7 +809,7 @@ public class Parser {
 
 	void Argumentos() {
 		int type=undef; 
-		if (StartOf(10)) {
+		if (StartOf(11)) {
 			type = Expresion();
 			while (la.kind == 27) {
 				Get();
@@ -733,7 +824,7 @@ public class Parser {
 		int type; 
 		System.out.println("Entramos en InstReturn");
 		Expect(18);
-		if (StartOf(11)) {
+		if (StartOf(9)) {
 			type = VExpresion();
 			tipoDev= type; 
 		}
@@ -793,30 +884,6 @@ public class Parser {
 		} else SynErr(71);
 		if (la.kind == 24) {
 			Else();
-		}
-	}
-
-	void VArgumentos(Simbolo simbolo, int pos) {
-		int type=undef;
-		Simbolo simbolo_nuevo = null; 
-		System.out.println("Entramos en VArgumentos");
-		if (StartOf(11)) {
-			type = VExpresion();
-			if  (pos >= simbolo.GetNParametros())
-			{
-			SemErr("Numero de parametros no coincidente");
-			}
-			else
-				{ 
-				simbolo_nuevo = simbolo.GetParametros(pos);
-				if (simbolo_nuevo.GetType() != type)
-					SemErr("Tipo de los parametros no coincidente");
-				}
-			 
-			if (la.kind == 27) {
-				Get();
-				VArgumentos(simbolo, pos + 1);
-			}
 		}
 	}
 
@@ -1458,8 +1525,28 @@ public class Parser {
 				} else if (la.kind == 28) {
 					Get();
 					Expect(1);
+					Simbolo simbolo_metodoatributo = null;
+					Simbolo simbolo_clase = simbolo.GetClase();
+					TablaSimbolos ambitoclase;
+					if (simbolo_clase == null)
+							SemErr("El identificador " + simbolo.GetNombre() + " no fue declarado como un objeto de ninguna clase.");
+					else
+							{
+						ambitoclase = simbolo_clase.GetAmbitoAsociado();
+						if (!(ambitoclase.Esta(t.val)))
+							SemErr("El metodo " + t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
+						else
+							{
+							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
+							if (simbolo_metodoatributo.GetType() == metodo)
+								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+							else if (simbolo_metodoatributo.GetType() == var)
+								tipoDev = simbolo_metodoatributo.GetType();
+							}
+							}
+					
 					Expect(31);
-					VArgumentos(simbolo, aux);
+					VArgumentos(simbolo_metodoatributo, aux);
 					Expect(38);
 				} else {
 					Get();
@@ -1536,9 +1623,9 @@ public class Parser {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},

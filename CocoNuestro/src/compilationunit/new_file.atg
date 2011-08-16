@@ -404,7 +404,10 @@ Cuerpo 	(. int type = undef; .)
 											 }
 									 .)
 											 	)
-									 (InstExpresion <simbolo_anterior> |
+									 
+									 
+									 
+									 (Llamada<simbolo_anterior> | InstExpresion <simbolo_anterior> |
 										  (ident (.
 										  if (estaba_declarado)
 										  	{
@@ -433,7 +436,6 @@ Cuerpo 	(. int type = undef; .)
 .
 
 
-//El apéndice del final indica el nivel de anhidamiento.
 
 DecVar <out int type, Simbolo simbolo>
 = (. int type1=undef;
@@ -467,6 +469,52 @@ corchete_ab [Exp <out type, sim> (. ((Number)sim.GetValor()).intValue();
 ] corchete_ce.
 
 
+//*********************LLAMADA***********************************//
+
+Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del objeto
+= (. TablaSimbolos ambito_clase = null;
+	 Simbolo simbolo_metodoargumento = null; .) 
+punto ident (. if (simbolo_objeto != null)
+				 	{
+				 	Simbolo simbolo_clase =  simbolo_objeto.GetClase();
+				 	if (simbolo_clase == null)
+				 		SemErr("El identificador " + simbolo_objeto.GetNombre() + " no ha sido declarado perteneciente a ninguna clase.");
+				 	else
+				 		{
+				 		ambito_clase = simbolo_clase.GetAmbitoAsociado();
+				 		if (ambito_clase == null)
+				 			SemErr("El ambito asociado a la clase " + simbolo_clase.GetNombre() + " no tiene ningun ambito asociado");
+				 		else
+				 			{
+				 			if (!(ambito_clase.Esta(t.val)))
+				 				SemErr("El identificador " + t.val + " no se ha encontrado declarado en la clase " + simbolo_clase.GetNombre());
+				 			else
+				 				{
+				 				simbolo_metodoargumento = ambito_clase.GetSimbolo(t.val);
+				 				if (simbolo_metodoargumento.GetVisibilidad() == privado)
+				 					SemErr(simbolo_metodoargumento.GetNombre() + " no es publico.");
+				 				System.out.println("Todas las comprobaciones han sido satisfactorias");
+				 				}
+				 			}
+				 		} 
+				 	}.) 
+
+[parent_ab (.if (simbolo_metodoargumento != null)
+				{
+				if (simbolo_metodoargumento.GetType() != metodo) //Si hay un paréntesis tiene que ser un método, y debe ser público.
+					SemErr(simbolo_metodoargumento.GetNombre() + " no ha sido declarado como un metodo.");
+				else if (simbolo_metodoargumento.GetVisibilidad() == privado)
+				 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
+			 	}
+			 	.)
+ VArgumentos<simbolo_metodoargumento, 0> parent_ce]
+.
+
+//**************************************************************//
+
+
+
+
 //*************SUBPROGRAMA**********************************//
 
 
@@ -474,7 +522,7 @@ corchete_ab [Exp <out type, sim> (. ((Number)sim.GetValor()).intValue();
 
 Subprograma <Simbolo simbolo> = (.  tabla.NuevoAmbito(simbolo);
 									simbolo.SetKind (funcion);
-									simbolo.SetTipoRetorno(simbolo.GetType());  .) 
+									simbolo.SetTipoRetorno(simbolo.GetType());  .)//Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno 
 parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo (. tabla.CerrarAmbito(); .)
  llave_ce.
 
@@ -964,7 +1012,35 @@ ValorFinalExp <out int tipoDev>
 				  {
 				  tipoDev = simbolo.GetTipoRetorno();
 				  } .)
-	 VArgumentos<simbolo, aux> parent_ce) | (punto ident parent_ab VArgumentos <simbolo, aux> parent_ce)
+	 VArgumentos<simbolo, aux> parent_ce)
+	 
+	 //Este es el caso de que sea un método de una clase 
+	 | (punto ident (.Simbolo simbolo_metodoatributo = null;
+	 				  Simbolo simbolo_clase = simbolo.GetClase();
+	 				  TablaSimbolos ambitoclase;
+	 				  if (simbolo_clase == null)
+	 				  		SemErr("El identificador " + simbolo.GetNombre() + " no fue declarado como un objeto de ninguna clase.");
+	 				  else
+	 				  		{
+	 				 		ambitoclase = simbolo_clase.GetAmbitoAsociado();
+	 				 		if (!(ambitoclase.Esta(t.val)))
+	 				 			SemErr("El metodo " + t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
+	 				 		else
+	 				 			{
+	 				 			simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
+	 				 			if (simbolo_metodoatributo.GetType() == metodo)
+	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+	 				 			else if (simbolo_metodoatributo.GetType() == var)
+	 				 				tipoDev = simbolo_metodoatributo.GetType();
+	 				 			}
+	 				  		}
+	 				 .)
+	 		  parent_ab VArgumentos <simbolo_metodoatributo, aux> parent_ce)
+	 		  
+	 		  
+	 		  
+	 		  
+	 		  //CASO DE QUE SEA UN VECTOR
 	 							   | (corchete_ab DarPosVector<out Pos_Vector, simbolo>
 	 							   	 (. if (Pos_Vector >= simbolo.GetTamano())
 	 							   	 		{
@@ -982,8 +1058,11 @@ ValorFinalExp <out int tipoDev>
 VArgumentos <Simbolo simbolo, int pos>
 = (. int type=undef;
 	 Simbolo simbolo_nuevo = null; 
-	 System.out.println("Entramos en VArgumentos");.)
-[VExpresion<out type> (. if  (pos >= simbolo.GetNParametros())
+	 System.out.println("Entramos en VArgumentos");
+	 	.)
+[VExpresion<out type> (. if (simbolo != null)
+							{
+							if  (pos >= simbolo.GetNParametros())
 											{
 											SemErr("Numero de parametros no coincidente");
 											}
@@ -993,6 +1072,7 @@ VArgumentos <Simbolo simbolo, int pos>
 											if (simbolo_nuevo.GetType() != type)
 												SemErr("Tipo de los parametros no coincidente");
 											}
+							}
 									  .)
 ["," VArgumentos <simbolo, pos + 1>]]
 .
