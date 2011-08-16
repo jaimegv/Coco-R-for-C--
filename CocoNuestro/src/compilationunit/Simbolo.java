@@ -33,7 +33,7 @@ public class Simbolo {
 	private Simbolo clase_perteneciente; //Si es una variable, indica la clase a la que pertenece y type será "identificador"
 										 //Si es un método, indica la clase perteneciente.
 	private Simbolo clase_devuelta;
-										 
+	private TablaSimbolos ambito_asociado; //Si es una función o un método, indicará cuál es el ámbito asociado
 	
 
 
@@ -48,6 +48,7 @@ public Simbolo(String nombre, int type, int kind){
 	   this.valor = new Vector();
 	   this.parametros = new Vector();
 	   clase_perteneciente = null;
+
 	}
 
 //*****************MODIFICADORES*******************///
@@ -106,6 +107,11 @@ public void SetClase(Simbolo simbolo)
 {
 	clase_perteneciente = simbolo;
 }
+
+public void SetAmbitoAsociado(TablaSimbolos ambito_asociado)
+	{
+	this.ambito_asociado = ambito_asociado;
+	}
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
 	   return this.nombre;
@@ -186,7 +192,6 @@ public Simbolo GetParametros(int pos)
 	return (Simbolo)this.parametros.elementAt(pos);
 	}
 
-
 public Vector GetPosicionesVector()
 	{
 	return this.valor;
@@ -197,6 +202,10 @@ public Simbolo GetClase()
 	return this.clase_perteneciente;
 	}
 
+public TablaSimbolos GetAmbitoAsociado()
+{
+return this.ambito_asociado;
+}
 //************************************************//////
 
 public void AnadirParametro (Simbolo simbolo)
