@@ -302,10 +302,16 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								sim.SetClase(simClase);
 								.)
 								DecCabMet<sim>
+							  	(. 	System.out.println("Declarando en la clase:");
+									System.out.println("Nombre:"+sim.GetNombre()+sim.GetKind()+"param"+sim.GetNParametros()); 
+								.)
 						)
 		)
 							  | (.Simbolo simbol = new Simbolo(t.val, 0, 0);.) 
 							  	voidd ident DecCabMet<simbol>
+							  	(. 	System.out.println("Declarando en la clase:");
+									System.out.println("Nombre:"+simbol.GetNombre()); 
+								.)
 	}]
 .
 
@@ -317,24 +323,22 @@ DecCabMet<Simbolo simbolo>
 .
 
 Param_Cab <Simbolo simbolo>
-= (. int type;
-	 int nparam=0; .)
-	[Ttipo<out type> (.	Simbolo sim = new Simbolo("Arg_Metodo",0,0); .)
+= (. int type; .)
+	[Ttipo<out type> (.	Simbolo sim = new Simbolo("Arg_Metodo",0,parametro); .)
 						[Vector<sim>	(. System.out.println("Funcionalidad por hacer");.)]
-			(.	nparam=nparam+1;	// Un parametro mas	
-				sim.SetType(type);
-				simbolo.SetValor(sim);	// añado el simbolo al metodo	
-			.)	[ comma Param_Cab<simbolo> (. nparam=nparam+1; .)]
-	| voidd (.	Simbolo simb1 = new Simbolo("Arg_Metodo",0,0);
-				nparam=nparam+1;	// Un parametro mas	
+			(.	sim.SetType(type);
+				simbolo.AnadirParametro(sim);
+				System.out.println("jasjasjas"+parametro);
+				System.out.println("Argumento declaracion metodo en clase tipo:"+simbolo.GetParametros(0).GetKind());
+			.)	
+		[ comma Param_Cab<simbolo>]
+	| voidd (.	Simbolo simb1 = new Simbolo("Arg_Metodo",0,parametro);	
 				simb1.SetType(vacio);
-				simbolo.SetValor(simb1);	// añado el simbolo al metodo
-			.)	[ comma Param_Cab<simbolo> (. nparam=nparam+1; .)]
+				simbolo.AnadirParametro(simb1);
+			.)	[ comma Param_Cab<simbolo>]
 		
 	]
-(. simbolo.SetNParametros(nparam);
-	System.out.println("Numero de argumentos del metodo:"+simbolo.GetNParametros());
-	.)	// Numero de param
+(. System.out.println("Numero de argumentos del metodo:"+simbolo.GetNParametros()); .)	// Numero de param
 .
 
 DecMetodo<String Clase, int tipoRetorno> 
@@ -344,7 +348,6 @@ DecMetodo<String Clase, int tipoRetorno>
 	dospuntos_dos ident	(.	System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
 							if ((tabla.GetSimboloRecur(Clase) != null) &&	// clase existe?¿
 									(tabla.GetSimboloRecur(Clase).GetKind()==clase)) {
-
 									//clase y metodo existen!
 									if (tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().Esta(t.val)) {	// metodo asoc a clase¿?
 										// Cojo el simbolo
@@ -354,9 +357,21 @@ DecMetodo<String Clase, int tipoRetorno>
 											System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 											.)
 											parent_ab
-														[Parametros<sim>]
+														[Parametros<simMetodo>]
+														(.	//Caso: int Persona::daNombre() <- sin args
+															if ((simMetodo.GetNParametros()==0) ||
+																	((simMetodo.GetNParametros()==1) 
+																		&& (simMetodo.GetParametros(0).GetType()==vacio))) {
+																System.out.println("Esta todo correcto");
+															} else {
+																SemErr("Tipos declaracion metodo incorrectos");
+															}
+														.)
 											parent_ce
 											(.
+											// Todo ok! inserto en Ambito de la clase
+											// Cambio al ambito asociado al simbolo clase
+											tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());											
 										} else {
 											SemErr("Declaración metodo devuelve un tipo diferente a la declaración en la Clase: "+Clase+", en linea-col:"+simMetodo.GetColumn()+"-"+simMetodo.GetColumn());
 										}
@@ -365,13 +380,11 @@ DecMetodo<String Clase, int tipoRetorno>
 									}
 							} else {
 								SemErr("No existe dicha clase: "+Clase);
+								System.out.println("SOLUCIONAR Y CONSUMIR");
 							}
 						.) 
-		parent_ab 
-			[Parametros<sim>]
-		parent_ce
-		llave_ab 
-			Cuerpo 
+		llave_ab
+			Cuerpo
 		llave_ce
 .
 
@@ -446,19 +459,57 @@ DecVar <out int type, Simbolo simbolo>
 .
 
 
-Parametros <Simbolo simbolo_nombre_funcion>	(. int type; .) 
+Parametros <Simbolo simbolo_nombre_funcion>
+(. int type, contador=0;.) 
 = 	Ttipo<out type>ident (. Simbolo simbolo_parametro = new Simbolo(t.val, type, parametro);
 							simbolo_parametro.SetLine(t.line);
 							simbolo_parametro.SetColumn(t.col);
 							simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-							tabla.InsertarEnActual(simbolo_parametro); .) 
+							// Separado para argumentos de metodo
+							if (simbolo_nombre_funcion.GetKind()!=metodo ) {
+								tabla.InsertarEnActual(simbolo_parametro);
+							} else {	// Caso en que son parametros de metodos
+								System.out.println("Parametros METODO!!");
+								Simbolo simbolo_arg = simbolo_nombre_funcion.GetParametros(contador);
+								contador++;
+								if ((simbolo_arg.GetKind()==parametro) &&
+										(simbolo_arg.GetType()==type)){
+									System.out.println("Esta todo correcto");
+								} else {
+									SemErr("Tipos declaracion metodo incorrectos");
+								}
+							} .) 
 				[Vector <simbolo_parametro>]
 				[{comma Ttipo<out type>ident (. simbolo_parametro = new Simbolo(t.val, type, parametro);
 												simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-												tabla.InsertarEnActual(simbolo_parametro);.) 
-				[Vector <simbolo_parametro>]
+												// Separado para argumentos de metodo
+												if (simbolo_nombre_funcion.GetKind()!=metodo ) {
+													tabla.InsertarEnActual(simbolo_parametro);
+												} else {	// Caso en que son parametros de metodos
+													System.out.println("Parametros METODO!!");
+													Simbolo simbolo_arg = simbolo_nombre_funcion.GetParametros(contador);
+													contador++;
+													if ((simbolo_arg.GetKind()==parametro) &&
+															(simbolo_arg.GetType()==type)){
+														System.out.println("Esta todo correcto");
+													} else {
+														SemErr("Tipos declaracion metodo incorrectos");
+													}
+												} .) 
+					[Vector <simbolo_parametro>]
 				}] 
-				| voidd
+				| voidd (. 	if (simbolo_nombre_funcion.GetKind()==metodo) {
+								System.out.println("Parametros METODO!!");
+								//Simbolo simbolo_arg = simbolo_nombre_funcion.GetParametros(contador)
+								if ((simbolo_nombre_funcion.GetNParametros()==0) ||
+										((simbolo_nombre_funcion.GetNParametros()==1) 
+											&& (simbolo_nombre_funcion.GetParametros(contador).GetType()==vacio))) {
+									System.out.println("Esta todo correcto");
+								} else {
+									SemErr("Tipos declaracion metodo incorrectos");
+								}
+							}
+				.)
 .
 
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();
