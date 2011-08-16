@@ -29,11 +29,12 @@ public class Tablas {
 	return ambito_global;
 	}
 	
-	public void NuevoAmbito() 
+	public void NuevoAmbito(Simbolo simbolo) 
 		{
 		// Nuevo ambito a desarrollar que será el actual
 		// su padre es el actual ambito
 		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);	// pasamos como arg la tabla padre
+		simbolo.SetAmbitoAsociado(ambito_nuevo);
 		ambito_actual = ambito_nuevo;
 		System.out.println("Nuevo ambito creado");
 		}
@@ -111,7 +112,7 @@ public class Tablas {
 			}
 		if (this.ambito_global.Esta(nombre))
 			{
-			System.out.println("Se ha encontrado en el ámbito global");
+			System.out.println(nombre + " se ha encontrado en el ámbito global");
 			return true;
 			}
 		else
