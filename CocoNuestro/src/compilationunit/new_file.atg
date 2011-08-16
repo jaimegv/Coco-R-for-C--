@@ -225,7 +225,7 @@ CEMASMAS
 																		.)
 						 				| 	(.	System.out.println("Entraste en DecMetodo: "+t.val+" con metodo "+la.val);
 												String Clase= (String) t.val; .)
-						 					DecMetodo<Clase>
+						 					DecMetodo<Clase, type>	// se envia nombre de clase y tipo retorno del metodo
 									)
 								CEMASMAS))
 .
@@ -301,11 +301,11 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								sim.SetTipoRetorno(type);
 								sim.SetClase(simClase);
 								.)
-								DecCabMet<sim> 
+								DecCabMet<sim>
 						)
 		)
-							  | (.Simbolo sim = new Simbolo(t.val, 0, 0);.) 
-							  	voidd ident DecCabMet<sim>
+							  | (.Simbolo simbol = new Simbolo(t.val, 0, 0);.) 
+							  	voidd ident DecCabMet<simbol>
 	}]
 .
 
@@ -337,22 +337,39 @@ Param_Cab <Simbolo simbolo>
 	.)	// Numero de param
 .
 
-DecMetodo<String Clase> 
+DecMetodo<String Clase, int tipoRetorno> 
 = (. Simbolo sim = new Simbolo("no def", 0, 0);		// Añado metodo al ambito actual
 	 System.out.println("Estas en declaracion Metodo");
 .) 
 	dospuntos_dos ident	(.	System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
-							if ((tabla.EstaEnActual(Clase) &&
-								(tabla.GetSimboloRecur(Clase) != null)) &&
-									(tabla.GetSimboloRecur(Clase).GetKind()==clase) ) {
-								System.out.println("Clase existe todo ok!");
+							if ((tabla.GetSimboloRecur(Clase) != null) &&	// clase existe?¿
+									(tabla.GetSimboloRecur(Clase).GetKind()==clase)) {
+
+									//clase y metodo existen!
+									if (tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().Esta(t.val)) {	// metodo asoc a clase¿?
+										// Cojo el simbolo
+										Simbolo simMetodo=tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().GetSimbolo(t.val);
+										// Comprobacion tipoRetoron y argumentos son iguales
+										if (simMetodo.GetTipoRetorno()==tipoRetorno) {
+											System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
+											.)
+											parent_ab
+														[Parametros<sim>]
+											parent_ce
+											(.
+										} else {
+											SemErr("Declaración metodo devuelve un tipo diferente a la declaración en la Clase: "+Clase+", en linea-col:"+simMetodo.GetColumn()+"-"+simMetodo.GetColumn());
+										}
+									} else {
+										SemErr("Existe la clase: "+Clase+", pero no tiene ningun metodo asociado: "+t.val);
+									}
 							} else {
-								SemErr("No existe una clase con este método asociado");
+								SemErr("No existe dicha clase: "+Clase);
 							}
 						.) 
 		parent_ab 
 			[Parametros<sim>]
-		parent_ce 
+		parent_ce
 		llave_ab 
 			Cuerpo 
 		llave_ce
