@@ -128,4 +128,8 @@ public class Tablas {
 		return this.ambito_actual.Esta(nombre);
 		}
 	
+	public void AbrirAmbito(TablaSimbolos ambito_a_abrir)
+		{
+		ambito_actual = ambito_a_abrir;
+		}
 }
