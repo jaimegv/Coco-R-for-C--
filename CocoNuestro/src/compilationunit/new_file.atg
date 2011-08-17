@@ -290,34 +290,48 @@ DecClase	(. int visible=privado; .) // Visibilidad del contenido, por defecto PR
 
 Cuerpo_Clase <int visible, Simbolo simClase>
 	(.	int type;
+		Simbolo ObjetoDevuelto=null;	// inicializado
 	.)	// Recuerda! estas en un ambito clase 
-= [{(Ttipo<out type> ident (. 	Simbolo sim = new Simbolo(t.val, 0, 0);	// Creacion del simbolo
+= [{(Ttipo<out type> 	(.	Simbolo sim = new Simbolo("tipoDevuelto", 0, 0);	// Creacion del simbolo
+						    if ((type==identificador) &&	// Devuelve un tipo.Objeto.
+						    	((tabla.GetSimboloRecur(t.val) != null) &&
+									(tabla.GetSimboloRecur(t.val).GetKind()==clase))) {
+								//Guardamos la dirección para engancharlo luego
+								ObjetoDevuelto=tabla.GetSimboloRecur(t.val);
+						    } else {
+						    	SemErr("No existe ningun objeto con dicho nombre.");
+						    }
+							tabla.InsertarEnActual(sim);
+						.)
+						ident (.sim.SetNombre(t.val);
 								sim.SetVisibilidad(visible);
 								sim.SetLine(t.line);
 	 						    sim.SetColumn(t.col);
-								tabla.InsertarEnActual(sim);
 							.)
 						( 	(. /* Caso en que es una Declaracion de variable */
 								sim.SetKind(var);	// Es variable
 								sim.SetType(type);	// Su tipo
+								if (type==identificador) {
+									sim.SetClase(ObjetoDevuelto);
+								}
 							.) 
 								DecVar<out type, sim> 
 							| (./* Caso Declaracion Cabecera de un metodo */
 								sim.SetKind(metodo);
 								sim.SetTipoRetorno(type);
 								sim.SetClase(simClase);
+								if (type==identificador) {
+									sim.SetClaseDevuelta(ObjetoDevuelto);
+								}
 								.)
 								DecCabMet<sim>
-							  	(. 	System.out.println("Declarando en la clase:");
-									System.out.println("Nombre:"+sim.GetNombre()+sim.GetKind()+"param"+sim.GetNParametros()); 
-								.)
 						)
 		)
-							  | (.Simbolo simbol = new Simbolo(t.val, 0, 0);.) 
-							  	voidd ident DecCabMet<simbol>
-							  	(. 	System.out.println("Declarando en la clase:");
-									System.out.println("Nombre:"+simbol.GetNombre()); 
-								.)
+							  | voidd ident (.	Simbolo simbol = new Simbolo(t.val, 0, metodo);
+											  		simbol.SetKind(metodo);
+											  		simbol.SetTipoRetorno(vacio);
+							  				.) 
+							  		DecCabMet<simbol>	// tiene q ser un metodo
 	}]
 .
 
@@ -354,6 +368,9 @@ DecMetodo<String Clase, int tipoRetorno>
 										if (simMetodo.GetTipoRetorno()==tipoRetorno) {
 											simDecMetodo.SetNombre(t.val);
 											simDecMetodo.SetTipoRetorno(tipoRetorno);
+											if (tipoRetorno==identificador) {
+												SemErr("FUNCIONALIDAD POR HACER");
+											}
 											//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 											// Todo ok! inserto en Ambito de la clase
 											// Cambio al ambito asociado al simbolo clase
