@@ -1,13 +1,35 @@
-int edad;
+int pene;
+int lista_compra[20];
 
 class Persona
-{       //atributos privados
-        char * nombre;  // el nombre es una cadena
-        int edad;
+{
+private:
+	int var_privada;
+	Persona papa;
 public:
-        int ponEdad(int);
+	int talla;
+	Persona daPadre();
+	int daPepe(int);
 };
 
-void main () {
+class Perro {};
+
+Perro Persona::daPadre(void) {
+	int num;
+	num=var_privada+talla;
+	return papa;
+}
+
+/*
+int Persona::daPepe (int numero) {
+//	numero=numero+pene;
+	return talla;
+}
+*/
+
+int main () {
+	Persona juan;
+
+	pene=juan.talla;
 	return 2; 
-} 
+}
