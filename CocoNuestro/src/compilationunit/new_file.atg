@@ -251,8 +251,8 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 
 DecClase	(. int visible=privado; .) // Visibilidad del contenido, por defecto PRIVADO
 = (. Simbolo simbolo = new Simbolo ("undef", 0, clase); System.out.println("DecClase!");.)
-	[publicc (. simbolo.SetVisibilidad(1); .) 
-		| privatte (. simbolo.SetVisibilidad(0); .)]
+	[publicc (. simbolo.SetVisibilidad(publico); .) 
+		| privatte (. simbolo.SetVisibilidad(privado); .)]
  	classs ident (. simbolo.SetNombre(t.val);	// Modifico el nombre del Simbolo
 					simbolo.SetLine(t.line);
 					simbolo.SetColumn(t.col);
@@ -271,9 +271,9 @@ DecClase	(. int visible=privado; .) // Visibilidad del contenido, por defecto PR
 				.)
 							llave_ab	// y variables de la clase.
 								Cuerpo_Clase<visible, simbolo>
-									[(publicc	(. visible=publico; .) 
+									[(publicc	(. visible=publico;  .) 
 										dosPuntos Cuerpo_Clase<visible, simbolo> 
-											[privatte dosPuntos (. visible=publico; .) 
+											[privatte dosPuntos (. visible=privado; .) 
 												Cuerpo_Clase<visible, simbolo>])
 									|(privatte	(. visible=privado; .) 
 										dosPuntos Cuerpo_Clase<visible, simbolo> 
