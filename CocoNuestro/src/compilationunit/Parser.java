@@ -168,6 +168,7 @@ public class Parser {
 		int type=undef; 
 		int type1;
 		Simbolo simbolo_dev = null;
+		String nombre = null;
 		
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
@@ -176,6 +177,7 @@ public class Parser {
 			if (StartOf(2)) {
 				type = Ttipo();
 				System.out.println("Hola!"+t.val+" cuyo type vale:"+type);
+				nombre = new String(t.val);
 				if (type==identificador) {
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
 				simbolo.SetLine(t.line);
@@ -210,7 +212,7 @@ public class Parser {
 				
 			}
 			if (la.kind == 25) {
-				Main(type);
+				Main(type, nombre);
 			} else if (la.kind == 1) {
 				Get();
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
@@ -356,19 +358,31 @@ public class Parser {
 		return type;
 	}
 
-	void Main(int type) {
-		Simbolo simbolo = new Simbolo("main",type,funcion);
+	void Main(int type, String nombre) {
+		Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
+		Simbolo simbolo_clase = null;
 		Expect(25);
-		tabla.NuevoAmbito(simbolo);
-		simbolo.SetKind (funcion);
-		simbolo.SetTipoRetorno(simbolo.GetType());
+		tabla.NuevoAmbito(simbolo_funcion);
+		simbolo_funcion.SetKind (funcion);
+		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());
+		if (simbolo_funcion.GetTipoRetorno() == identificador)
+		{
+		if (!(tabla.EstaRecur(nombre)))
+			SemErr("No se ha encontrado ninguna clase con nombre " + nombre);
+		else
+			simbolo_clase = tabla.GetSimboloRecur(nombre);
+			if (simbolo_clase.GetKind() != clase)
+				SemErr(identificador + " no es una clase");
+			else
+				simbolo_funcion.SetClaseDevuelta(simbolo_clase);
+		} 
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros(simbolo);
+			Parametros(simbolo_funcion);
 		}
 		Expect(38);
 		Expect(29);
-		Cuerpo(simbolo);
+		Cuerpo(simbolo_funcion);
 		Expect(36);
 	}
 
@@ -700,6 +714,16 @@ public class Parser {
 			type  = InstReturn();
 			if (simbolo_funcion.GetTipoRetorno() != type)
 			SemErr("return devuelve un tipo distinto al declarado.");
+			else if (type == identificador)
+					{
+					if (simbolo_funcion.GetClaseDevuelta() != simboloClaseObjeto)
+						{
+						System.out.println(simboloClaseObjeto.GetNombre());
+						System.out.println(simbolo_funcion.GetClaseDevuelta().GetNombre());
+						SemErr("return devuelve una clase distinta a la declarada.");
+						}
+					}
+			
 		} else if (la.kind == 19) {
 			InstCout();
 		} else if (la.kind == 20) {
@@ -854,8 +878,7 @@ public class Parser {
 								SemErr("Tipo de los parametros no coincidente");
 							}
 			}
-			else
-						  
+					  
 			if (la.kind == 27) {
 				Get();
 				VArgumentos(simbolo, pos + 1);
@@ -897,6 +920,7 @@ public class Parser {
 		tipoDev = undef;
 		int type; 
 		System.out.println("Entramos en InstReturn");
+		simboloClaseObjeto = null;
 		Expect(18);
 		if (StartOf(9)) {
 			type = VExpresion();
