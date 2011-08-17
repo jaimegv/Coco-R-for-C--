@@ -92,6 +92,8 @@ public class Parser {
 	// Tabla de simbolos global
 	public Tablas tabla;
 	// Tupla devuelta por las expresiones (tipo, valor)
+	
+	public Simbolo simboloClaseObjeto = null; 
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -759,7 +761,8 @@ public class Parser {
 
 	void InstExpresion(Simbolo simbolo) {
 		int type=undef;
-		System.out.println("Entramos en InstExpresion"); 
+		System.out.println("Entramos en InstExpresion");
+		simboloClaseObjeto = null; 
 		if (la.kind == 31) {
 			Get();
 			VArgumentos(simbolo, 0);
@@ -795,6 +798,17 @@ public class Parser {
 			type = VExpresion();
 			if (simbolo.GetType() != type)
 				SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+			else if (type == identificador)
+				{
+				if (simbolo.GetClase() != simboloClaseObjeto)
+					{
+					SemErr("La clase del identificador no coincide con la clase de la expresion");
+					}
+				else
+					simboloClaseObjeto = null;
+				}
+			
+			
 			
 			Expect(42);
 		} else SynErr(71);
@@ -1571,6 +1585,7 @@ public class Parser {
 			{
 			simbolo = tabla.GetSimboloRecur(t.val);
 			tipoDev = simbolo.GetType();
+			simboloClaseObjeto = simbolo.GetClase();
 			esta = true;
 			}
 			
@@ -1599,6 +1614,8 @@ public class Parser {
 						else
 							{
 							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
+							simboloClaseObjeto = simbolo_metodoatributo.GetClase();
+					System.out.println(simbolo_metodoatributo.GetClase().GetNombre());
 							System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
 							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 															(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
@@ -1618,6 +1635,7 @@ public class Parser {
 						if (simbolo_metodoatributo.GetKind() != metodo)
 						SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
 						else
+							simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 							tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 							
 						 

@@ -18,6 +18,8 @@ COMPILER CEMASMAS1
 	// Tabla de simbolos global
 	public Tablas tabla;
 	// Tupla devuelta por las expresiones (tipo, valor)
+	
+	public Simbolo simboloClaseObjeto = null; 
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -580,7 +582,7 @@ punto ident (. if (simbolo_objeto != null)
 			 	}
 			 	.)
  VArgumentos<simbolo_metodoargumento, 0> parent_ce puntoComa)
- |InstExpresion<simbolo_metodoargumento>)
+ | InstExpresion<simbolo_metodoargumento>)
 .
 
 //**************************************************************//
@@ -623,14 +625,27 @@ Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o me
 
 InstExpresion <Simbolo simbolo>
 =	(. int type=undef;
-	   System.out.println("Entramos en InstExpresion"); .)
+	   System.out.println("Entramos en InstExpresion");
+	   simboloClaseObjeto = null; .)
 				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
 				| (op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													VExpresion<out type>
 													(. if (simbolo.GetType() != type)
 													   		SemErr("El tipo del identificador no coincide con el tipo de la expresion");
-													.) puntoComa)
+														else if (type == identificador)
+															{
+															if (simbolo.GetClase() != simboloClaseObjeto)
+																{
+																SemErr("La clase del identificador no coincide con la clase de la expresion");
+																}
+															else
+																simboloClaseObjeto = null;
+															}
+														
+														
+														.) 
+														puntoComa)
 .
 
 InstReturn <out int tipoDev>
@@ -1082,6 +1097,7 @@ ValorFinalExp <out int tipoDev>
 				{
 				simbolo = tabla.GetSimboloRecur(t.val);
 				tipoDev = simbolo.GetType();
+				simboloClaseObjeto = simbolo.GetClase();
 				esta = true;
 				}
 
@@ -1107,6 +1123,8 @@ ValorFinalExp <out int tipoDev>
 	 				 		else
 	 				 			{
 	 				 			simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
+	 				 			simboloClaseObjeto = simbolo_metodoatributo.GetClase();
+								System.out.println(simbolo_metodoatributo.GetClase().GetNombre());
 	 				 			System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
 	 				 			if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 	 				 											(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
@@ -1125,6 +1143,7 @@ ValorFinalExp <out int tipoDev>
 	 		  [parent_ab (. if (simbolo_metodoatributo.GetKind() != metodo)
 	 		  					SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
 	 		  				else
+	 		  					simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 	 		  					tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 	 		  					
 	 		  			  .)
