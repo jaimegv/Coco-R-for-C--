@@ -243,6 +243,7 @@ public class Parser {
 					Subprograma(simbolo);
 				} else if (la.kind == 30) {
 					Vector(simbolo);
+					simbolo.SetToVector(); 
 					Expect(42);
 				} else if (la.kind == 41 || la.kind == 42) {
 					type1 = DecVar(simbolo);
@@ -407,13 +408,18 @@ public class Parser {
 
 	void Vector(Simbolo simbolo) {
 		simbolo.SetToVector();
-		Simbolo sim = new Simbolo ("Temp", 0,0);
+		Simbolo sim = new Simbolo ("SimVector", 0,0);
 		int type;
 		Expect(30);
 		if (StartOf(3)) {
 			type = Exp(sim);
-			((Number)sim.GetValor()).intValue();
-			System.out.println("El tamano del vector es " + (Number)sim.GetValor());
+			System.out.println("El tamano del vector es " + (Integer)sim.GetValor());
+			if (type!=entera) {
+				SemErr("Indice tipo Vector erroneo.");
+			} else {
+				simbolo.SetToVector((Integer)sim.GetValor());
+			}
+			
 		}
 		Expect(37);
 	}
@@ -434,7 +440,7 @@ public class Parser {
 	}
 
 	void DecMetodo(String Clase, int tipoRetorno) {
-		Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// AÃ±ado metodo al ambito actual
+		Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Anado metodo al ambito actual
 		//System.out.println("Estas en declaracion Metodo");
 		
 		Expect(17);
@@ -449,9 +455,7 @@ public class Parser {
 				if (simMetodo.GetTipoRetorno()==tipoRetorno) {
 					simDecMetodo.SetNombre(t.val);
 					simDecMetodo.SetTipoRetorno(tipoRetorno);
-					if (tipoRetorno==identificador) {
-						SemErr("FUNCIONALIDAD POR HACER");
-					}
+					simDecMetodo.SetClase(tabla.GetSimboloRecur(Clase));
 					//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 					// Todo ok! inserto en Ambito de la clase
 					// Cambio al ambito asociado al simbolo clase
@@ -476,11 +480,21 @@ public class Parser {
 		} else {
 			SemErr("Tipos declaracion metodo incorrectos");
 		}
-		
+		System.out.println("Tipo que devuelve simDecMet:"+simDecMetodo.GetTipoRetorno());
+										
 		Expect(38);
 		Expect(29);
 		Cuerpo(simDecMetodo);
 		Expect(36);
+		if (tipoRetorno==identificador) {
+		//1Âº Buscamos en simDevMetodo la clase asociada
+		SemErr("FUNCIONALIDAD POR HACER");
+		}
+		
+		if (simDecMetodo.GetTipoRetorno()==identificador) {
+			SemErr("jurjur");
+		}
+		
 		tabla.CerrarAmbito();	// cierro ambito del metodo
 		tabla.CerrarAmbito();	// Cerramos el ambito de la clase
 								// y volveremos, seguramente, al global
@@ -821,7 +835,7 @@ public class Parser {
 			}
 			type = VExpresion();
 			if (simbolo.GetType() != type)
-				SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+				SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
 			else if (type == identificador)
 				{
 				if (simbolo.GetClase() != simboloClaseObjeto)
@@ -924,6 +938,7 @@ public class Parser {
 		Expect(18);
 		if (StartOf(9)) {
 			type = VExpresion();
+			System.out.println("Return devuelve un tipo:"+type);
 			tipoDev= type; 
 		}
 		Expect(42);
@@ -1637,12 +1652,15 @@ public class Parser {
 							SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 						else
 							{
+							System.out.println("1-jarjar");
 							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 							simboloClaseObjeto = simbolo_metodoatributo.GetClase();
+							System.out.println("2-jarjar"); 
 					System.out.println(simbolo_metodoatributo.GetClase().GetNombre());
-							System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
-							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
-															(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
+					System.out.println("3-jarjar");
+							System.out.println(simbolo_metodoatributo.GetVisibilidad());
+						if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
+										(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
 											SemErr(t.val + " es privado");
 							if (simbolo_metodoatributo.GetKind() == metodo)
 								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
@@ -1661,7 +1679,6 @@ public class Parser {
 						else
 							simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 							tipoDev = simbolo_metodoatributo.GetTipoRetorno();
-							
 						 
 						VArgumentos(simbolo_metodoatributo, aux);
 						Expect(38);

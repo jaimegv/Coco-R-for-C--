@@ -219,7 +219,8 @@ CEMASMAS
 			 						.)
 			 					  	( (. System.out.println("Entras a Subprograma"); .)
 			 					  	 Subprograma <simbolo>
-			 					  		|  Vector<simbolo> puntoComa 
+			 					  		|  Vector<simbolo> (. simbolo.SetToVector(); .) 
+			 					  				puntoComa 
 			 					  			| DecVar<out type1, simbolo> 
 		 					  											(. 
 		 					  											if (type1==type) {
@@ -359,9 +360,9 @@ Param_Cab <Simbolo simbolo>
 .
 
 DecMetodo<String Clase, int tipoRetorno> 
-= (. Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Añado metodo al ambito actual
+= (. Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Anado metodo al ambito actual
 	 //System.out.println("Estas en declaracion Metodo");
-.) 
+.)
 	dospuntos_dos ident	(.	//System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
 							if ((tabla.GetSimboloRecur(Clase) != null) &&	// clase existe?¿
 									(tabla.GetSimboloRecur(Clase).GetKind()==clase)) {
@@ -373,9 +374,7 @@ DecMetodo<String Clase, int tipoRetorno>
 										if (simMetodo.GetTipoRetorno()==tipoRetorno) {
 											simDecMetodo.SetNombre(t.val);
 											simDecMetodo.SetTipoRetorno(tipoRetorno);
-											if (tipoRetorno==identificador) {
-												SemErr("FUNCIONALIDAD POR HACER");
-											}
+											simDecMetodo.SetClase(tabla.GetSimboloRecur(Clase));
 											//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 											// Todo ok! inserto en Ambito de la clase
 											// Cambio al ambito asociado al simbolo clase
@@ -400,13 +399,23 @@ DecMetodo<String Clase, int tipoRetorno>
 												} else {
 													SemErr("Tipos declaracion metodo incorrectos");
 												}
+			System.out.println("Tipo que devuelve simDecMet:"+simDecMetodo.GetTipoRetorno());
 											.)
 											parent_ce
-
 											llave_ab
 												Cuerpo<simDecMetodo>
 											llave_ce
 											(.
+											// En caso de devolver un Objeto
+											if (tipoRetorno==identificador) {
+												//1º Buscamos en simDevMetodo la clase asociada
+												SemErr("FUNCIONALIDAD POR HACER");
+											}
+											
+											if (simDecMetodo.GetTipoRetorno()==identificador) {
+												SemErr("jurjur");
+											}
+											
 											tabla.CerrarAmbito();	// cierro ambito del metodo
 											tabla.CerrarAmbito();	// Cerramos el ambito de la clase
 																	// y volveremos, seguramente, al global
@@ -547,10 +556,15 @@ Parametros <Simbolo simbolo_nombre_funcion>
 .
 
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();
-							  Simbolo sim = new Simbolo ("Temp", 0,0);
+							  Simbolo sim = new Simbolo ("SimVector", 0,0);
 							  int type;.)
-corchete_ab [Exp <out type, sim> (. ((Number)sim.GetValor()).intValue();
-											 System.out.println("El tamano del vector es " + (Number)sim.GetValor());.)
+corchete_ab [Exp <out type, sim>	(. 	System.out.println("El tamano del vector es " + (Integer)sim.GetValor());
+										if (type!=entera) {
+											SemErr("Indice tipo Vector erroneo.");
+										} else {
+											simbolo.SetToVector((Integer)sim.GetValor());
+										}
+									.)
 ] corchete_ce.
 
 
@@ -644,9 +658,6 @@ Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o me
 							  			}
 							  		}
 							  .)
-							  
-							  
-							  
 	| InstCout | InstCin | InstIfElse<simbolo_funcion>
 .
 
@@ -659,7 +670,7 @@ InstExpresion <Simbolo simbolo>
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													VExpresion<out type>
 													(. if (simbolo.GetType() != type)
-													   		SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+													   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
 														else if (type == identificador)
 															{
 															if (simbolo.GetClase() != simboloClaseObjeto)
@@ -680,7 +691,8 @@ InstReturn <out int tipoDev>
 	int type; .)
 = 	   (.System.out.println("Entramos en InstReturn");
 		 simboloClaseObjeto = null;.)
-(rreturn [VExpresion<out type> (. tipoDev= type; .) ] puntoComa)
+(rreturn [VExpresion<out type> (.   System.out.println("Return devuelve un tipo:"+type);
+									tipoDev= type; .) ] puntoComa)
 .
 
 /****************************************************/
@@ -1150,12 +1162,15 @@ ValorFinalExp <out int tipoDev>
 	 				 			SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 	 				 		else
 	 				 			{
+	 				 			System.out.println("1-jarjar");
 	 				 			simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 	 				 			simboloClaseObjeto = simbolo_metodoatributo.GetClase();
+	 				 			System.out.println("2-jarjar"); 
 								System.out.println(simbolo_metodoatributo.GetClase().GetNombre());
-	 				 			System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
-	 				 			if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
-	 				 											(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
+								System.out.println("3-jarjar");
+	 				 			System.out.println(simbolo_metodoatributo.GetVisibilidad());
+	 							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
+	 				 						(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
 	 				 							SemErr(t.val + " es privado");
 	 				 			if (simbolo_metodoatributo.GetKind() == metodo)
 	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
@@ -1173,7 +1188,6 @@ ValorFinalExp <out int tipoDev>
 	 		  				else
 	 		  					simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 	 		  					tipoDev = simbolo_metodoatributo.GetTipoRetorno();
-	 		  					
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  
