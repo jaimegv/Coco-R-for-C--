@@ -418,7 +418,7 @@ public class Parser {
 	}
 
 	void DecMetodo(String Clase, int tipoRetorno) {
-		Simbolo simDecMetodo = new Simbolo("sim_DecMetodo", 0, metodo);		// AÃ±ado metodo al ambito actual
+		Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// AÃ±ado metodo al ambito actual
 		//System.out.println("Estas en declaracion Metodo");
 		
 		Expect(17);
@@ -432,6 +432,7 @@ public class Parser {
 				// Comprobacion tipoRetoron y argumentos son iguales
 				if (simMetodo.GetTipoRetorno()==tipoRetorno) {
 					simDecMetodo.SetNombre(t.val);
+					simDecMetodo.SetTipoRetorno(tipoRetorno);
 					//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 					// Todo ok! inserto en Ambito de la clase
 					// Cambio al ambito asociado al simbolo clase

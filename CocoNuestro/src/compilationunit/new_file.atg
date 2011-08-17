@@ -340,7 +340,7 @@ Param_Cab <Simbolo simbolo>
 .
 
 DecMetodo<String Clase, int tipoRetorno> 
-= (. Simbolo simDecMetodo = new Simbolo("sim_DecMetodo", 0, metodo);		// Añado metodo al ambito actual
+= (. Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Añado metodo al ambito actual
 	 //System.out.println("Estas en declaracion Metodo");
 .) 
 	dospuntos_dos ident	(.	//System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
@@ -353,6 +353,7 @@ DecMetodo<String Clase, int tipoRetorno>
 										// Comprobacion tipoRetoron y argumentos son iguales
 										if (simMetodo.GetTipoRetorno()==tipoRetorno) {
 											simDecMetodo.SetNombre(t.val);
+											simDecMetodo.SetTipoRetorno(tipoRetorno);
 											//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 											// Todo ok! inserto en Ambito de la clase
 											// Cambio al ambito asociado al simbolo clase
