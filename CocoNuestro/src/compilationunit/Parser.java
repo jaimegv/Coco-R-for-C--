@@ -709,7 +709,8 @@ public class Parser {
 
 	void Llamada(Simbolo simbolo_objeto) {
 		TablaSimbolos ambito_clase = null;
-		Simbolo simbolo_metodoargumento = null; 
+		Simbolo simbolo_metodoargumento = null;
+		System.out.println("Entramos en Llamada"); 
 		Expect(28);
 		Expect(1);
 		if (simbolo_objeto != null)
@@ -721,7 +722,7 @@ public class Parser {
 			{
 			ambito_clase = simbolo_clase.GetAmbitoAsociado();
 			if (ambito_clase == null)
-				SemErr("El ambito asociado a la clase " + simbolo_clase.GetNombre() + " no tiene ningun ambito asociado");
+				SemErr("La clase " + simbolo_clase.GetNombre() + " no tiene ningun ambito asociado");
 			else
 				{
 				if (!(ambito_clase.Esta(t.val)))
@@ -740,15 +741,20 @@ public class Parser {
 			Get();
 			if (simbolo_metodoargumento != null)
 			{
-			if (simbolo_metodoargumento.GetType() != metodo) //Si hay un parÃ©ntesis tiene que ser un mÃ©todo, y debe ser pÃºblico.
+			if (simbolo_metodoargumento.GetKind() != metodo) //Si hay un parÃ©ntesis tiene que ser un mÃ©todo, y debe ser pÃºblico.
+				{
 				SemErr(simbolo_metodoargumento.GetNombre() + " no ha sido declarado como un metodo.");
+				}
 			else if (simbolo_metodoargumento.GetVisibilidad() == privado)
 			 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
 				}
 				
 			VArgumentos(simbolo_metodoargumento, 0);
 			Expect(38);
-		}
+			Expect(42);
+		} else if (StartOf(6)) {
+			InstExpresion(simbolo_metodoargumento);
+		} else SynErr(70);
 	}
 
 	void InstExpresion(Simbolo simbolo) {
@@ -756,13 +762,6 @@ public class Parser {
 		System.out.println("Entramos en InstExpresion"); 
 		if (la.kind == 31) {
 			Get();
-			VArgumentos(simbolo, 0);
-			Expect(38);
-			Expect(42);
-		} else if (la.kind == 28) {
-			Get();
-			Expect(1);
-			Expect(31);
 			VArgumentos(simbolo, 0);
 			Expect(38);
 			Expect(42);
@@ -798,7 +797,7 @@ public class Parser {
 				SemErr("El tipo del identificador no coincide con el tipo de la expresion");
 			
 			Expect(42);
-		} else SynErr(70);
+		} else SynErr(71);
 	}
 
 	int  Exp(Simbolo sim) {
@@ -841,7 +840,8 @@ public class Parser {
 								SemErr("Tipo de los parametros no coincidente");
 							}
 			}
-					  
+			else
+						  
 			if (la.kind == 27) {
 				Get();
 				VArgumentos(simbolo, pos + 1);
@@ -941,7 +941,7 @@ public class Parser {
 			}
 			
 			InstExpresion(simbolo);
-		} else SynErr(71);
+		} else SynErr(72);
 		if (la.kind == 24) {
 			Else(simbolo_funcion);
 		}
@@ -1028,7 +1028,7 @@ public class Parser {
 			Get();
 			tipoDev = VExpresion();
 			Expect(38);
-		} else SynErr(72);
+		} else SynErr(73);
 		return tipoDev;
 	}
 
@@ -1045,7 +1045,7 @@ public class Parser {
 			Expect(36);
 		} else if (StartOf(5)) {
 			Instruccion(simbolo_funcion);
-		} else SynErr(73);
+		} else SynErr(74);
 	}
 
 	int  Arg_io() {
@@ -1074,7 +1074,7 @@ public class Parser {
 		} else if (StartOf(15)) {
 			tipoDev = Exp(sim);
 			tipoDev = entera; 
-		} else SynErr(74);
+		} else SynErr(75);
 		return tipoDev;
 	}
 
@@ -1215,7 +1215,7 @@ public class Parser {
 				}
 				
 			}
-		} else SynErr(75);
+		} else SynErr(76);
 		return tipoDev;
 	}
 
@@ -1226,7 +1226,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 46) {
 			Get();
-		} else SynErr(76);
+		} else SynErr(77);
 	}
 
 	void Operador_Relacional() {
@@ -1255,7 +1255,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(77); break;
+		default: SynErr(78); break;
 		}
 	}
 
@@ -1368,7 +1368,7 @@ public class Parser {
 				SemErr("No es entero!es un:"+t.val);
 			}
 			
-		} else SynErr(78);
+		} else SynErr(79);
 		return valor;
 	}
 
@@ -1388,7 +1388,7 @@ public class Parser {
 		} else if (la.kind == 8) {
 			Get();
 			tipoDev=bool;	
-		} else SynErr(79);
+		} else SynErr(80);
 		return tipoDev;
 	}
 
@@ -1418,7 +1418,7 @@ public class Parser {
 		} else if (StartOf(21)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
-		} else SynErr(80);
+		} else SynErr(81);
 		return tipoDev;
 	}
 
@@ -1458,7 +1458,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(81);
+		} else SynErr(82);
 	}
 
 	int  Expresion5() {
@@ -1526,7 +1526,7 @@ public class Parser {
 			tipoDev=bool;	
 			break;
 		}
-		default: SynErr(82); break;
+		default: SynErr(83); break;
 		}
 		return tipoDev;
 	}
@@ -1550,7 +1550,7 @@ public class Parser {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
-		} else SynErr(83);
+		} else SynErr(84);
 	}
 
 	int  ValorFinalExp() {
@@ -1644,7 +1644,7 @@ public class Parser {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena;
-		} else SynErr(84);
+		} else SynErr(85);
 		return tipoDev;
 	}
 
@@ -1671,7 +1671,7 @@ public class Parser {
 			Get();
 			tipoDev = VExpresion();
 			Expect(38);
-		} else SynErr(85);
+		} else SynErr(86);
 		return tipoDev;
 	}
 
@@ -1693,7 +1693,7 @@ public class Parser {
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,T,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
@@ -1803,22 +1803,23 @@ class Errors {
 			case 67: s = "invalid Cuerpo"; break;
 			case 68: s = "invalid Cuerpo"; break;
 			case 69: s = "invalid Instruccion"; break;
-			case 70: s = "invalid InstExpresion"; break;
-			case 71: s = "invalid InstIfElse"; break;
-			case 72: s = "invalid VExpresion"; break;
-			case 73: s = "invalid Else"; break;
-			case 74: s = "invalid Arg_io"; break;
-			case 75: s = "invalid Expresion21"; break;
-			case 76: s = "invalid Operador_Logico"; break;
-			case 77: s = "invalid Operador_Relacional"; break;
-			case 78: s = "invalid ExpCambioSigno"; break;
-			case 79: s = "invalid ExpOperadores"; break;
-			case 80: s = "invalid Expresion4"; break;
-			case 81: s = "invalid Operador_Aritmetico"; break;
-			case 82: s = "invalid Expresion5"; break;
-			case 83: s = "invalid Expresion_Entera"; break;
-			case 84: s = "invalid ValorFinalExp"; break;
-			case 85: s = "invalid VExpresion2"; break;
+			case 70: s = "invalid Llamada"; break;
+			case 71: s = "invalid InstExpresion"; break;
+			case 72: s = "invalid InstIfElse"; break;
+			case 73: s = "invalid VExpresion"; break;
+			case 74: s = "invalid Else"; break;
+			case 75: s = "invalid Arg_io"; break;
+			case 76: s = "invalid Expresion21"; break;
+			case 77: s = "invalid Operador_Logico"; break;
+			case 78: s = "invalid Operador_Relacional"; break;
+			case 79: s = "invalid ExpCambioSigno"; break;
+			case 80: s = "invalid ExpOperadores"; break;
+			case 81: s = "invalid Expresion4"; break;
+			case 82: s = "invalid Operador_Aritmetico"; break;
+			case 83: s = "invalid Expresion5"; break;
+			case 84: s = "invalid Expresion_Entera"; break;
+			case 85: s = "invalid ValorFinalExp"; break;
+			case 86: s = "invalid VExpresion2"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);

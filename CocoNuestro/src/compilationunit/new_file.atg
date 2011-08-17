@@ -542,7 +542,8 @@ corchete_ab [Exp <out type, sim> (. ((Number)sim.GetValor()).intValue();
 
 Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del objeto
 = (. TablaSimbolos ambito_clase = null;
-	 Simbolo simbolo_metodoargumento = null; .) 
+	 Simbolo simbolo_metodoargumento = null;
+	 System.out.println("Entramos en Llamada"); .) 
 punto ident (. if (simbolo_objeto != null)
 				 	{
 				 	Simbolo simbolo_clase =  simbolo_objeto.GetClase();
@@ -552,7 +553,7 @@ punto ident (. if (simbolo_objeto != null)
 				 		{
 				 		ambito_clase = simbolo_clase.GetAmbitoAsociado();
 				 		if (ambito_clase == null)
-				 			SemErr("El ambito asociado a la clase " + simbolo_clase.GetNombre() + " no tiene ningun ambito asociado");
+				 			SemErr("La clase " + simbolo_clase.GetNombre() + " no tiene ningun ambito asociado");
 				 		else
 				 			{
 				 			if (!(ambito_clase.Esta(t.val)))
@@ -568,15 +569,18 @@ punto ident (. if (simbolo_objeto != null)
 				 		} 
 				 	}.) 
 
-[parent_ab (.if (simbolo_metodoargumento != null)
+((parent_ab (.if (simbolo_metodoargumento != null)
 				{
-				if (simbolo_metodoargumento.GetType() != metodo) //Si hay un paréntesis tiene que ser un método, y debe ser público.
+				if (simbolo_metodoargumento.GetKind() != metodo) //Si hay un paréntesis tiene que ser un método, y debe ser público.
+					{
 					SemErr(simbolo_metodoargumento.GetNombre() + " no ha sido declarado como un metodo.");
+					}
 				else if (simbolo_metodoargumento.GetVisibilidad() == privado)
 				 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
 			 	}
 			 	.)
- VArgumentos<simbolo_metodoargumento, 0> parent_ce]
+ VArgumentos<simbolo_metodoargumento, 0> parent_ce puntoComa)
+ |InstExpresion<simbolo_metodoargumento>)
 .
 
 //**************************************************************//
@@ -620,8 +624,7 @@ Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o me
 InstExpresion <Simbolo simbolo>
 =	(. int type=undef;
 	   System.out.println("Entramos en InstExpresion"); .)
-				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa
-				| punto ident (parent_ab VArgumentos<simbolo, 0> parent_ce puntoComa)
+				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
 				| (op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													VExpresion<out type>
@@ -1160,6 +1163,7 @@ VArgumentos <Simbolo simbolo, int pos>
 												SemErr("Tipo de los parametros no coincidente");
 											}
 							}
+						else
 									  .)
 ["," VArgumentos <simbolo, pos + 1>]]
 .
