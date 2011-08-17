@@ -251,8 +251,8 @@ Ttipo<out int type>	// Devolvemo un entero con el tipo
 
 DecClase	(. int visible=privado; .) // Visibilidad del contenido, por defecto PRIVADO
 = (. Simbolo simbolo = new Simbolo ("undef", 0, clase); System.out.println("DecClase!");.)
-	[publicc (. simbolo.SetVisibilidad(publico); .) 
-		| privatte (. simbolo.SetVisibilidad(privado); .)]
+	[publicc (. simbolo.SetVisibilidad(1); .) 
+		| privatte (. simbolo.SetVisibilidad(0); .)]
  	classs ident (. simbolo.SetNombre(t.val);	// Modifico el nombre del Simbolo
 					simbolo.SetLine(t.line);
 					simbolo.SetColumn(t.col);
@@ -271,9 +271,9 @@ DecClase	(. int visible=privado; .) // Visibilidad del contenido, por defecto PR
 				.)
 							llave_ab	// y variables de la clase.
 								Cuerpo_Clase<visible, simbolo>
-									[(publicc	(. visible=publico;  .) 
+									[(publicc	(. visible=publico; .) 
 										dosPuntos Cuerpo_Clase<visible, simbolo> 
-											[privatte dosPuntos (. visible=privado; .) 
+											[privatte dosPuntos (. visible=publico; .) 
 												Cuerpo_Clase<visible, simbolo>])
 									|(privatte	(. visible=privado; .) 
 										dosPuntos Cuerpo_Clase<visible, simbolo> 
@@ -1102,6 +1102,7 @@ ValorFinalExp <out int tipoDev>
 	 				 			SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 	 				 		else
 	 				 			{
+	 				 			simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 	 				 			System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
 	 				 			if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 	 				 											(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
@@ -1115,7 +1116,13 @@ ValorFinalExp <out int tipoDev>
 
 	 				  		
 	 				 .)
-	 		  [parent_ab VArgumentos <simbolo_metodoatributo, aux> parent_ce])
+	 		  [parent_ab (. if (simbolo_metodoatributo.GetKind() != metodo)
+	 		  					SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
+	 		  				else
+	 		  					tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+	 		  					
+	 		  			  .)
+	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  
 	 		  
 	 		  

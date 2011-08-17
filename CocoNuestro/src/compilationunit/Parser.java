@@ -269,10 +269,10 @@ public class Parser {
 		if (la.kind == 15 || la.kind == 16) {
 			if (la.kind == 15) {
 				Get();
-				simbolo.SetVisibilidad(publico); 
+				simbolo.SetVisibilidad(1); 
 			} else {
 				Get();
-				simbolo.SetVisibilidad(privado); 
+				simbolo.SetVisibilidad(0); 
 			}
 		}
 		Expect(7);
@@ -299,13 +299,13 @@ public class Parser {
 		if (la.kind == 15 || la.kind == 16) {
 			if (la.kind == 15) {
 				Get();
-				visible=publico;  
+				visible=publico; 
 				Expect(26);
 				Cuerpo_Clase(visible, simbolo);
 				if (la.kind == 16) {
 					Get();
 					Expect(26);
-					visible=privado; 
+					visible=publico; 
 					Cuerpo_Clase(visible, simbolo);
 				}
 			} else {
@@ -1597,6 +1597,7 @@ public class Parser {
 							SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 						else
 							{
+							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 							System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
 							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 															(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
@@ -1611,6 +1612,12 @@ public class Parser {
 					
 					if (la.kind == 31) {
 						Get();
+						if (simbolo_metodoatributo.GetKind() != metodo)
+						SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
+						else
+							tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+							
+						 
 						VArgumentos(simbolo_metodoatributo, aux);
 						Expect(38);
 					}
