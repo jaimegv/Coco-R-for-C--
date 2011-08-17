@@ -32,7 +32,8 @@ public class Simbolo {
 	private int tiporetorno; //Si es una función esto indicará el tipo de valor devuelto
 	private Simbolo clase_perteneciente; //Si es una variable, indica la clase a la que pertenece y type será "identificador"
 										 //Si es un método, indica la clase perteneciente.
-	private Simbolo clase_devuelta;
+	
+	private Simbolo clase_devuelta;		//Si es una función, indica la clase del objeto devuelto, y tiporetorno será igual a identificador.
 	private TablaSimbolos ambito_asociado; //Si es una función o un método, indicará cuál es el ámbito asociado
 	
 
@@ -48,6 +49,7 @@ public Simbolo(String nombre, int type, int kind){
 	   this.valor = new Vector();
 	   this.parametros = new Vector();
 	   this.clase_perteneciente = null;
+	   this.clase_devuelta = null;
 	   this.ambito_asociado = null;
 
 	}
@@ -112,6 +114,11 @@ public void SetClase(Simbolo simbolo)
 public void SetAmbitoAsociado(TablaSimbolos ambito_asociado)
 	{
 	this.ambito_asociado = ambito_asociado;
+	}
+
+public void SetClaseDevuelta (Simbolo simbolo_clase)
+	{
+	this.clase_devuelta = simbolo_clase;
 	}
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
@@ -207,6 +214,11 @@ public TablaSimbolos GetAmbitoAsociado()
 {
 return this.ambito_asociado;
 }
+
+public Simbolo GetClaseDevuelta ()
+	{
+	return this.clase_devuelta;
+	}
 //************************************************//////
 
 public void AnadirParametro (Simbolo simbolo)
