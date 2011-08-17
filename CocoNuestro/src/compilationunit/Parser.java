@@ -165,6 +165,7 @@ public class Parser {
 	void CEMASMAS() {
 		int type=undef; 
 		int type1;
+		Simbolo simbolo_dev = null;
 		
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
@@ -177,8 +178,11 @@ public class Parser {
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
 				simbolo.SetLine(t.line);
 				simbolo.SetColumn(t.col);
-				if ((tabla.EstaEnActual(simbolo.GetNombre()))) {
+				if ((tabla.EstaRecur(simbolo.GetNombre()))) {
 					System.out.println(t.val+ " declarado anteriormente, esta ok!");
+					simbolo_dev = tabla.GetSimboloRecur(simbolo.GetNombre());
+						if (simbolo_dev.GetClase() == null)
+							SemErr(simbolo_dev.GetNombre() + " deberia ser una clase");
 					//tabla.InsertarEnActual(simbolo);
 				} else {
 					System.out.println("Simbolo NO declarado, serÃ¡ return de otra cosa");
@@ -210,6 +214,9 @@ public class Parser {
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
 				simbolo.SetLine(t.line);
 				simbolo.SetColumn(t.col);
+				if (simbolo_dev != null)
+						if (simbolo_dev.GetClase() != null)
+							simbolo.SetClase(simbolo_dev);
 				System.out.println("Entraste en ident CEMASMAS, detras del main");
 				 Simbolo sim = tabla.GetSimboloRecur(t.val);
 				// Metodo de una clase: Persona::daAnio
@@ -367,7 +374,11 @@ public class Parser {
 	void Subprograma(Simbolo simbolo_funcion) {
 		tabla.NuevoAmbito(simbolo_funcion);
 		simbolo_funcion.SetKind (funcion);
-		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());  
+		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el sÃ­mbolo que nos pasan, en type se ha metido el tipo de retorno.
+		if (simbolo_funcion.GetTipoRetorno() == identificador)
+			{
+			simbolo_funcion.SetClaseDevuelta(simbolo_funcion.GetClase()); //Cuando se ha creado el simbolo que nos pasan, en Clase se ha metido el sÃ­mbolo de la clase que vamos a devolver.
+			}  
 		Expect(31);
 		if (StartOf(1)) {
 			Parametros(simbolo_funcion);
