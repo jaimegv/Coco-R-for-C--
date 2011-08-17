@@ -293,14 +293,15 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 		Simbolo ObjetoDevuelto=null;	// inicializado
 	.)	// Recuerda! estas en un ambito clase 
 = [{(Ttipo<out type> 	(.	Simbolo sim = new Simbolo("tipoDevuelto", 0, 0);	// Creacion del simbolo
-						    if ((type==identificador) &&	// Devuelve un tipo.Objeto.
-						    	((tabla.GetSimboloRecur(t.val) != null) &&
-									(tabla.GetSimboloRecur(t.val).GetKind()==clase))) {
+						    if (type==identificador) {
+						    	if ((tabla.GetSimboloRecur(t.val) != null) &&
+									(tabla.GetSimboloRecur(t.val).GetKind()==clase)) {
 								//Guardamos la dirección para engancharlo luego
 								ObjetoDevuelto=tabla.GetSimboloRecur(t.val);
-						    } else {
-						    	SemErr("No existe ningun objeto con dicho nombre.");
-						    }
+								} else {
+									SemErr("No existe ningun objeto con dicho nombre.");
+								}
+							}
 							tabla.InsertarEnActual(sim);
 						.)
 						ident (.sim.SetNombre(t.val);
