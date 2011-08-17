@@ -269,10 +269,10 @@ public class Parser {
 		if (la.kind == 15 || la.kind == 16) {
 			if (la.kind == 15) {
 				Get();
-				simbolo.SetVisibilidad(1); 
+				simbolo.SetVisibilidad(publico); 
 			} else {
 				Get();
-				simbolo.SetVisibilidad(0); 
+				simbolo.SetVisibilidad(privado); 
 			}
 		}
 		Expect(7);
@@ -299,13 +299,13 @@ public class Parser {
 		if (la.kind == 15 || la.kind == 16) {
 			if (la.kind == 15) {
 				Get();
-				visible=publico; 
+				visible=publico;  
 				Expect(26);
 				Cuerpo_Clase(visible, simbolo);
 				if (la.kind == 16) {
 					Get();
 					Expect(26);
-					visible=publico; 
+					visible=privado; 
 					Cuerpo_Clase(visible, simbolo);
 				}
 			} else {
@@ -433,6 +433,9 @@ public class Parser {
 				if (simMetodo.GetTipoRetorno()==tipoRetorno) {
 					simDecMetodo.SetNombre(t.val);
 					simDecMetodo.SetTipoRetorno(tipoRetorno);
+					if (tipoRetorno==identificador) {
+						SemErr("FUNCIONALIDAD POR HACER");
+					}
 					//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 					// Todo ok! inserto en Ambito de la clase
 					// Cambio al ambito asociado al simbolo clase
@@ -484,41 +487,56 @@ public class Parser {
 
 	void Cuerpo_Clase(int visible, Simbolo simClase) {
 		int type;
+		Simbolo ObjetoDevuelto=null;	// inicializado
 		
 		if (StartOf(1)) {
 			while (StartOf(1)) {
 				if (StartOf(2)) {
 					type = Ttipo();
+					Simbolo sim = new Simbolo("tipoDevuelto", 0, 0);	// Creacion del simbolo
+					if (type==identificador) {
+						if ((tabla.GetSimboloRecur(t.val) != null) &&
+					(tabla.GetSimboloRecur(t.val).GetKind()==clase)) {
+					//Guardamos la direcciÃ³n para engancharlo luego
+					ObjetoDevuelto=tabla.GetSimboloRecur(t.val);
+					} else {
+						SemErr("No existe ningun objeto con dicho nombre.");
+					}
+					}
+					tabla.InsertarEnActual(sim);
+					
 					Expect(1);
-					Simbolo sim = new Simbolo(t.val, 0, 0);	// Creacion del simbolo
+					sim.SetNombre(t.val);
 					sim.SetVisibilidad(visible);
 					sim.SetLine(t.line);
 					    sim.SetColumn(t.col);
-					tabla.InsertarEnActual(sim);
 					
 					if (la.kind == 41 || la.kind == 42) {
 						sim.SetKind(var);	// Es variable
 						sim.SetType(type);	// Su tipo
+						if (type==identificador) {
+							sim.SetClase(ObjetoDevuelto);
+						}
 						
 						type = DecVar(sim);
 					} else if (la.kind == 31) {
 						sim.SetKind(metodo);
 						sim.SetTipoRetorno(type);
 						sim.SetClase(simClase);
+						if (type==identificador) {
+							sim.SetClaseDevuelta(ObjetoDevuelto);
+						}
 						
 						DecCabMet(sim);
-						System.out.println("Declarando en la clase:");
-						System.out.println("Nombre:"+sim.GetNombre()+sim.GetKind()+"param"+sim.GetNParametros()); 
-						
 					} else SynErr(65);
 				} else {
-					Simbolo simbol = new Simbolo(t.val, 0, 0);
 					Get();
 					Expect(1);
-					DecCabMet(simbol);
-					System.out.println("Declarando en la clase:");
-					System.out.println("Nombre:"+simbol.GetNombre()); 
+					Simbolo simbol = new Simbolo(t.val, 0, metodo);
+					simbol.SetKind(metodo);
+					simbol.SetTipoRetorno(vacio);
 					
+					DecCabMet(simbol);
 				}
 			}
 		}
@@ -1576,20 +1594,26 @@ public class Parser {
 							{
 						ambitoclase = simbolo_clase.GetAmbitoAsociado();
 						if (!(ambitoclase.Esta(t.val)))
-							SemErr("El metodo " + t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
+							SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 						else
 							{
-							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
+							System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
+							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
+															(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
+											SemErr(t.val + " es privado");
 							if (simbolo_metodoatributo.GetType() == metodo)
 								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 							else if (simbolo_metodoatributo.GetType() == var)
 								tipoDev = simbolo_metodoatributo.GetType();
 							}
 							}
+					 		
 					
-					Expect(31);
-					VArgumentos(simbolo_metodoatributo, aux);
-					Expect(38);
+					if (la.kind == 31) {
+						Get();
+						VArgumentos(simbolo_metodoatributo, aux);
+						Expect(38);
+					}
 				} else {
 					Get();
 					Pos_Vector = DarPosVector(simbolo);

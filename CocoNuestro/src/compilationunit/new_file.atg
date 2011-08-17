@@ -1099,18 +1099,23 @@ ValorFinalExp <out int tipoDev>
 	 				  		{
 	 				 		ambitoclase = simbolo_clase.GetAmbitoAsociado();
 	 				 		if (!(ambitoclase.Esta(t.val)))
-	 				 			SemErr("El metodo " + t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
+	 				 			SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 	 				 		else
 	 				 			{
-	 				 			simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
+	 				 			System.out.println(simbolo_metodoatributo.GetVisibilidad()); 
+	 				 			if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
+	 				 											(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
+	 				 							SemErr(t.val + " es privado");
 	 				 			if (simbolo_metodoatributo.GetType() == metodo)
 	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 	 				 			else if (simbolo_metodoatributo.GetType() == var)
 	 				 				tipoDev = simbolo_metodoatributo.GetType();
 	 				 			}
 	 				  		}
+
+	 				  		
 	 				 .)
-	 		  parent_ab VArgumentos <simbolo_metodoatributo, aux> parent_ce)
+	 		  [parent_ab VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  
 	 		  
 	 		  
