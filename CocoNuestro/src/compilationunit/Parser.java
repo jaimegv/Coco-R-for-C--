@@ -418,36 +418,53 @@ public class Parser {
 	}
 
 	void DecMetodo(String Clase, int tipoRetorno) {
-		Simbolo sim = new Simbolo("no def", 0, 0);		// AÃ±ado metodo al ambito actual
-		System.out.println("Estas en declaracion Metodo");
+		Simbolo simDecMetodo = new Simbolo("sim_DecMetodo", 0, metodo);		// AÃ±ado metodo al ambito actual
+		//System.out.println("Estas en declaracion Metodo");
 		
 		Expect(17);
 		Expect(1);
-		System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
 		if ((tabla.GetSimboloRecur(Clase) != null) &&	// clase existe?Â¿
-				(tabla.GetSimboloRecur(Clase).GetKind()==clase)) {
-				//clase y metodo existen!
-				if (tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().Esta(t.val)) {	// metodo asoc a claseÂ¿?
-					// Cojo el simbolo
-					Simbolo simMetodo=tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().GetSimbolo(t.val);
-					// Comprobacion tipoRetoron y argumentos son iguales
-					if (simMetodo.GetTipoRetorno()==tipoRetorno) {
-						System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
-						
+			(tabla.GetSimboloRecur(Clase).GetKind()==clase)) {
+			//clase y metodo existen!
+			if (tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().Esta(t.val)) {	// metodo asoc a claseÂ¿?
+				// Cojo el simbolo del metodo que se declaro dentro de la clase
+				Simbolo simMetodo=tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().GetSimbolo(t.val);
+				// Comprobacion tipoRetoron y argumentos son iguales
+				if (simMetodo.GetTipoRetorno()==tipoRetorno) {
+					simDecMetodo.SetNombre(t.val);
+					//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
+					// Todo ok! inserto en Ambito de la clase
+					// Cambio al ambito asociado al simbolo clase
+					// abierto ambito clase
+					tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());
+					// Nuevo ambito para la dec del metodo
+					tabla.NuevoAmbito(simMetodo);
+					
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros(simMetodo);
+			Parametros(simDecMetodo);
 		}
-		if ((simMetodo.GetNParametros()==0) ||
-			((simMetodo.GetNParametros()==1) 
-				&& (simMetodo.GetParametros(0).GetType()==vacio))) {
-		System.out.println("Esta todo correcto");
+		int nParam=simMetodo.GetNParametros();
+		// Compruebo si los tipos de argumentos son iguales, tanto en la declaracion
+		// como cuando fue declarado dentro de la clase
+		if (simDecMetodo.GetNParametros()==nParam) {	//Mismo numero de argumentos
+			System.out.println("Comprobando argumentos entre declaracion Metodo y dentro de la clase");
+			for (int i=0; i <nParam; i++){ 
+				if (simDecMetodo.GetParametros(i).GetType()!=simMetodo.GetParametros(i).GetType()) {
+					SemErr("Fallo en tipos argumentos nuemro"+i);
+				}
+			}
 		} else {
 			SemErr("Tipos declaracion metodo incorrectos");
 		}
 		
 		Expect(38);
-		tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());											
+		Expect(29);
+		Cuerpo(simDecMetodo);
+		Expect(36);
+		tabla.CerrarAmbito();	// cierro ambito del metodo
+		tabla.CerrarAmbito();	// Cerramos el ambito de la clase
+								// y volveremos, seguramente, al global
 		} else {
 			SemErr("DeclaraciÃ³n metodo devuelve un tipo diferente a la declaraciÃ³n en la Clase: "+Clase+", en linea-col:"+simMetodo.GetColumn()+"-"+simMetodo.GetColumn());
 		}
@@ -457,11 +474,12 @@ public class Parser {
 		} else {
 			SemErr("No existe dicha clase: "+Clase);
 			System.out.println("SOLUCIONAR Y CONSUMIR");
+			
+		Expect(29);
+		Cuerpo(simDecMetodo);
+		Expect(36);
 		}
 		
-		Expect(29);
-		Cuerpo(sim);
-		Expect(36);
 	}
 
 	void Cuerpo_Clase(int visible, Simbolo simClase) {
@@ -526,8 +544,6 @@ public class Parser {
 				}
 				sim.SetType(type);
 				simbolo.AnadirParametro(sim);
-				System.out.println("jasjasjas"+parametro);
-				System.out.println("Argumento declaracion metodo en clase tipo:"+simbolo.GetParametros(0).GetKind());
 				
 				if (la.kind == 27) {
 					Get();
@@ -545,7 +561,6 @@ public class Parser {
 				}
 			}
 		}
-		System.out.println("Numero de argumentos del metodo:"+simbolo.GetNParametros()); 
 	}
 
 	void Parametros(Simbolo simbolo_nombre_funcion) {
@@ -557,20 +572,8 @@ public class Parser {
 			simbolo_parametro.SetLine(t.line);
 			simbolo_parametro.SetColumn(t.col);
 			simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-			// Separado para argumentos de metodo
-			if (simbolo_nombre_funcion.GetKind()!=metodo ) {
-				tabla.InsertarEnActual(simbolo_parametro);
-			} else {	// Caso en que son parametros de metodos
-				System.out.println("Parametros METODO!!");
-				Simbolo simbolo_arg = simbolo_nombre_funcion.GetParametros(contador);
-				contador++;
-				if ((simbolo_arg.GetKind()==parametro) &&
-						(simbolo_arg.GetType()==type)){
-					System.out.println("Esta todo correcto");
-				} else {
-					SemErr("Tipos declaracion metodo incorrectos");
-				}
-			} 
+			tabla.InsertarEnActual(simbolo_parametro);
+			
 			if (la.kind == 30) {
 				Vector(simbolo_parametro);
 			}
@@ -581,20 +584,8 @@ public class Parser {
 					Expect(1);
 					simbolo_parametro = new Simbolo(t.val, type, parametro);
 					simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-					// Separado para argumentos de metodo
-					if (simbolo_nombre_funcion.GetKind()!=metodo ) {
-						tabla.InsertarEnActual(simbolo_parametro);
-					} else {	// Caso en que son parametros de metodos
-						System.out.println("Parametros METODO!!");
-						Simbolo simbolo_arg = simbolo_nombre_funcion.GetParametros(contador);
-						contador++;
-						if ((simbolo_arg.GetKind()==parametro) &&
-								(simbolo_arg.GetType()==type)){
-							System.out.println("Esta todo correcto");
-						} else {
-							SemErr("Tipos declaracion metodo incorrectos");
-						}
-					} 
+					tabla.InsertarEnActual(simbolo_parametro);
+					
 					if (la.kind == 30) {
 						Vector(simbolo_parametro);
 					}
@@ -602,18 +593,6 @@ public class Parser {
 			}
 		} else if (la.kind == 14) {
 			Get();
-			if (simbolo_nombre_funcion.GetKind()==metodo) {
-			System.out.println("Parametros METODO!!");
-			//Simbolo simbolo_arg = simbolo_nombre_funcion.GetParametros(contador)
-			if ((simbolo_nombre_funcion.GetNParametros()==0) ||
-					((simbolo_nombre_funcion.GetNParametros()==1) 
-						&& (simbolo_nombre_funcion.GetParametros(contador).GetType()==vacio))) {
-				System.out.println("Esta todo correcto");
-			} else {
-				SemErr("Tipos declaracion metodo incorrectos");
-			}
-			}
-			
 		} else SynErr(66);
 	}
 
