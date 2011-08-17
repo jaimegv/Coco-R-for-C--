@@ -448,7 +448,6 @@ public class Parser {
 		// Compruebo si los tipos de argumentos son iguales, tanto en la declaracion
 		// como cuando fue declarado dentro de la clase
 		if (simDecMetodo.GetNParametros()==nParam) {	//Mismo numero de argumentos
-			System.out.println("Comprobando argumentos entre declaracion Metodo y dentro de la clase");
 			for (int i=0; i <nParam; i++){ 
 				if (simDecMetodo.GetParametros(i).GetType()!=simMetodo.GetParametros(i).GetType()) {
 					SemErr("Fallo en tipos argumentos nuemro"+i);
@@ -551,14 +550,6 @@ public class Parser {
 				}
 			} else {
 				Get();
-				Simbolo simb1 = new Simbolo("Arg_Metodo",0,parametro);	
-				simb1.SetType(vacio);
-				simbolo.AnadirParametro(simb1);
-				
-				if (la.kind == 27) {
-					Get();
-					Param_Cab(simbolo);
-				}
 			}
 		}
 	}

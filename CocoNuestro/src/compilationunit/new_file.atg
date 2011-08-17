@@ -336,12 +336,7 @@ Param_Cab <Simbolo simbolo>
 				simbolo.AnadirParametro(sim);
 			.)	
 		[ comma Param_Cab<simbolo>]
-	| voidd (.	Simbolo simb1 = new Simbolo("Arg_Metodo",0,parametro);	
-				simb1.SetType(vacio);
-				simbolo.AnadirParametro(simb1);
-			.)	[ comma Param_Cab<simbolo>]
-		
-	]
+	| voidd ]
 .
 
 DecMetodo<String Clase, int tipoRetorno> 
@@ -374,7 +369,6 @@ DecMetodo<String Clase, int tipoRetorno>
 												// Compruebo si los tipos de argumentos son iguales, tanto en la declaracion
 												// como cuando fue declarado dentro de la clase
 												if (simDecMetodo.GetNParametros()==nParam) {	//Mismo numero de argumentos
-													System.out.println("Comprobando argumentos entre declaracion Metodo y dentro de la clase");
 													for (int i=0; i <nParam; i++){ 
 														if (simDecMetodo.GetParametros(i).GetType()!=simMetodo.GetParametros(i).GetType()) {
 															SemErr("Fallo en tipos argumentos nuemro"+i);
