@@ -557,19 +557,21 @@ public class Parser {
 
 	void Parametros(Simbolo simbolo_nombre_funcion) {
 		int type, contador=0;
+		String nombre_clase = null;
 		if (StartOf(2)) {
 			type = Ttipo();
+			nombre_clase = new String(t.val);
 			Expect(1);
 			Simbolo simbolo_parametro = new Simbolo(t.val, type, parametro);
 			simbolo_parametro.SetLine(t.line);
 			simbolo_parametro.SetColumn(t.col);
 			if (type == identificador)
 				{
-				if (!(tabla.EstaRecur(t.val)))
+				if (!(tabla.EstaRecur(nombre_clase)))
 					SemErr(t.val + " no estaba declarado previamente");
 				else
 					{
-					Simbolo simbolo_clase = tabla.GetSimboloRecur(t.val);
+					Simbolo simbolo_clase = tabla.GetSimboloRecur(nombre_clase);
 					if (simbolo_clase.GetKind() != clase)
 						SemErr(t.val + " no es una clase");
 					else
