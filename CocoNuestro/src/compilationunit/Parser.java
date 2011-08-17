@@ -181,7 +181,7 @@ public class Parser {
 				if ((tabla.EstaRecur(simbolo.GetNombre()))) {
 					System.out.println(t.val+ " declarado anteriormente, esta ok!");
 					simbolo_dev = tabla.GetSimboloRecur(simbolo.GetNombre());
-						if (simbolo_dev.GetClase() == null)
+						if (simbolo_dev.GetKind() != clase)
 							SemErr(simbolo_dev.GetNombre() + " deberia ser una clase");
 					//tabla.InsertarEnActual(simbolo);
 				} else {
@@ -214,8 +214,7 @@ public class Parser {
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
 				simbolo.SetLine(t.line);
 				simbolo.SetColumn(t.col);
-				if (simbolo_dev != null)
-						if (simbolo_dev.GetClase() != null)
+				if ((simbolo_dev != null) && (simbolo_dev.GetKind() == clase))
 							simbolo.SetClase(simbolo_dev);
 				System.out.println("Entraste en ident CEMASMAS, detras del main");
 				 Simbolo sim = tabla.GetSimboloRecur(t.val);
