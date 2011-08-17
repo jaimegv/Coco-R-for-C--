@@ -1559,7 +1559,8 @@ public class Parser {
 		Simbolo simbolo = null;
 		boolean esta = false;
 		int Pos_Vector;
-		int aux = 0; 
+		int aux = 0;
+		System.out.println("Entramos en ValorFinalExp"); 
 		if (la.kind == 1) {
 			Get();
 			if (!(tabla.EstaRecur(t.val)))
@@ -1602,10 +1603,12 @@ public class Parser {
 							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 															(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
 											SemErr(t.val + " es privado");
-							if (simbolo_metodoatributo.GetType() == metodo)
+							if (simbolo_metodoatributo.GetKind() == metodo)
 								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
-							else if (simbolo_metodoatributo.GetType() == var)
+							else if (simbolo_metodoatributo.GetKind() == var)
+								{
 								tipoDev = simbolo_metodoatributo.GetType();
+								}
 							}
 							}
 					 		
