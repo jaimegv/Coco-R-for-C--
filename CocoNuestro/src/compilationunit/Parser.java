@@ -360,21 +360,21 @@ public class Parser {
 		}
 		Expect(38);
 		Expect(29);
-		Cuerpo();
+		Cuerpo(simbolo);
 		Expect(36);
 	}
 
-	void Subprograma(Simbolo simbolo) {
-		tabla.NuevoAmbito(simbolo);
-		simbolo.SetKind (funcion);
-		simbolo.SetTipoRetorno(simbolo.GetType());  
+	void Subprograma(Simbolo simbolo_funcion) {
+		tabla.NuevoAmbito(simbolo_funcion);
+		simbolo_funcion.SetKind (funcion);
+		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());  
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros(simbolo);
+			Parametros(simbolo_funcion);
 		}
 		Expect(38);
 		Expect(29);
-		Cuerpo();
+		Cuerpo(simbolo_funcion);
 		tabla.CerrarAmbito(); 
 		Expect(36);
 	}
@@ -450,7 +450,7 @@ public class Parser {
 		}
 		
 		Expect(29);
-		Cuerpo();
+		Cuerpo(sim);
 		Expect(36);
 	}
 
@@ -607,13 +607,13 @@ public class Parser {
 		} else SynErr(66);
 	}
 
-	void Cuerpo() {
+	void Cuerpo(Simbolo simbolo_funcion) {
 		int type = undef; 
 		Simbolo simbolo_anterior = null;
 		boolean estaba_declarado = false;
 		while (StartOf(4)) {
 			if (StartOf(5)) {
-				Instruccion();
+				Instruccion(simbolo_funcion);
 			} else {
 				if (StartOf(2)) {
 					type = Ttipo();
@@ -677,17 +677,19 @@ public class Parser {
 		}
 	}
 
-	void Instruccion() {
-		int type; 
+	void Instruccion(Simbolo simbolo_funcion) {
+		int type = undef; 
 		if (la.kind == 18) {
 			System.out.println("Estamos en Instruccion");
 			type  = InstReturn();
+			if (simbolo_funcion.GetTipoRetorno() != type)
+			SemErr("return devuelve un tipo distinto al declarado.");
 		} else if (la.kind == 19) {
 			InstCout();
 		} else if (la.kind == 20) {
 			InstCin();
 		} else if (la.kind == 23) {
-			InstIfElse();
+			InstIfElse(simbolo_funcion);
 		} else SynErr(69);
 	}
 
@@ -897,7 +899,7 @@ public class Parser {
 		Expect(42);
 	}
 
-	void InstIfElse() {
+	void InstIfElse(Simbolo simbolo_funcion) {
 		int type, type1;
 		Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 		
@@ -908,11 +910,11 @@ public class Parser {
 		if (la.kind == 29) {
 			Get();
 			tabla.NuevoAmbito(simbolo); 
-			Cuerpo();
+			Cuerpo(simbolo_funcion);
 			tabla.CerrarAmbito(); 
 			Expect(36);
 		} else if (StartOf(5)) {
-			Instruccion();
+			Instruccion(simbolo_funcion);
 		} else if (la.kind == 1) {
 			Get();
 			if (!(tabla.EstaRecur(t.val)))
@@ -927,7 +929,7 @@ public class Parser {
 			InstExpresion(simbolo);
 		} else SynErr(71);
 		if (la.kind == 24) {
-			Else();
+			Else(simbolo_funcion);
 		}
 	}
 
@@ -1016,7 +1018,7 @@ public class Parser {
 		return tipoDev;
 	}
 
-	void Else() {
+	void Else(Simbolo simbolo_funcion) {
 		int type;
 		Simbolo sim = new Simbolo("ELSE", 0, 0);	// borrarcuando corrigas
 		
@@ -1024,11 +1026,11 @@ public class Parser {
 		if (la.kind == 29) {
 			Get();
 			tabla.NuevoAmbito(sim); 
-			Cuerpo();
+			Cuerpo(simbolo_funcion);
 			tabla.CerrarAmbito(); 
 			Expect(36);
 		} else if (StartOf(5)) {
-			Instruccion();
+			Instruccion(simbolo_funcion);
 		} else SynErr(73);
 	}
 

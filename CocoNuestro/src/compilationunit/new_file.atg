@@ -384,7 +384,7 @@ DecMetodo<String Clase, int tipoRetorno>
 							}
 						.) 
 		llave_ab
-			Cuerpo
+			Cuerpo<sim>
 		llave_ce
 .
 
@@ -395,13 +395,13 @@ Main<int type> = (. Simbolo simbolo = new Simbolo("main",type,funcion);.)
 	   main   (.tabla.NuevoAmbito(simbolo);
 			  simbolo.SetKind (funcion);
 			  simbolo.SetTipoRetorno(simbolo.GetType());.)   
-	   parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo llave_ce
+	   parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo<simbolo> llave_ce
 .
 
-Cuerpo 	(. int type = undef; .) 
+Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .) 
 = (. Simbolo simbolo_anterior = null;
 	 boolean estaba_declarado = false;.)
-	{Instruccion 
+	{Instruccion <simbolo_funcion>
 		| ((Ttipo<out type> | voidd) (. if (type == identificador)
 											 {
 											 if (!(tabla.EstaRecur(t.val)))
@@ -571,10 +571,10 @@ punto ident (. if (simbolo_objeto != null)
 
 
 
-Subprograma <Simbolo simbolo> = (.  tabla.NuevoAmbito(simbolo);
-									simbolo.SetKind (funcion);
-									simbolo.SetTipoRetorno(simbolo.GetType());  .)//Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno 
-parent_ab [Parametros <simbolo>] parent_ce llave_ab Cuerpo (. tabla.CerrarAmbito(); .)
+Subprograma <Simbolo simbolo_funcion> = (.  tabla.NuevoAmbito(simbolo_funcion);
+											simbolo_funcion.SetKind (funcion);
+											simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());  .)//Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno 
+parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito(); .)
  llave_ce.
 
 
@@ -587,10 +587,12 @@ LlamMet = ident punto ident { parent_ab parent_ce | parent_ab {Argumentos} paren
 .
 
 /******************INSTRUCCIONES****************************/
-Instruccion
-(. int type; .)
+Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o metodo que este activa en ese momento.
+(. int type = undef; .)
 = (. System.out.println("Estamos en Instruccion");.)
-	InstReturn< out type > | InstCout | InstCin | InstIfElse
+	InstReturn< out type > (. if (simbolo_funcion.GetTipoRetorno() != type)
+							  		SemErr("return devuelve un tipo distinto al declarado.");.)
+	| InstCout | InstCin | InstIfElse<simbolo_funcion>
 .
 
 InstExpresion <Simbolo simbolo>
@@ -615,16 +617,16 @@ InstReturn <out int tipoDev>
 
 /****************************************************/
 
-InstIfElse	
+InstIfElse <Simbolo simbolo_funcion>	
 (. int type, type1;
 	Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 .) 
 =
 		iff VExpresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
 								  simbolo = new Simbolo ("IF", 0, 0);.) 
-	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo (. tabla.CerrarAmbito(); .) llave_ce) 
+	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito(); .) llave_ce) 
 	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
-	| Instruccion | ident (.
+	| Instruccion<simbolo_funcion> | ident (.
 									 if (!(tabla.EstaRecur(t.val)))
 									 	{
 									 	SemErr(t.val + " no ha sido declarado previamente");
@@ -636,15 +638,15 @@ InstIfElse
 						.)
 						InstExpresion <simbolo>
 	) 
-		 [Else]
+		 [Else <simbolo_funcion>]
 .
 
-Else	(. int type;
+Else<Simbolo simbolo_funcion>	(. int type;
 	Simbolo sim = new Simbolo("ELSE", 0, 0);	// borrarcuando corrigas
 .) 
 =
-	elsse ((llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo (. tabla.CerrarAmbito(); .) llave_ce) 
-			| Instruccion) .
+	elsse ((llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito(); .) llave_ce) 
+			| Instruccion<simbolo_funcion>) .
 
 /***************************************************/
 
