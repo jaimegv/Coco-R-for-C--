@@ -351,6 +351,7 @@ Param_Cab <Simbolo simbolo>
 
 DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoReturn=identificador, es decir, dev un Objeto 
 = (. Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Anado metodo al ambito actual
+	 boolean hay_param=false;
 	 //System.out.println("Estas en declaracion Metodo");
 .)
 	dospuntos_dos ident	(.	//System.out.println("Comprobando si el metodo "+t.val+" pertenece a la clase "+Clase);
@@ -374,11 +375,17 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 											tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());											
 											// Nuevo ambito para la dec del metodo
 											tabla.NuevoAmbito(simMetodo);
-											simMetodo.SetAmbitoAsociado(tabla.GetAmbitoActual());
+											//simMetodo.SetAmbitoAsociado(tabla.GetAmbitoActual());
 											.)
 											parent_ab
-														[Parametros<simMetodo>]
+														[Parametros<simMetodo> (. hay_param=true; .) ]
 											parent_ce
+											(.
+												if ((!(hay_param)) && 
+														(simMetodo.GetNParametros()!=0)) {	// No hemos entrado en parametros
+													SemErr("Error tipos declaracion Metodo.");
+												}
+											.)
 											llave_ab
 												Cuerpo<simMetodo>
 											llave_ce
@@ -523,36 +530,60 @@ Parametros <Simbolo simbolo_nombre_funcion>
 							if (simbolo_nombre_funcion.GetKind() != metodo) {						
 									simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
 									tabla.InsertarEnActual(simbolo_parametro);		
-
 							} else { // Caso decMetodo
-								if (simbolo_nombre_funcion.GetNParametros() == 0)
-									SemErr("Error tipos declaracion Metodo");
-								else
-									{
-									if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) 
-										SemErr("Error tipos declaracion Metodo");
-									else	// coincide en tipos
-										simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
-									
+								System.out.println("Estas en caso decMetodo PARAMETROS.");
+								if (simbolo_nombre_funcion.GetNParametros() == 0) {
+									SemErr("Error numero argumentos en declaracion Metodo.");
+								} else {
+									if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) { 
+										SemErr("Error tipos declaracion Metodo.");
+									} else {	// coincide en tipos
+										simbolo_nombre_funcion.GetParametros(0).SetNombre(t.val);
+										//String temp_nueva = new String(t.val);
+										//simbolo_nombre_funcion.GetParametros(0).SetNombre(temp_nueva);
+										System.out.println("Esstas llegando aki!");
+										tabla.InsertarEnActual(simbolo_nombre_funcion.GetParametros(contador));	// inserto en ambito Metodo el simb
+										contador++;
 									}
+								}
 							}
  						.) 
 				[Vector <simbolo_parametro>]
 				[{comma Ttipo<out type>ident (. simbolo_parametro = new Simbolo(t.val, type, parametro);
 												simbolo_parametro.SetLine(t.line);
 												simbolo_parametro.SetColumn(t.col);
-												if (tabla.EstaEnActual(simbolo_parametro.GetNombre()))
-													SemErr("Hay otro parametro con el mismo nombre");
-												else
-													{
-													simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-													tabla.InsertarEnActual(simbolo_parametro);		
+												if (simbolo_nombre_funcion.GetKind() != metodo) {						
+													if (tabla.EstaEnActual(simbolo_parametro.GetNombre())) {
+														SemErr("Hay otro parametro con el mismo nombre");
+													} else {
+														simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+														tabla.InsertarEnActual(simbolo_parametro);		
 													}
-												
+												} else { // Caso decMetodo
+													System.out.println("Estas en caso decMetodo PARAMETROS.");
+													if (simbolo_nombre_funcion.GetNParametros() == 0) {
+														SemErr("Error numero argumentos en declaracion Metodo.");
+													} else {
+														if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) { 
+															SemErr("Error tipos declaracion Metodo.");
+														} else {	// coincide en tipos
+															simbolo_nombre_funcion.GetParametros(0).SetNombre(t.val);
+															//String temp_nueva = new String(t.val);
+															//simbolo_nombre_funcion.GetParametros(0).SetNombre(temp_nueva);
+															tabla.InsertarEnActual(simbolo_nombre_funcion.GetParametros(contador));	// inserto en ambito Metodo el simb
+															contador++;
+														}
+													}
+												}
 											 .) 
 					[Vector <simbolo_parametro>]
 				}] 
-				| voidd
+				| voidd (.	System.out.println("Estas en caso decMetodo PARAMETROS.");
+							if (simbolo_nombre_funcion.GetKind() == metodo) {
+								if (simbolo_nombre_funcion.GetNParametros() != 0)
+									SemErr("Error tipos declaracion Metodo.");
+							}
+						.)
 .
 
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();.)
