@@ -314,11 +314,11 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								sim.SetVisibilidad(visible);
 								sim.SetLine(t.line);
 	 						    sim.SetColumn(t.col);
-	 						    System.out.println(t.val+" Simbolo q estas mirando");
+	 						    System.out.println(t.val+" Simbolo q estas mirando, y su tipo:"+type);
 							.)
 						( 	(. /* Caso en que es una Declaracion de variable */
 								sim.SetKind(var);	// Es variable
-								sim.SetType(identificador);	// Su tipo
+								sim.SetType(type);	// Su tipo
 								if (type==identificador) {
 									sim.SetClaseDevuelta(ObjetoDevuelto);
 								}
@@ -390,6 +390,12 @@ DecMetodo<String Clase, int tipoRetorno>
 											// abierto ambito clase
 											System.out.println("2juasjuas");
 											tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());
+					if (tabla.EstaEnActual("talla")) {
+						System.out.println("Nombre y type"+tabla.GetSimboloRecur("talla").GetNombre()+tabla.GetSimboloRecur("talla").GetType());
+					} else {
+						System.out.println("Nada de nada!");
+					}
+											
 											System.out.println("3juasjuas");
 											// Nuevo ambito para la dec del metodo
 											tabla.NuevoAmbito(simMetodo);
@@ -1156,8 +1162,10 @@ ValorFinalExp <out int tipoDev>
 				}
 			 else
 				{
+				System.out.println("identificador ident!!"+t.val);
 				simbolo = tabla.GetSimboloRecur(t.val);
 				tipoDev = simbolo.GetType();
+				System.out.println("Tipo del ident!!"+tipoDev);
 				simboloClaseObjeto = simbolo.GetClase();
 				esta = true;
 				}
@@ -1272,4 +1280,3 @@ Operador_Relacional = op_menor | op_mayor |   op_menor_igual
 .
 
 END CEMASMAS1.
-
