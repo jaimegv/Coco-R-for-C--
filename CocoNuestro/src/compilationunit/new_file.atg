@@ -155,7 +155,7 @@ CEMASMAS
 (.	int type=undef; 
 	int type1;
 	Simbolo simbolo_dev = null;
-	String nombre = null;
+	String nombre = null;	// podre ser nombre de Objeto
 .)
 =
 	DecClase CEMASMAS
@@ -236,7 +236,7 @@ CEMASMAS
 																		.)
 						 				| 	(.	System.out.println("Entraste en DecMetodo: "+t.val+" con metodo "+la.val);
 												String Clase= (String) t.val; .)
-						 					DecMetodo<Clase, type>	// se envia nombre de clase y tipo retorno del metodo
+						 					DecMetodo<Clase, type, nombre>	// se envia nombre de clase y tipo retorno del metodo
 									)
 								CEMASMAS))
 .
@@ -314,7 +314,7 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								sim.SetVisibilidad(visible);
 								sim.SetLine(t.line);
 	 						    sim.SetColumn(t.col);
-	 						    System.out.println(t.val+" Simbolo q estas mirando, y su tipo:"+type);
+	 						    //System.out.println(t.val+" Simbolo q estas mirando, y su tipo:"+type);
 							.)
 						( 	(. /* Caso en que es una Declaracion de variable */
 								sim.SetKind(var);	// Es variable
@@ -329,10 +329,10 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								sim.SetTipoRetorno(type);
 								sim.SetClase(simClase);		// a q clase pertenece le metodo
 								sim.SetAmbitoAsociado(tabla.GetAmbitoActual());	// ambito de accion
-								System.out.println("El Metodo pertenece a la clase:"+sim.GetClase().GetNombre());
+								//System.out.println("El Metodo pertenece a la clase:"+sim.GetClase().GetNombre());
 								if (type==identificador) {
 									sim.SetClaseDevuelta(ObjetoDevuelto);	//devuelve un tipo objeto
-									System.out.println("Clase devuelta:"+ObjetoDevuelto.GetNombre());
+									//System.out.println("Clase devuelta:"+ObjetoDevuelto.GetNombre());
 								}
 								.)
 								DecCabMet<sim>
@@ -367,7 +367,7 @@ Param_Cab <Simbolo simbolo>
 	| voidd ]
 .
 
-DecMetodo<String Clase, int tipoRetorno> 
+DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoReturn=identificador, es decir, dev un Objeto 
 = (. Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Anado metodo al ambito actual
 	 //System.out.println("Estas en declaracion Metodo");
 .)
@@ -380,62 +380,27 @@ DecMetodo<String Clase, int tipoRetorno>
 										Simbolo simMetodo=tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().GetSimbolo(t.val);
 										// Comprobacion tipoRetoron y argumentos son iguales
 										if (simMetodo.GetTipoRetorno()==tipoRetorno) {
-											//simDecMetodo.SetNombre(t.val);
-											//simDecMetodo.SetTipoRetorno(tipoRetorno);
-											//System.out.println("juasjuas");
-											//simDecMetodo.SetClase(tabla.GetSimboloRecur(Clase));
-											//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
-											// Todo ok! inserto en Ambito de la clase
-											// Cambio al ambito asociado al simbolo clase
-											// abierto ambito clase
-											System.out.println("2juasjuas");
-											tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());
-					if (tabla.EstaEnActual("talla")) {
-						System.out.println("Nombre y type"+tabla.GetSimboloRecur("talla").GetNombre()+tabla.GetSimboloRecur("talla").GetType());
-					} else {
-						System.out.println("Nada de nada!");
-					}
-											
-											System.out.println("3juasjuas");
+										
+											/*Comprobacion de tipo devuelvo DecMetodo correcto y del mismo Objeto (si es ident)*/
+											if (tipoRetorno==identificador) {
+												if ((tabla.GetSimboloRecur(Nombre)!=null) &&	// Existe
+														(tabla.GetSimboloRecur(Nombre).GetKind()==clase) &&	// es clase¿?
+															(!(simMetodo.GetClaseDevuelta().GetNombre().equalsIgnoreCase(Nombre))) ) {
+													SemErr("Clases devueltas difieren");
+												}
+											}
+											tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());											
 											// Nuevo ambito para la dec del metodo
 											tabla.NuevoAmbito(simMetodo);
 											simMetodo.SetAmbitoAsociado(tabla.GetAmbitoActual());
-											System.out.println("4juasjuas"+simDecMetodo.GetNombre());
 											.)
 											parent_ab
 														[Parametros<simMetodo>]
-											(.	
-											// Separado para argumentos de metodo
-/*												int nParam=simMetodo.GetNParametros();
-												// Compruebo si los tipos de argumentos son iguales, tanto en la declaracion
-												// como cuando fue declarado dentro de la clase
-												if (simMetodo.GetNParametros()==nParam) {	//Mismo numero de argumentos
-													for (int i=0; i <nParam; i++){ 
-														if (simMetodo.GetParametros(i).GetType()!=simMetodo.GetParametros(i).GetType()) {
-															SemErr("Fallo en tipos argumentos nuemro"+i);
-														}
-													}
-												} else {
-													SemErr("Tipos declaracion metodo incorrectos");
-												}
-*/
-
-											.)
 											parent_ce
 											llave_ab
 												Cuerpo<simMetodo>
 											llave_ce
 											(.
-											// En caso de devolver un Objeto
-											if (tipoRetorno==identificador) {
-												//1º Buscamos en simDevMetodo la clase asociada
-												SemErr("FUNCIONALIDAD POR HACER");
-											}
-											
-											if (simMetodo.GetTipoRetorno()==identificador) {
-												SemErr("jurjur");
-											}
-											
 											tabla.CerrarAmbito();	// cierro ambito del metodo
 											tabla.CerrarAmbito();	// Cerramos el ambito de la clase
 																	// y volveremos, seguramente, al global
@@ -447,7 +412,6 @@ DecMetodo<String Clase, int tipoRetorno>
 									}
 							} else {
 								SemErr("No existe dicha clase: "+Clase);
-								System.out.println("SOLUCIONAR Y CONSUMIR");
 								.)
 								llave_ab
 									Cuerpo<simDecMetodo>	// simDecMetodo-> no vale para nada!
