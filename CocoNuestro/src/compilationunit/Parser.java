@@ -168,7 +168,7 @@ public class Parser {
 		int type=undef; 
 		int type1;
 		Simbolo simbolo_dev = null;
-		String nombre = null;
+		String nombre = null;	// podre ser nombre de Objeto
 		
 		if (la.kind == 7 || la.kind == 15 || la.kind == 16) {
 			DecClase();
@@ -176,40 +176,22 @@ public class Parser {
 		} else if (StartOf(1)) {
 			if (StartOf(2)) {
 				type = Ttipo();
-				System.out.println("Hola!"+t.val+" cuyo type vale:"+type);
 				nombre = new String(t.val);
 				if (type==identificador) {
 				Simbolo simbolo = new Simbolo(t.val, type, 0);
 				simbolo.SetLine(t.line);
 				simbolo.SetColumn(t.col);
-				if ((tabla.EstaRecur(simbolo.GetNombre()))) {
-					System.out.println(t.val+ " declarado anteriormente, esta ok!");
+				if ((tabla.EstaRecur(simbolo.GetNombre()))) {	// este ident ya existia!, ok!
 					simbolo_dev = tabla.GetSimboloRecur(simbolo.GetNombre());
 						if (simbolo_dev.GetKind() != clase)
 							SemErr(simbolo_dev.GetNombre() + " deberia ser una clase");
-					//tabla.InsertarEnActual(simbolo);
 				} else {
-					System.out.println("Simbolo NO declarado, serÃ¡ return de otra cosa");
-					System.out.println("=======Falta meter return de esto!!");
-					//SemErr(t.val + " No declarado anteriormente");
+					SemErr(t.val + " no declarado anteriormente.");
 				}
 				}
 				
-			} else if (la.kind == 14) {
-				Get();
 			} else {
 				Get();
-				Simbolo simbolo = new Simbolo(t.val, type, 0);
-				simbolo.SetLine(t.line);
-				System.out.println("Declarando objeto de clase");
-				simbolo.SetColumn(t.col);
-				if (tabla.EstaEnActual(simbolo.GetNombre())) {
-						Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
-						SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
-					} else {
-				 tabla.InsertarEnActual(simbolo);
-				}
-				
 			}
 			if (la.kind == 25) {
 				Main(type, nombre);
@@ -220,7 +202,6 @@ public class Parser {
 				simbolo.SetColumn(t.col);
 				if ((simbolo_dev != null) && (simbolo_dev.GetKind() == clase))
 							simbolo.SetClase(simbolo_dev);
-				System.out.println("Entraste en ident CEMASMAS, detras del main");
 				 Simbolo sim = tabla.GetSimboloRecur(t.val);
 				// Metodo de una clase: Persona::daAnio
 				if (la.val.equals((String) "::")) { // casting, si el siguiente es metodo, caso especial
@@ -239,7 +220,6 @@ public class Parser {
 				}
 				
 				if (la.kind == 31) {
-					System.out.println("Entras a Subprograma"); 
 					Subprograma(simbolo);
 				} else if (la.kind == 30) {
 					Vector(simbolo);
@@ -259,9 +239,8 @@ public class Parser {
 					//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 					
 				} else if (la.kind == 17) {
-					System.out.println("Entraste en DecMetodo: "+t.val+" con metodo "+la.val);
 					String Clase= (String) t.val; 
-					DecMetodo(Clase, type);
+					DecMetodo(Clase, type, nombre);
 				} else SynErr(61);
 				CEMASMAS();
 			} else SynErr(62);
@@ -437,7 +416,7 @@ public class Parser {
 		return type;
 	}
 
-	void DecMetodo(String Clase, int tipoRetorno) {
+	void DecMetodo(String Clase, int tipoRetorno, String Nombre) {
 		Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Anado metodo al ambito actual
 		//System.out.println("Estas en declaracion Metodo");
 		
@@ -502,7 +481,6 @@ public class Parser {
 		}
 		} else {
 			SemErr("No existe dicha clase: "+Clase);
-			System.out.println("SOLUCIONAR Y CONSUMIR");
 			
 		Expect(29);
 		Cuerpo(simDecMetodo);
@@ -1668,7 +1646,6 @@ public class Parser {
 							SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 						else
 							{
-							System.out.println("1-jarjar");
 							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 							simboloClaseObjeto = simbolo_metodoatributo.GetClase();
 							System.out.println("2-jarjar"+simbolo_metodoatributo.GetNombre());
@@ -1677,7 +1654,7 @@ public class Parser {
 							System.out.println(simbolo_metodoatributo.GetVisibilidad());
 						if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 										(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el mÃ©todo o atributo es privado
-											SemErr(t.val + " es privado");
+											SemErr(t.val + " es de tipo privado");
 							if (simbolo_metodoatributo.GetKind() == metodo)
 								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 							else if (simbolo_metodoatributo.GetKind() == var)

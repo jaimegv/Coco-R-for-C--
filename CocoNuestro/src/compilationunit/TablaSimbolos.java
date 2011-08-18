@@ -65,7 +65,7 @@ public class TablaSimbolos {
 		for(int i=0; i< this.tabla.size(); i++)
 			{
 			simbolito = (Simbolo) this.tabla.elementAt(i);
-			//System.out.println("Un simbolo a comparar con "+nombre+" es "+simbolito.GetNombre()+" kind:"+simbolito.GetKind());
+			//System.out.println("Un simbolo a comparar con "+nombre+" es "+simbolito.GetNombre()+" kind:"+simbolito.GetKind()+" type:"+simbolito.GetType());
 			if ((this.tabla.elementAt(i) instanceof Simbolo) && (nombre.contentEquals(simbolito.GetNombre())))
 				{
 				return true;

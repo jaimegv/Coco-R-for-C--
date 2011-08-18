@@ -160,37 +160,34 @@ CEMASMAS
 =
 	DecClase CEMASMAS
 			 | ((Ttipo<out type>	// Existe este tipo ident¿?
-			 						(.	System.out.println("Hola!"+t.val+" cuyo type vale:"+type);
-			 							nombre = new String(t.val);
+			 						(.	nombre = new String(t.val);
 			 							if (type==identificador) {
 											Simbolo simbolo = new Simbolo(t.val, type, 0);
 											simbolo.SetLine(t.line);
 											simbolo.SetColumn(t.col);
-											if ((tabla.EstaRecur(simbolo.GetNombre()))) {
-												System.out.println(t.val+ " declarado anteriormente, esta ok!");
+											if ((tabla.EstaRecur(simbolo.GetNombre()))) {	// este ident ya existia!, ok!
 												simbolo_dev = tabla.GetSimboloRecur(simbolo.GetNombre());
 													if (simbolo_dev.GetKind() != clase)
 														SemErr(simbolo_dev.GetNombre() + " deberia ser una clase");
-												//tabla.InsertarEnActual(simbolo);
 											} else {
-												System.out.println("Simbolo NO declarado, será return de otra cosa");
-												System.out.println("=======Falta meter return de esto!!");
-												//SemErr(t.val + " No declarado anteriormente");
+												SemErr(t.val + " no declarado anteriormente.");
 											}
 										}
 			 						.)
-			 			| voidd | ident	(.	// En caso de declarar un Objeto de una clase
-			 										   Simbolo simbolo = new Simbolo(t.val, type, 0);
-							 						   simbolo.SetLine(t.line);
-							 						   System.out.println("Declarando objeto de clase");
-							 						   simbolo.SetColumn(t.col);
-							 						   if (tabla.EstaEnActual(simbolo.GetNombre())) {
-							 						   		Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
-							 						   		SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
-							 						   	} else {
-							 							   tabla.InsertarEnActual(simbolo);
-														}
-	 											.)	) //Parentedid de Ttipo|voidd|ident
+			 			| voidd 
+			 				/*| ident	(.	// En caso de declarar un Objeto de una clase
+											Simbolo simbolo = new Simbolo(t.val, type, 0);
+											simbolo.SetLine(t.line);
+											System.out.println("Declarando objeto de clase");
+											simbolo.SetColumn(t.col);
+											if (tabla.EstaEnActual(simbolo.GetNombre())) {
+												Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
+												SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
+											} else {
+											   tabla.InsertarEnActual(simbolo);
+											}
+	 									.)	*/
+	 							) //Parentedid de Ttipo|voidd|ident
 			 			(Main <type, nombre>
 			 				| ident	
 			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
@@ -198,7 +195,6 @@ CEMASMAS
 			 						   simbolo.SetColumn(t.col);
 			 						   if ((simbolo_dev != null) && (simbolo_dev.GetKind() == clase))
 			 						   			simbolo.SetClase(simbolo_dev);
-			 						   System.out.println("Entraste en ident CEMASMAS, detras del main");
 
 			 						   Simbolo sim = tabla.GetSimboloRecur(t.val);
 			 						   // Metodo de una clase: Persona::daAnio
@@ -217,8 +213,7 @@ CEMASMAS
 											tabla.InsertarEnActual(simbolo); // Estaba puesto antes...
 										}
 			 						.)
-			 					  	( (. System.out.println("Entras a Subprograma"); .)
-			 					  	 Subprograma <simbolo>
+			 					  	(Subprograma <simbolo>
 			 					  		|  Vector<simbolo> (. simbolo.SetToVector(); .) 
 			 					  				puntoComa 
 			 					  			| DecVar<out type1, simbolo> 
@@ -234,9 +229,8 @@ CEMASMAS
 																		}
 																		//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
 																		.)
-						 				| 	(.	System.out.println("Entraste en DecMetodo: "+t.val+" con metodo "+la.val);
-												String Clase= (String) t.val; .)
-						 					DecMetodo<Clase, type, nombre>	// se envia nombre de clase y tipo retorno del metodo
+						 				| 	(.	String Clase= (String) t.val; .)
+						 						DecMetodo<Clase, type, nombre>	// se envia nombre de clase y tipo retorno del metodo
 									)
 								CEMASMAS))
 .
@@ -1127,10 +1121,10 @@ ValorFinalExp <out int tipoDev>
 				}
 			 else
 				{
-				System.out.println("identificador ident!!"+t.val);
+				//System.out.println("identificador ident!!"+t.val);
 				simbolo = tabla.GetSimboloRecur(t.val);
 				tipoDev = simbolo.GetType();
-				System.out.println("Tipo del ident!!"+tipoDev);
+				//System.out.println("Tipo del ident!!"+tipoDev);
 				simboloClaseObjeto = simbolo.GetClase();
 				esta = true;
 				}
@@ -1157,21 +1151,16 @@ ValorFinalExp <out int tipoDev>
 	 				 			SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 	 				 		else
 	 				 			{
-	 				 			System.out.println("1-jarjar");
 	 				 			simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 	 				 			simboloClaseObjeto = simbolo_metodoatributo.GetClase();
-	 				 			System.out.println("2-jarjar"+simbolo_metodoatributo.GetNombre());
-								System.out.println(simbolo_metodoatributo.GetClase().GetNombre());
-								System.out.println("3-jarjar");
-	 				 			System.out.println(simbolo_metodoatributo.GetVisibilidad());
 	 							if ((simbolo_metodoatributo.GetVisibilidad() == privado) &&
 	 				 						(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
-	 				 							SemErr(t.val + " es privado");
+	 				 							SemErr(t.val + " es de tipo privado");
 	 				 			if (simbolo_metodoatributo.GetKind() == metodo)
 	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 	 				 			else if (simbolo_metodoatributo.GetKind() == var)
 	 				 				{
-	 				 				System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
+	 				 				//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 	 				 				tipoDev = simbolo_metodoatributo.GetType();
 	 				 				}
 	 				 			}
