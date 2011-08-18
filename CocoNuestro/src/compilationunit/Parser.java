@@ -184,7 +184,7 @@ public class Parser {
 				if ((tabla.EstaRecur(simbolo.GetNombre()))) {	// este ident ya existia!, ok!
 					simbolo_dev = tabla.GetSimboloRecur(simbolo.GetNombre());
 						if (simbolo_dev.GetKind() != clase)
-							SemErr(simbolo_dev.GetNombre() + " deberia ser una clase");
+							SemErr(simbolo_dev.GetNombre() + " Error declaracion.");
 				} else {
 					SemErr(t.val + " no declarado anteriormente.");
 				}
