@@ -736,8 +736,7 @@ InstCin
 
 Arg_io<out int tipoDev>
 (. tipoDev=undef;
-   Simbolo sim = new Simbolo("Temp",0,0);
-   int posicion; .)
+   Simbolo sim = new Simbolo("Temp",0,0); .)
 =	ident (. if (!(tabla.EstaRecur(t.val)))
 			 	SemErr(t.val + " no esta definido");
 			 else if (sim.GetKind() == clase)
@@ -748,18 +747,21 @@ Arg_io<out int tipoDev>
 			 	sim = tabla.GetSimboloRecur(t.val);
 			 	tipoDev = sim.GetType();
 			 	} .) 
-		[DarPosVector <out posicion, sim>]
+		[DarPosVector <sim>]
 		| cadenaCar (. tipoDev = cadena; .)
-		| Exp<out tipoDev, sim> (. tipoDev = entera; .)
+		| VExpresion<out tipoDev>
 .
 
-DarPosVector <out int posicion, Simbolo sim> (. Simbolo simbolo_nuevo = new Simbolo("temp", 0, 0);
-												int tipoDev; .)
+DarPosVector <Simbolo sim> (.int tipoDev; .)
 = corchete_ab (. if (!(sim.Es_Vector()))
 	 	SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");.)
- Exp<out tipoDev, simbolo_nuevo> corchete_ce (. if (tipoDev != entera)
- 														  	SemErr("La posicion del vector debe ser una expresion de tipo entero");
- 														  posicion = ((Number) simbolo_nuevo.GetValor()).intValue(); .)
+ VExpresion <out tipoDev> (. if (tipoDev != entera)
+ 									{
+ 									SemErr("La posicion del vector debe ser de tipo entero");
+ 									} 
+ 
+ 		 .)	 
+ 		corchete_ce
 .
 
 /******************EXPRESIONES*****************************/
@@ -1180,13 +1182,7 @@ ValorFinalExp <out int tipoDev>
 	 		  
 	 		  
 	 		  //CASO DE QUE SEA UN VECTOR
-	 							   | (corchete_ab DarPosVector<out Pos_Vector, simbolo>
-	 							   	 (. if (Pos_Vector >= simbolo.GetTamano())
-	 							   	 		{
-	 							   	 	 	SemErr("Posicion del vector fuera de rango.");
-	 							   	 	 	}
-	 							   	 	 	.) 
-	 							     corchete_ce))]
+	 							   | (DarPosVector<simbolo>))]
   
   | enteros (. tipoDev = entera;.)
   | ttrue (. tipoDev = bool;.)

@@ -1095,8 +1095,7 @@ public class Parser {
 	int  Arg_io() {
 		int  tipoDev;
 		tipoDev=undef;
-		Simbolo sim = new Simbolo("Temp",0,0);
-		int posicion; 
+		Simbolo sim = new Simbolo("Temp",0,0); 
 		if (la.kind == 1) {
 			Get();
 			if (!(tabla.EstaRecur(t.val)))
@@ -1110,31 +1109,29 @@ public class Parser {
 				tipoDev = sim.GetType();
 				} 
 			if (la.kind == 30) {
-				posicion = DarPosVector(sim);
+				DarPosVector(sim);
 			}
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena; 
-		} else if (StartOf(14)) {
-			tipoDev = Exp(sim);
-			tipoDev = entera; 
+		} else if (StartOf(8)) {
+			tipoDev = VExpresion();
 		} else SynErr(75);
 		return tipoDev;
 	}
 
-	int  DarPosVector(Simbolo sim) {
-		int  posicion;
-		Simbolo simbolo_nuevo = new Simbolo("temp", 0, 0);
+	void DarPosVector(Simbolo sim) {
 		int tipoDev; 
 		Expect(30);
 		if (!(sim.Es_Vector()))
 		SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
-		tipoDev = Exp(simbolo_nuevo);
-		Expect(37);
+		tipoDev = VExpresion();
 		if (tipoDev != entera)
-		SemErr("La posicion del vector debe ser una expresion de tipo entero");
-		posicion = ((Number) simbolo_nuevo.GetValor()).intValue(); 
-		return posicion;
+		{
+		SemErr("La posicion del vector debe ser de tipo entero");
+		} 
+		
+		Expect(37);
 	}
 
 	int  Expresion() {
@@ -1221,7 +1218,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(15)) {
+		if (StartOf(14)) {
 			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 				Operador_Logico();
 				type = Expresion3();
@@ -1240,8 +1237,8 @@ public class Parser {
 				}
 				
 			}
-		} else if (StartOf(16)) {
-			if (StartOf(17)) {
+		} else if (StartOf(15)) {
+			if (StartOf(16)) {
 				Operador_Relacional();
 				type = Expresion3();
 				type1 = Expresion21();
@@ -1404,7 +1401,7 @@ public class Parser {
 		} else if (la.kind == 2) {
 			Get();
 			valor = Integer.parseInt(t.val); 
-		} else if (StartOf(18)) {
+		} else if (StartOf(17)) {
 			valor = ExpOperadores();
 			if (valor==entera)	{
 			System.out.println("es entero");
@@ -1422,7 +1419,7 @@ public class Parser {
 		int type1, type;
 		System.out.println("estas en expoperadores");
 		
-		if (StartOf(19)) {
+		if (StartOf(18)) {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev=cadena;	
@@ -1459,7 +1456,7 @@ public class Parser {
 				SemErr("OpNegAritmetico: Error argumento.");
 			}
 			
-		} else if (StartOf(20)) {
+		} else if (StartOf(19)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
 		} else SynErr(81);
@@ -1678,14 +1675,7 @@ public class Parser {
 						Expect(38);
 					}
 				} else {
-					Get();
-					Pos_Vector = DarPosVector(simbolo);
-					if (Pos_Vector >= simbolo.GetTamano())
-					{
-						SemErr("Posicion del vector fuera de rango.");
-						}
-						
-					Expect(37);
+					DarPosVector(simbolo);
 				}
 			}
 		} else if (la.kind == 2) {
@@ -1757,12 +1747,11 @@ public class Parser {
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,T, T,x,x,x, x,T,T,x, x,x,x,x, T,x,T,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,T, T,x,x,x, x,T,T,x, x,x,x,x, T,x,T,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
-		{x,x,x,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,T,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,T,T, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
