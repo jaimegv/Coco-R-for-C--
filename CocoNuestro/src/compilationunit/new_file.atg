@@ -581,17 +581,17 @@ Parametros <Simbolo simbolo_nombre_funcion>
 				| voidd
 .
 
-Vector <Simbolo simbolo> = (. simbolo.SetToVector();
-							  Simbolo sim = new Simbolo ("SimVector", 0,0);
-							  int type;.)
-corchete_ab [Exp <out type, sim>	(. 	System.out.println("El tamano del vector es " + (Integer)sim.GetValor());
-										if (type!=entera) {
-											SemErr("Indice tipo Vector erroneo.");
-										} else {
-											simbolo.SetToVector((Integer)sim.GetValor());
-										}
-									.)
-] corchete_ce.
+Vector <Simbolo simbolo> = (. simbolo.SetToVector();.)
+corchete_ab enteros	(. 	System.out.println("El tamano del vector es " + t.val);
+						try {										
+						simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
+							}
+						catch (NumberFormatException e)
+							{
+							System.out.println("Deberia haberse especificado la dimension del vector");
+							}
+					.)
+ corchete_ce.
 
 
 //*********************LLAMADA***********************************//
@@ -681,6 +681,7 @@ Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o me
 							  			System.out.println(simboloClaseObjeto.GetNombre());
 							  			System.out.println("mierda");
 							  			System.out.println(simbolo_funcion.GetClaseDevuelta().GetNombre());
+							  			System.out.println("Chocho!!!!!");
 							  			SemErr("return devuelve una clase distinta a la declarada.");
 							  			}
 							  		}
@@ -1206,6 +1207,7 @@ ValorFinalExp <out int tipoDev>
 	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 	 				 			else if (simbolo_metodoatributo.GetKind() == var)
 	 				 				{
+	 				 				System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 	 				 				tipoDev = simbolo_metodoatributo.GetType();
 	 				 				}
 	 				 			}

@@ -408,19 +408,17 @@ public class Parser {
 
 	void Vector(Simbolo simbolo) {
 		simbolo.SetToVector();
-		Simbolo sim = new Simbolo ("SimVector", 0,0);
-		int type;
 		Expect(30);
-		if (StartOf(3)) {
-			type = Exp(sim);
-			System.out.println("El tamano del vector es " + (Integer)sim.GetValor());
-			if (type!=entera) {
-				SemErr("Indice tipo Vector erroneo.");
-			} else {
-				simbolo.SetToVector((Integer)sim.GetValor());
+		Expect(2);
+		System.out.println("El tamano del vector es " + t.val);
+		try {										
+		simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
 			}
-			
-		}
+		catch (NumberFormatException e)
+			{
+			System.out.println("Deberia haberse especificado la dimension del vector");
+			}
+		
 		Expect(37);
 	}
 
@@ -453,45 +451,43 @@ public class Parser {
 				Simbolo simMetodo=tabla.GetSimboloRecur(Clase).GetAmbitoAsociado().GetSimbolo(t.val);
 				// Comprobacion tipoRetoron y argumentos son iguales
 				if (simMetodo.GetTipoRetorno()==tipoRetorno) {
-					simDecMetodo.SetNombre(t.val);
-					simDecMetodo.SetTipoRetorno(tipoRetorno);
-					simDecMetodo.SetClase(tabla.GetSimboloRecur(Clase));
+					//simDecMetodo.SetNombre(t.val);
+					//simDecMetodo.SetTipoRetorno(tipoRetorno);
+					//System.out.println("juasjuas");
+					//simDecMetodo.SetClase(tabla.GetSimboloRecur(Clase));
 					//System.out.println("Nombre del simbolo: "+simMetodo.GetNombre()+ ", naparam:"+simMetodo.GetNParametros());
 					// Todo ok! inserto en Ambito de la clase
 					// Cambio al ambito asociado al simbolo clase
 					// abierto ambito clase
+					System.out.println("2juasjuas");
 					tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());
-					// Nuevo ambito para la dec del metodo
-					tabla.NuevoAmbito(simMetodo);
-					
+		if (tabla.EstaEnActual("talla")) {
+			System.out.println("Nombre y type"+tabla.GetSimboloRecur("talla").GetNombre()+tabla.GetSimboloRecur("talla").GetType());
+		} else {
+			System.out.println("Nada de nada!");
+		}
+								
+								System.out.println("3juasjuas");
+								// Nuevo ambito para la dec del metodo
+								tabla.NuevoAmbito(simMetodo);
+								simMetodo.SetAmbitoAsociado(tabla.GetAmbitoActual());
+								System.out.println("4juasjuas"+simDecMetodo.GetNombre());
+								
 		Expect(31);
 		if (StartOf(1)) {
-			Parametros(simDecMetodo);
+			Parametros(simMetodo);
 		}
-		int nParam=simMetodo.GetNParametros();
-		// Compruebo si los tipos de argumentos son iguales, tanto en la declaracion
-		// como cuando fue declarado dentro de la clase
-		if (simDecMetodo.GetNParametros()==nParam) {	//Mismo numero de argumentos
-			for (int i=0; i <nParam; i++){ 
-				if (simDecMetodo.GetParametros(i).GetType()!=simMetodo.GetParametros(i).GetType()) {
-					SemErr("Fallo en tipos argumentos nuemro"+i);
-				}
-			}
-		} else {
-			SemErr("Tipos declaracion metodo incorrectos");
-		}
-		System.out.println("Tipo que devuelve simDecMet:"+simDecMetodo.GetTipoRetorno());
-										
+		
 		Expect(38);
 		Expect(29);
-		Cuerpo(simDecMetodo);
+		Cuerpo(simMetodo);
 		Expect(36);
 		if (tipoRetorno==identificador) {
 		//1Âº Buscamos en simDevMetodo la clase asociada
 		SemErr("FUNCIONALIDAD POR HACER");
 		}
 		
-		if (simDecMetodo.GetTipoRetorno()==identificador) {
+		if (simMetodo.GetTipoRetorno()==identificador) {
 			SemErr("jurjur");
 		}
 		
@@ -523,15 +519,16 @@ public class Parser {
 			while (StartOf(1)) {
 				if (StartOf(2)) {
 					type = Ttipo();
-					Simbolo sim = new Simbolo("tipoDevuelto", 0, 0);	// Creacion del simbolo
-					if (type==identificador) {
-						if ((tabla.GetSimboloRecur(t.val) != null) &&
-					(tabla.GetSimboloRecur(t.val).GetKind()==clase)) {
-					//Guardamos la direcciÃ³n para engancharlo luego
-					ObjetoDevuelto=tabla.GetSimboloRecur(t.val);
-					} else {
-						SemErr("No existe ningun objeto con dicho nombre.");
-					}
+					Simbolo sim = new Simbolo("elem_clase", 0, 0);	// Creacion del simbolo
+					sim.SetClase(simClase);	// clase a la q pertenece
+					   if (type==identificador) {
+					   	if ((tabla.GetSimboloRecur(t.val) != null) &&
+							(tabla.GetSimboloRecur(t.val).GetKind()==clase)) {
+						//Guardamos la direcciÃ³n para engancharlo luego
+							ObjetoDevuelto=tabla.GetSimboloRecur(t.val);
+						} else {
+							SemErr("No existe ningun objeto con dicho nombre.");
+						}
 					}
 					tabla.InsertarEnActual(sim);
 					
@@ -540,21 +537,25 @@ public class Parser {
 					sim.SetVisibilidad(visible);
 					sim.SetLine(t.line);
 					    sim.SetColumn(t.col);
+					    System.out.println(t.val+" Simbolo q estas mirando, y su tipo:"+type);
 					
 					if (la.kind == 41 || la.kind == 42) {
 						sim.SetKind(var);	// Es variable
 						sim.SetType(type);	// Su tipo
 						if (type==identificador) {
-							sim.SetClase(ObjetoDevuelto);
+							sim.SetClaseDevuelta(ObjetoDevuelto);
 						}
 						
 						type = DecVar(sim);
 					} else if (la.kind == 31) {
 						sim.SetKind(metodo);
 						sim.SetTipoRetorno(type);
-						sim.SetClase(simClase);
+						sim.SetClase(simClase);		// a q clase pertenece le metodo
+						sim.SetAmbitoAsociado(tabla.GetAmbitoActual());	// ambito de accion
+						System.out.println("El Metodo pertenece a la clase:"+sim.GetClase().GetNombre());
 						if (type==identificador) {
-							sim.SetClaseDevuelta(ObjetoDevuelto);
+							sim.SetClaseDevuelta(ObjetoDevuelto);	//devuelve un tipo objeto
+							System.out.println("Clase devuelta:"+ObjetoDevuelto.GetNombre());
 						}
 						
 						DecCabMet(sim);
@@ -565,6 +566,8 @@ public class Parser {
 					Simbolo simbol = new Simbolo(t.val, 0, metodo);
 					simbol.SetKind(metodo);
 					simbol.SetTipoRetorno(vacio);
+					simbol.SetClase(simClase);		// a q clase pertenece le metodo
+					simbol.SetAmbitoAsociado(tabla.GetAmbitoActual());	// ambito de accion
 					
 					DecCabMet(simbol);
 				}
@@ -626,8 +629,16 @@ public class Parser {
 						simbolo_parametro.SetClase(simbolo_clase);
 					}
 				}
-			simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-			tabla.InsertarEnActual(simbolo_parametro);
+			if (simbolo_nombre_funcion.GetKind() != metodo) {
+				simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+				tabla.InsertarEnActual(simbolo_parametro);
+			} else { // Caso decMetodo
+				if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) {
+					SemErr("Error tipos declaracion Metodo");
+				} else {	// coincide en tipos
+					simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
+				}
+			}
 			
 			if (la.kind == 30) {
 				Vector(simbolo_parametro);
@@ -655,8 +666,8 @@ public class Parser {
 		int type = undef; 
 		Simbolo simbolo_anterior = null;
 		boolean estaba_declarado = false;
-		while (StartOf(4)) {
-			if (StartOf(5)) {
+		while (StartOf(3)) {
+			if (StartOf(4)) {
 				Instruccion(simbolo_funcion);
 			} else {
 				if (StartOf(2)) {
@@ -680,7 +691,7 @@ public class Parser {
 				
 				if (la.kind == 28) {
 					Llamada(simbolo_anterior);
-				} else if (StartOf(6)) {
+				} else if (StartOf(5)) {
 					InstExpresion(simbolo_anterior);
 				} else if (la.kind == 1) {
 					Get();
@@ -733,7 +744,9 @@ public class Parser {
 					if (simbolo_funcion.GetClaseDevuelta() != simboloClaseObjeto)
 						{
 						System.out.println(simboloClaseObjeto.GetNombre());
+						System.out.println("mierda");
 						System.out.println(simbolo_funcion.GetClaseDevuelta().GetNombre());
+						System.out.println("Chocho!!!!!");
 						SemErr("return devuelve una clase distinta a la declarada.");
 						}
 					}
@@ -792,7 +805,7 @@ public class Parser {
 			VArgumentos(simbolo_metodoargumento, 0);
 			Expect(38);
 			Expect(42);
-		} else if (StartOf(6)) {
+		} else if (StartOf(5)) {
 			InstExpresion(simbolo_metodoargumento);
 		} else SynErr(70);
 	}
@@ -806,7 +819,7 @@ public class Parser {
 			VArgumentos(simbolo, 0);
 			Expect(38);
 			Expect(42);
-		} else if (StartOf(7)) {
+		} else if (StartOf(6)) {
 			switch (la.kind) {
 			case 41: {
 				Get();
@@ -858,7 +871,7 @@ public class Parser {
 		int valor=0, suma;
 		int numErr=errors.count;	// Numero de errores actuales
 		
-		if (StartOf(8)) {
+		if (StartOf(7)) {
 			suma = ExpAritmetica();
 			if (numErr == errors.count) {	// todo fue ok!
 			System.out.println("vas a sumar a "+valor+" el valor de"+suma);
@@ -877,7 +890,7 @@ public class Parser {
 		Simbolo simbolo_nuevo = null; 
 		System.out.println("Entramos en VArgumentos");
 			
-		if (StartOf(9)) {
+		if (StartOf(8)) {
 			type = VExpresion();
 			if (simbolo != null)
 			{
@@ -910,7 +923,7 @@ public class Parser {
 				Expect(38);
 			} else {
 				Get();
-				while (StartOf(10)) {
+				while (StartOf(9)) {
 					Argumentos();
 				}
 				Expect(38);
@@ -920,7 +933,7 @@ public class Parser {
 
 	void Argumentos() {
 		int type=undef; 
-		if (StartOf(11)) {
+		if (StartOf(10)) {
 			type = Expresion();
 			while (la.kind == 27) {
 				Get();
@@ -936,7 +949,7 @@ public class Parser {
 		System.out.println("Entramos en InstReturn");
 		simboloClaseObjeto = null;
 		Expect(18);
-		if (StartOf(9)) {
+		if (StartOf(8)) {
 			type = VExpresion();
 			System.out.println("Return devuelve un tipo:"+type);
 			tipoDev= type; 
@@ -980,7 +993,7 @@ public class Parser {
 			Cuerpo(simbolo_funcion);
 			tabla.CerrarAmbito(); 
 			Expect(36);
-		} else if (StartOf(5)) {
+		} else if (StartOf(4)) {
 			Instruccion(simbolo_funcion);
 		} else if (la.kind == 1) {
 			Get();
@@ -1005,15 +1018,15 @@ public class Parser {
 		System.out.println("Entramos en VExpresion");
 		tipoDev=undef;
 		int type=undef;
-		if (StartOf(12)) {
+		if (StartOf(11)) {
 			tipoDev = ValorFinalExp();
-			if (StartOf(13)) {
+			if (StartOf(12)) {
 				if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 					Operador_Logico();
 					type = VExpresion2();
 					if ((tipoDev != bool) || (type != bool))
 					SemErr("Error de tipos");
-				} else if (StartOf(14)) {
+				} else if (StartOf(13)) {
 					Operador_Aritmetico();
 					type = VExpresion2();
 					if ((tipoDev != entera) || (type != entera))
@@ -1032,13 +1045,13 @@ public class Parser {
 			tipoDev = ValorFinalExp();
 			if (tipoDev != entera)
 			SemErr("Error de tipos");
-			if (StartOf(13)) {
+			if (StartOf(12)) {
 				if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 					Operador_Logico();
 					type = VExpresion2();
 					if ((tipoDev != bool) || (type != bool))
 					SemErr("Error de tipos");
-				} else if (StartOf(14)) {
+				} else if (StartOf(13)) {
 					Operador_Aritmetico();
 					type = VExpresion2();
 					if ((tipoDev != entera) || (type != entera))
@@ -1057,13 +1070,13 @@ public class Parser {
 			tipoDev = ValorFinalExp();
 			if (tipoDev != bool)
 			SemErr("Error de tipos");
-			if (StartOf(13)) {
+			if (StartOf(12)) {
 				if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 					Operador_Logico();
 					type = VExpresion2();
 					if ((tipoDev != bool) || (type != bool))
 					SemErr("Error de tipos");
-				} else if (StartOf(14)) {
+				} else if (StartOf(13)) {
 					Operador_Aritmetico();
 					type = VExpresion2();
 					if ((tipoDev != entera) || (type != entera))
@@ -1096,7 +1109,7 @@ public class Parser {
 			Cuerpo(simbolo_funcion);
 			tabla.CerrarAmbito(); 
 			Expect(36);
-		} else if (StartOf(5)) {
+		} else if (StartOf(4)) {
 			Instruccion(simbolo_funcion);
 		} else SynErr(74);
 	}
@@ -1124,7 +1137,7 @@ public class Parser {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena; 
-		} else if (StartOf(15)) {
+		} else if (StartOf(14)) {
 			tipoDev = Exp(sim);
 			tipoDev = entera; 
 		} else SynErr(75);
@@ -1230,7 +1243,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(16)) {
+		if (StartOf(15)) {
 			if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 				Operador_Logico();
 				type = Expresion3();
@@ -1249,8 +1262,8 @@ public class Parser {
 				}
 				
 			}
-		} else if (StartOf(17)) {
-			if (StartOf(18)) {
+		} else if (StartOf(16)) {
+			if (StartOf(17)) {
 				Operador_Relacional();
 				type = Expresion3();
 				type1 = Expresion21();
@@ -1413,7 +1426,7 @@ public class Parser {
 		} else if (la.kind == 2) {
 			Get();
 			valor = Integer.parseInt(t.val); 
-		} else if (StartOf(19)) {
+		} else if (StartOf(18)) {
 			valor = ExpOperadores();
 			if (valor==entera)	{
 			System.out.println("es entero");
@@ -1431,7 +1444,7 @@ public class Parser {
 		int type1, type;
 		System.out.println("estas en expoperadores");
 		
-		if (StartOf(20)) {
+		if (StartOf(19)) {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev=cadena;	
@@ -1468,7 +1481,7 @@ public class Parser {
 				SemErr("OpNegAritmetico: Error argumento.");
 			}
 			
-		} else if (StartOf(21)) {
+		} else if (StartOf(20)) {
 			type2 = Expresion5();
 			tipoDev=type2; 
 		} else SynErr(81);
@@ -1480,7 +1493,7 @@ public class Parser {
 		tipoDev=undef;
 		int type, type1;
 		
-		if (StartOf(14)) {
+		if (StartOf(13)) {
 			Operador_Aritmetico();
 			type = Expresion4();
 			type1 = Expresion31();
@@ -1591,7 +1604,7 @@ public class Parser {
 			} else {
 				Get();
 			}
-			if (StartOf(14)) {
+			if (StartOf(13)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
@@ -1599,7 +1612,7 @@ public class Parser {
 			Get();
 			Expresion_Entera();
 			Expect(38);
-			if (StartOf(14)) {
+			if (StartOf(13)) {
 				Operador_Aritmetico();
 				Expresion_Entera();
 			}
@@ -1622,8 +1635,10 @@ public class Parser {
 			}
 			else
 			{
+			System.out.println("identificador ident!!"+t.val);
 			simbolo = tabla.GetSimboloRecur(t.val);
 			tipoDev = simbolo.GetType();
+			System.out.println("Tipo del ident!!"+tipoDev);
 			simboloClaseObjeto = simbolo.GetClase();
 			esta = true;
 			}
@@ -1648,6 +1663,7 @@ public class Parser {
 					else
 							{
 						ambitoclase = simbolo_clase.GetAmbitoAsociado();
+						 				 		
 						if (!(ambitoclase.Esta(t.val)))
 							SemErr(t.val + " no fue declarado dentro de la clase" + simbolo_clase.GetNombre());
 						else
@@ -1655,7 +1671,7 @@ public class Parser {
 							System.out.println("1-jarjar");
 							simbolo_metodoatributo = ambitoclase.GetSimbolo(t.val);
 							simboloClaseObjeto = simbolo_metodoatributo.GetClase();
-							System.out.println("2-jarjar"); 
+							System.out.println("2-jarjar"+simbolo_metodoatributo.GetNombre());
 					System.out.println(simbolo_metodoatributo.GetClase().GetNombre());
 					System.out.println("3-jarjar");
 							System.out.println(simbolo_metodoatributo.GetVisibilidad());
@@ -1666,6 +1682,7 @@ public class Parser {
 								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 							else if (simbolo_metodoatributo.GetKind() == var)
 								{
+								System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 								tipoDev = simbolo_metodoatributo.GetType();
 								}
 							}
@@ -1715,10 +1732,10 @@ public class Parser {
 		System.out.println("Entramos en VExpresion2");
 		tipoDev=undef;
 		int type = undef;
-		if (StartOf(12)) {
+		if (StartOf(11)) {
 			tipoDev = ValorFinalExp();
-			if (StartOf(13)) {
-				if (StartOf(14)) {
+			if (StartOf(12)) {
+				if (StartOf(13)) {
 					Operador_Aritmetico();
 				} else if (la.kind == 46 || la.kind == 53 || la.kind == 54) {
 					Operador_Logico();
@@ -1752,7 +1769,6 @@ public class Parser {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,T,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
