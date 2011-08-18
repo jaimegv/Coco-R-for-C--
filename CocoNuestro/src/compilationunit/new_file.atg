@@ -538,10 +538,9 @@ Parametros <Simbolo simbolo_nombre_funcion>
 									if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) { 
 										SemErr("Error tipos declaracion Metodo.");
 									} else {	// coincide en tipos
-										simbolo_nombre_funcion.GetParametros(0).SetNombre(t.val);
+										simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
 										//String temp_nueva = new String(t.val);
 										//simbolo_nombre_funcion.GetParametros(0).SetNombre(temp_nueva);
-										System.out.println("Esstas llegando aki!");
 										tabla.InsertarEnActual(simbolo_nombre_funcion.GetParametros(contador));	// inserto en ambito Metodo el simb
 										contador++;
 									}
@@ -567,7 +566,7 @@ Parametros <Simbolo simbolo_nombre_funcion>
 														if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) { 
 															SemErr("Error tipos declaracion Metodo.");
 														} else {	// coincide en tipos
-															simbolo_nombre_funcion.GetParametros(0).SetNombre(t.val);
+															simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
 															//String temp_nueva = new String(t.val);
 															//simbolo_nombre_funcion.GetParametros(0).SetNombre(temp_nueva);
 															tabla.InsertarEnActual(simbolo_nombre_funcion.GetParametros(contador));	// inserto en ambito Metodo el simb

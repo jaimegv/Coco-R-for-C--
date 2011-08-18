@@ -419,6 +419,7 @@ public class Parser {
 
 	void DecMetodo(String Clase, int tipoRetorno, String Nombre) {
 		Simbolo simDecMetodo = new Simbolo("simDecMetodo", 0, metodo);		// Anado metodo al ambito actual
+		boolean hay_param=false;
 		//System.out.println("Estas en declaracion Metodo");
 		
 		Expect(17);
@@ -443,13 +444,19 @@ public class Parser {
 					tabla.AbrirAmbito(tabla.GetSimboloRecur(Clase).GetAmbitoAsociado());											
 					// Nuevo ambito para la dec del metodo
 					tabla.NuevoAmbito(simMetodo);
-					simMetodo.SetAmbitoAsociado(tabla.GetAmbitoActual());
+					//simMetodo.SetAmbitoAsociado(tabla.GetAmbitoActual());
 					
 		Expect(31);
 		if (StartOf(1)) {
 			Parametros(simMetodo);
+			hay_param=true; 
 		}
 		Expect(38);
+		if ((!(hay_param)) && 
+			(simMetodo.GetNParametros()!=0)) {	// No hemos entrado en parametros
+		SemErr("Error tipos declaracion Metodo.");
+		}
+		
 		Expect(29);
 		Cuerpo(simMetodo);
 		Expect(36);
@@ -593,17 +600,21 @@ public class Parser {
 			if (simbolo_nombre_funcion.GetKind() != metodo) {						
 					simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
 					tabla.InsertarEnActual(simbolo_parametro);		
-				} else { // Caso decMetodo
-				if (simbolo_nombre_funcion.GetNParametros() == 0)
-					SemErr("Error tipos declaracion Metodo");
-				else
-					{
-					if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) 
-						SemErr("Error tipos declaracion Metodo");
-					else	// coincide en tipos
+			} else { // Caso decMetodo
+				System.out.println("Estas en caso decMetodo PARAMETROS.");
+				if (simbolo_nombre_funcion.GetNParametros() == 0) {
+					SemErr("Error numero argumentos en declaracion Metodo.");
+				} else {
+					if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) { 
+						SemErr("Error tipos declaracion Metodo.");
+					} else {	// coincide en tipos
 						simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
-					
+						//String temp_nueva = new String(t.val);
+						//simbolo_nombre_funcion.GetParametros(0).SetNombre(temp_nueva);
+						tabla.InsertarEnActual(simbolo_nombre_funcion.GetParametros(contador));	// inserto en ambito Metodo el simb
+						contador++;
 					}
+				}
 			}
 			
 			if (la.kind == 30) {
@@ -617,14 +628,29 @@ public class Parser {
 					simbolo_parametro = new Simbolo(t.val, type, parametro);
 					simbolo_parametro.SetLine(t.line);
 					simbolo_parametro.SetColumn(t.col);
-					if (tabla.EstaEnActual(simbolo_parametro.GetNombre()))
-						SemErr("Hay otro parametro con el mismo nombre");
-					else
-						{
-						simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-						tabla.InsertarEnActual(simbolo_parametro);		
+					if (simbolo_nombre_funcion.GetKind() != metodo) {						
+						if (tabla.EstaEnActual(simbolo_parametro.GetNombre())) {
+							SemErr("Hay otro parametro con el mismo nombre");
+						} else {
+							simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+							tabla.InsertarEnActual(simbolo_parametro);		
 						}
-					
+					} else { // Caso decMetodo
+						System.out.println("Estas en caso decMetodo PARAMETROS.");
+						if (simbolo_nombre_funcion.GetNParametros() == 0) {
+							SemErr("Error numero argumentos en declaracion Metodo.");
+						} else {
+							if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) { 
+								SemErr("Error tipos declaracion Metodo.");
+							} else {	// coincide en tipos
+								simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
+								//String temp_nueva = new String(t.val);
+								//simbolo_nombre_funcion.GetParametros(0).SetNombre(temp_nueva);
+								tabla.InsertarEnActual(simbolo_nombre_funcion.GetParametros(contador));	// inserto en ambito Metodo el simb
+								contador++;
+							}
+						}
+					}
 					
 					if (la.kind == 30) {
 						Vector(simbolo_parametro);
@@ -633,6 +659,12 @@ public class Parser {
 			}
 		} else if (la.kind == 14) {
 			Get();
+			System.out.println("Estas en caso decMetodo PARAMETROS.");
+			if (simbolo_nombre_funcion.GetKind() == metodo) {
+				if (simbolo_nombre_funcion.GetNParametros() != 0)
+					SemErr("Error tipos declaracion Metodo.");
+			}
+			
 		} else SynErr(66);
 	}
 

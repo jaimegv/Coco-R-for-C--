@@ -57,7 +57,8 @@ public Simbolo(String nombre, int type, int kind){
 //*****************MODIFICADORES*******************///
 public void SetNombre(String nombre){
 		//System.out.println("Cambiando nombre simbolo a:"+nombre);
-		this.nombre = nombre;
+		this.nombre = new String(nombre);
+		//this.nombre = nombre;
 	}
 
 public void SetType(int type){
