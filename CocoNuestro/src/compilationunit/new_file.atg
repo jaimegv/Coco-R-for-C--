@@ -216,19 +216,7 @@ CEMASMAS
 			 					  	(Subprograma <simbolo>
 			 					  		|  Vector<simbolo> (. simbolo.SetToVector(); .) 
 			 					  				puntoComa 
-			 					  			| DecVar<out type1, simbolo> 
-		 					  											(. 
-		 					  											if (type1==type) {
-			 																//System.out.println("tipos ok!"+type+" "+type1);
-		 																}
-																		else if (type1==undef) {
-																			//System.out.println("tipos ok!__No has inicializado la var, pero ok!");
-																		} 
-																		else {
-																			SemErr("Tipos: Error: arg1="+type+",arg2=" + type1);
-																		}
-																		//System.out.println("El valor del simbolo es:"+simbolo.GetValor()); 
-																		.)
+			 					  			| DecVar<simbolo>
 						 				| 	(.	String Clase= (String) t.val; .)
 						 						DecMetodo<Clase, type, nombre>	// se envia nombre de clase y tipo retorno del metodo
 									)
@@ -317,7 +305,7 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 									sim.SetClaseDevuelta(ObjetoDevuelto);
 								}
 							.) 
-								DecVar<out type, sim> 
+								DecVar<sim> 
 							| (./* Caso Declaracion Cabecera de un metodo */
 								sim.SetKind(metodo);
 								sim.SetTipoRetorno(type);
@@ -484,17 +472,27 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 			 							   		}	
 			 							   	.) 
 			(Subprograma <simbolo>
-		 | (Vector<simbolo> puntoComa | DecVar<out type, simbolo> ))))}
+		 | (Vector<simbolo> puntoComa | DecVar<simbolo> ))))}
 .
 
 
 
-DecVar <out int type, Simbolo simbolo>
-= (. int type1=undef;
-//System.out.println("Estas en DecVar");
-.)
-[op_asig Exp<out type1, simbolo> (. System.out.println("Variable inicializada a " + simbolo.GetValor()); .)
-					] puntoComa	(. type=type1; .)//Expresion<out type1, sim>] puntoComa	(.	type=type1;.)
+DecVar <Simbolo simbolo_anterior>
+= (.simboloClaseObjeto = null;
+	int type = undef;.)
+[op_asig VExpresion<out type>	(. if (type != simbolo_anterior.GetType())
+											 		SemErr("Error de tipos en la inicializacion de la variable");
+											 	else if (type == identificador)
+											 		{
+											 		if (simbolo_anterior.GetClase() == null)
+											 			SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
+											 		else if (simbolo_anterior.GetClase() != simboloClaseObjeto)
+											 			SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
+											 		}
+											 	else
+											 		simboloClaseObjeto = null;
+								.)
+							] puntoComa
 .
 
 
