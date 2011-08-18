@@ -542,9 +542,11 @@ Parametros <Simbolo simbolo_nombre_funcion>
 .
 
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();.)
-corchete_ab enteros	(. 	System.out.println("El tamano del vector es " + t.val);
-						try {										
-						simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
+corchete_ab enteros	(.	try {										
+							if (Integer.parseInt(t.val) == 0)
+								SemErr("Error declarando la dimension del vector");
+							
+							simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
 							}
 						catch (NumberFormatException e)
 							{

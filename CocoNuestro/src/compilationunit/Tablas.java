@@ -9,7 +9,6 @@ public class Tablas {
 	// Constructor
 	public Tablas()	
 		{
-		System.out.println("Ambito global creado");
 		ambito_global = new TablaSimbolos();
 		ambito_actual = ambito_global;
 		}
@@ -36,7 +35,6 @@ public class Tablas {
 		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);	// pasamos como arg la tabla padre
 		simbolo.SetAmbitoAsociado(ambito_nuevo);
 		ambito_actual = ambito_nuevo;
-		System.out.println("Nuevo ambito creado");
 		}
 	
 	public void CerrarAmbito() 
@@ -44,19 +42,16 @@ public class Tablas {
 		{
 		TablaSimbolos ambitopadre = this.ambito_actual.Ambito_Padre();
 		this.ambito_actual = ambitopadre;
-		System.out.println("Ambito actual cerrado");
 		}
 	
 	public int InsertarEnActual (Simbolo simbolo)
 		{
 		if (this.ambito_actual.InsertarSimbolo(simbolo) == 0)
 			{
-			System.out.println("Exito insertando simbolo en el ambito actual");
 			return 0;
 			}
 		else
 			{
-			System.out.println("JUR: El simbolo ya estaba definido en este ambito");
 			return -1;
 			}
 		}
@@ -66,12 +61,10 @@ public class Tablas {
 		TablaSimbolos ambito_padre = this.ambito_actual.Ambito_Padre();
 		if (ambito_padre.InsertarSimbolo(simbolo) == 0)
 			{
-			System.out.println("Exito insertando simbolo en el ambito padre");
 			return 0;
 			}
 		else
 			{
-			System.out.println("JUR: El simbolo ya estaba definido en este ambito");
 			return -1;
 			}
 		}
@@ -91,7 +84,7 @@ public class Tablas {
 			if (this.ambito_global.Esta(nombre))
 				return this.ambito_global.GetSimbolo(nombre);
 			else {
-				System.out.println("Cuidado! devolviendo Null.object");
+//				System.out.println("Cuidado! devolviendo Null.object");
 				return null;
 			}
 		}
@@ -112,12 +105,10 @@ public class Tablas {
 			}
 		if (this.ambito_global.Esta(nombre))
 			{
-			System.out.println(nombre + " se ha encontrado en el ámbito global");
 			return true;
 			}
 		else
 			{
-			System.out.println("No se ha encontrado el simbolo en la jerarquia de ambitos");
 			return false;
 			}
 		

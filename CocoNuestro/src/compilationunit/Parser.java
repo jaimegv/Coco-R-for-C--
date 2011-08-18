@@ -378,10 +378,12 @@ public class Parser {
 		simbolo.SetToVector();
 		Expect(30);
 		Expect(2);
-		System.out.println("El tamano del vector es " + t.val);
 		try {										
+		if (Integer.parseInt(t.val) == 0)
+			SemErr("Error declarando la dimension del vector");
+		
 		simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
-			}
+		}
 		catch (NumberFormatException e)
 			{
 			System.out.println("Deberia haberse especificado la dimension del vector");
