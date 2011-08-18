@@ -406,6 +406,7 @@ public class Parser {
 					SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
 				}
 			else
+				simbolo_anterior.SetValor(null); //AsÃ­ la variable constarÃ¡ como inicializada
 				simboloClaseObjeto = null;
 			
 		}
@@ -644,7 +645,12 @@ public class Parser {
 					System.out.println("El simbolo estaba declarado en la TS");
 					}
 				}
+				else if (la.val.contentEquals("["))
+						SemErr("No existe el tipo especificado");
 				
+				if (la.kind == 30) {
+					DarPosVector(simbolo_anterior);
+				}
 				if (la.kind == 28) {
 					Llamada(simbolo_anterior);
 				} else if (StartOf(5)) {
@@ -714,6 +720,20 @@ public class Parser {
 		} else if (la.kind == 23) {
 			InstIfElse(simbolo_funcion);
 		} else SynErr(69);
+	}
+
+	void DarPosVector(Simbolo sim) {
+		int tipoDev; 
+		Expect(30);
+		if (!(sim.Es_Vector()))
+		SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+		tipoDev = VExpresion();
+		if (tipoDev != entera)
+		{
+		SemErr("La posicion del vector debe ser de tipo entero");
+		} 
+		
+		Expect(37);
 	}
 
 	void Llamada(Simbolo simbolo_objeto) {
@@ -1076,20 +1096,6 @@ public class Parser {
 			tipoDev = VExpresion();
 		} else SynErr(75);
 		return tipoDev;
-	}
-
-	void DarPosVector(Simbolo sim) {
-		int tipoDev; 
-		Expect(30);
-		if (!(sim.Es_Vector()))
-		SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
-		tipoDev = VExpresion();
-		if (tipoDev != entera)
-		{
-		SemErr("La posicion del vector debe ser de tipo entero");
-		} 
-		
-		Expect(37);
 	}
 
 	int  Expresion() {

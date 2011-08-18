@@ -442,7 +442,10 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 											 	System.out.println("El simbolo estaba declarado en la TS");
 											 	}
 											 }
+										else if (la.val.contentEquals("["))
+												SemErr("No existe el tipo especificado");
 									 .)
+									 [DarPosVector<simbolo_anterior>]
 											 	)
 									 
 									 
@@ -490,6 +493,7 @@ DecVar <Simbolo simbolo_anterior>
 											 			SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
 											 		}
 											 	else
+											 		simbolo_anterior.SetValor(null); //Así la variable constará como inicializada
 											 		simboloClaseObjeto = null;
 								.)
 							] puntoComa
