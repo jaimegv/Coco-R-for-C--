@@ -588,15 +588,20 @@ public class Parser {
 						simbolo_parametro.SetClase(simbolo_clase);
 					}
 				}
-			if (simbolo_nombre_funcion.GetKind() != metodo) {
-				simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-				tabla.InsertarEnActual(simbolo_parametro);
-			} else { // Caso decMetodo
-				if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) {
+			if (simbolo_nombre_funcion.GetKind() != metodo) {						
+					simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+					tabla.InsertarEnActual(simbolo_parametro);		
+				} else { // Caso decMetodo
+				if (simbolo_nombre_funcion.GetNParametros() == 0)
 					SemErr("Error tipos declaracion Metodo");
-				} else {	// coincide en tipos
-					simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
-				}
+				else
+					{
+					if (simbolo_nombre_funcion.GetParametros(contador).GetType()!=type) 
+						SemErr("Error tipos declaracion Metodo");
+					else	// coincide en tipos
+						simbolo_nombre_funcion.GetParametros(contador).SetNombre(t.val);
+					
+					}
 			}
 			
 			if (la.kind == 30) {
@@ -608,8 +613,16 @@ public class Parser {
 					type = Ttipo();
 					Expect(1);
 					simbolo_parametro = new Simbolo(t.val, type, parametro);
-					simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
-					tabla.InsertarEnActual(simbolo_parametro);
+					simbolo_parametro.SetLine(t.line);
+					simbolo_parametro.SetColumn(t.col);
+					if (tabla.EstaEnActual(simbolo_parametro.GetNombre()))
+						SemErr("Hay otro parametro con el mismo nombre");
+					else
+						{
+						simbolo_nombre_funcion.AnadirParametro(simbolo_parametro);
+						tabla.InsertarEnActual(simbolo_parametro);		
+						}
+					
 					
 					if (la.kind == 30) {
 						Vector(simbolo_parametro);
@@ -644,7 +657,7 @@ public class Parser {
 					{
 					simbolo_anterior = tabla.GetSimboloRecur(t.val);
 					estaba_declarado = true;
-					System.out.println("El simbolo estaba declarado en la TS");
+					System.out.println("Correcto, el simbolo estaba declarado en la TS");
 					}
 				}
 				else if (la.val.contentEquals("["))

@@ -50,7 +50,6 @@ public class TablaSimbolos {
             if ((this.tabla.elementAt(i) instanceof Simbolo) && 
             		(simbolo.GetNombre() == simbolito.GetNombre()))
             	{
-					System.out.println("YA existe este simbolo:"+simbolo.GetNombre());
             		return -1;
             	}
 			}
