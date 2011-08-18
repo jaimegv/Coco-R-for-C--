@@ -556,7 +556,9 @@ Parametros <Simbolo simbolo_nombre_funcion>
 .
 
 Vector <Simbolo simbolo> = (. simbolo.SetToVector();.)
-corchete_ab enteros	(.	try {										
+corchete_ab enteros	(.	if (simbolo.GetType() != entera)
+							SemErr("El contenido de un vector debe ser de tipo entero");
+						try {										
 							if (Integer.parseInt(t.val) == 0)
 								SemErr("Error declarando la dimension del vector");
 							

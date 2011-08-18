@@ -378,12 +378,14 @@ public class Parser {
 		simbolo.SetToVector();
 		Expect(30);
 		Expect(2);
+		if (simbolo.GetType() != entera)
+		SemErr("El contenido de un vector debe ser de tipo entero");
 		try {										
-		if (Integer.parseInt(t.val) == 0)
-			SemErr("Error declarando la dimension del vector");
-		
-		simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
-		}
+			if (Integer.parseInt(t.val) == 0)
+				SemErr("Error declarando la dimension del vector");
+			
+			simbolo.SetToVector(Integer.parseInt(t.val)); //Si no ha venido un entero se generara una excepcion
+			}
 		catch (NumberFormatException e)
 			{
 			System.out.println("Deberia haberse especificado la dimension del vector");
