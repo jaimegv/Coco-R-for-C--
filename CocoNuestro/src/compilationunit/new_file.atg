@@ -657,19 +657,23 @@ InstExpresion <Simbolo simbolo>
 				| (op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													VExpresion<out type>
-													(. if (simbolo.GetType() != type)
-													   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
-														else if (type == identificador)
+													(. try
 															{
-															if (simbolo.GetClase() != simboloClaseObjeto)
+															if (simbolo.GetType() != type)
+														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
+															else if (type == identificador)
 																{
-																SemErr("La clase del identificador no coincide con la clase de la expresion");
+																if (simbolo.GetClase() != simboloClaseObjeto)
+																	{
+																	SemErr("La clase del identificador no coincide con la clase de la expresion");
+																	}
+																else
+																	simboloClaseObjeto = null;
 																}
-															else
-																simboloClaseObjeto = null;
 															}
-														
-														
+														catch (NullPointerException e)
+															{
+															}
 														.) 
 														puntoComa)
 .
@@ -755,8 +759,17 @@ Arg_io<out int tipoDev>
 .
 
 DarPosVector <Simbolo sim> (.int tipoDev; .)
-= corchete_ab (. if (!(sim.Es_Vector()))
-	 	SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");.)
+		= (.System.out.println("Estamos en DarPosVector");.)
+			corchete_ab (.try
+							{ 
+							if (!(sim.Es_Vector()))
+			 					SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+			 				}
+			 			catch (NullPointerException e)
+			 				{
+			 				System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
+							}
+			 			.)
  VExpresion <out tipoDev> (. if (tipoDev != entera)
  									{
  									SemErr("La posicion del vector debe ser de tipo entero");

@@ -724,9 +724,18 @@ public class Parser {
 
 	void DarPosVector(Simbolo sim) {
 		int tipoDev; 
+		System.out.println("Estamos en DarPosVector");
 		Expect(30);
+		try
+		{ 
 		if (!(sim.Es_Vector()))
-		SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+				SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+			}
+		catch (NullPointerException e)
+			{
+			System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
+		}
+		
 		tipoDev = VExpresion();
 		if (tipoDev != entera)
 		{
@@ -823,8 +832,10 @@ public class Parser {
 			}
 			}
 			type = VExpresion();
+			try
+			{
 			if (simbolo.GetType() != type)
-				SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
+			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
 			else if (type == identificador)
 				{
 				if (simbolo.GetClase() != simboloClaseObjeto)
@@ -834,8 +845,10 @@ public class Parser {
 				else
 					simboloClaseObjeto = null;
 				}
-			
-			
+			}
+			catch (NullPointerException e)
+				{
+				}
 			
 			Expect(42);
 		} else SynErr(71);
