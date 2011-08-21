@@ -93,7 +93,13 @@ public class Parser {
 	public Tablas tabla;
 	// Tupla devuelta por las expresiones (tipo, valor)
 	
-	public Simbolo simboloClaseObjeto = null; 
+	// Este simbolo servira para indicar la clase del objeto encontrado por ValorFinalExp
+	// En realidad es una solucion un poco chapuza, pero es necesario tenerlo aqui
+	public Simbolo simboloClaseObjeto = null;
+	
+	// Esta variable indicarÃ¡ si se ha producido un return en una funcion/metodo que devuelva
+	// algo distinto de void
+	public boolean hayreturn = false;
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -192,6 +198,7 @@ public class Parser {
 				
 			} else {
 				Get();
+				type = vacio;
 			}
 			if (la.kind == 25) {
 				Main(type, nombre);
@@ -330,6 +337,7 @@ public class Parser {
 	void Main(int type, String nombre) {
 		Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 		Simbolo simbolo_clase = null;
+		hayreturn = false;
 		Expect(25);
 		tabla.NuevoAmbito(simbolo_funcion);
 		simbolo_funcion.SetKind (funcion);
@@ -352,6 +360,14 @@ public class Parser {
 		Expect(38);
 		Expect(29);
 		Cuerpo(simbolo_funcion);
+		if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
+		{
+		System.out.println(simbolo_funcion.GetTipoRetorno());
+		SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
+		}
+		else
+			hayreturn = false; 
+		  
 		Expect(36);
 	}
 
@@ -370,7 +386,14 @@ public class Parser {
 		Expect(38);
 		Expect(29);
 		Cuerpo(simbolo_funcion);
-		tabla.CerrarAmbito(); 
+		tabla.CerrarAmbito();
+		if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
+				{
+				System.out.println(hayreturn);
+				SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
+				}
+		else
+				hayreturn = false; 
 		Expect(36);
 	}
 
@@ -459,6 +482,10 @@ public class Parser {
 		
 		Expect(29);
 		Cuerpo(simMetodo);
+		if ((simMetodo.GetTipoRetorno() != vacio) && !hayreturn)
+		SemErr("El metodo tiene que devolver el tipo especificado en la declaracion (no hay sentencia return)");
+		else
+			hayreturn = false;
 		Expect(36);
 		tabla.CerrarAmbito();	// cierro ambito del metodo
 		tabla.CerrarAmbito();	// Cerramos el ambito de la clase
@@ -1021,6 +1048,7 @@ public class Parser {
 			type = VExpresion();
 			System.out.println("Return devuelve un tipo:" + type);
 			tipoDev= type; 
+			hayreturn = true;
 		}
 		Expect(42);
 		return tipoDev;
@@ -1059,7 +1087,7 @@ public class Parser {
 			Get();
 			tabla.NuevoAmbito(simbolo); 
 			Cuerpo(simbolo_funcion);
-			tabla.CerrarAmbito(); 
+			tabla.CerrarAmbito();
 			Expect(36);
 		} else if (StartOf(4)) {
 			Instruccion(simbolo_funcion);
@@ -1090,7 +1118,7 @@ public class Parser {
 			Get();
 			tabla.NuevoAmbito(sim); 
 			Cuerpo(simbolo_funcion);
-			tabla.CerrarAmbito(); 
+			tabla.CerrarAmbito();
 			Expect(36);
 		} else if (StartOf(4)) {
 			Instruccion(simbolo_funcion);

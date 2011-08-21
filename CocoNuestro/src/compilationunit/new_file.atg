@@ -19,7 +19,13 @@ COMPILER CEMASMAS1
 	public Tablas tabla;
 	// Tupla devuelta por las expresiones (tipo, valor)
 	
-	public Simbolo simboloClaseObjeto = null; 
+	// Este simbolo servira para indicar la clase del objeto encontrado por ValorFinalExp
+	// En realidad es una solucion un poco chapuza, pero es necesario tenerlo aqui
+	public Simbolo simboloClaseObjeto = null;
+	
+	// Esta variable indicará si se ha producido un return en una funcion/metodo que devuelva
+	// algo distinto de void
+	public boolean hayreturn = false;
 
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -174,7 +180,7 @@ CEMASMAS
 											}
 										}
 			 						.)
-			 			| voidd 
+			 			| voidd (. type = vacio;.)
 			 				/*| ident	(.	// En caso de declarar un Objeto de una clase
 											Simbolo simbolo = new Simbolo(t.val, type, 0);
 											simbolo.SetLine(t.line);
@@ -387,7 +393,10 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 												}
 											.)
 											llave_ab
-												Cuerpo<simMetodo>
+												Cuerpo<simMetodo> (.if ((simMetodo.GetTipoRetorno() != vacio) && !hayreturn)
+																		SemErr("El metodo tiene que devolver el tipo especificado en la declaracion (no hay sentencia return)");
+																	else
+																		hayreturn = false;.)
 											llave_ce
 											(.
 											tabla.CerrarAmbito();	// cierro ambito del metodo
@@ -414,7 +423,8 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 
 //******************************************************************//
 Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
-								   Simbolo simbolo_clase = null;.)
+								   Simbolo simbolo_clase = null;
+								   hayreturn = false;.)
 	   main   (.tabla.NuevoAmbito(simbolo_funcion);
 			  simbolo_funcion.SetKind (funcion);
 			  simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());
@@ -429,7 +439,17 @@ Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",
 						else
 							simbolo_funcion.SetClaseDevuelta(simbolo_clase);
 					} .)   
-	   parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion> llave_ce
+	   parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion>
+	   															   (.
+	   															    if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
+																   		{
+																   		System.out.println(simbolo_funcion.GetTipoRetorno());
+																   		SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
+																   		}
+															   		else
+															   			hayreturn = false; 
+	   															   .)
+	    llave_ce
 .
 
 Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .) 
@@ -662,7 +682,15 @@ Subprograma <Simbolo simbolo_funcion> = (.  tabla.NuevoAmbito(simbolo_funcion);
 												{
 												simbolo_funcion.SetClaseDevuelta(simbolo_funcion.GetClase()); //Cuando se ha creado el simbolo que nos pasan, en Clase se ha metido el símbolo de la clase que vamos a devolver.
 												}  .) 
-parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito(); .)
+parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion> 
+															(. tabla.CerrarAmbito();
+															   if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
+															   		{
+															   		System.out.println(hayreturn);
+															   		SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
+															   		}
+															   else
+															   		hayreturn = false; .)
  llave_ce.
 
 
@@ -730,7 +758,8 @@ InstReturn <out int tipoDev>
 = 	   (.System.out.println("Entramos en InstReturn");
 		 simboloClaseObjeto = null;.)
 (rreturn [VExpresion<out type> (.   System.out.println("Return devuelve un tipo:" + type);
-									tipoDev= type; .) ] puntoComa)
+									tipoDev= type; 
+									hayreturn = true;.) ] puntoComa)
 .
 
 /****************************************************/
@@ -742,7 +771,7 @@ InstIfElse <Simbolo simbolo_funcion>
 =
 		iff VExpresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
 								  simbolo = new Simbolo ("IF", 0, 0);.) 
-	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito(); .) llave_ce) 
+	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) 
 	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
 	| Instruccion<simbolo_funcion> | ident (.
 									 if (!(tabla.EstaRecur(t.val)))
@@ -763,7 +792,7 @@ Else<Simbolo simbolo_funcion>	(. int type;
 	Simbolo sim = new Simbolo("ELSE", 0, 0);	// borrarcuando corrigas
 .) 
 =
-	elsse ((llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito(); .) llave_ce) 
+	elsse ((llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) 
 			| Instruccion<simbolo_funcion>) .
 
 /***************************************************/
