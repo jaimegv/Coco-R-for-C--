@@ -446,7 +446,6 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 											 	{
 											 	simbolo_anterior = tabla.GetSimboloRecur(t.val);
 											 	estaba_declarado = true;
-											 	System.out.println("Correcto, el simbolo estaba declarado en la TS");
 											 	}
 											 }
 										else if (la.val.contentEquals("["))
@@ -463,7 +462,7 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 										  	{
 										  	if (simbolo_anterior.GetKind() != clase) 
 										 		{
-										 		SemErr("Se esperaba un tipo o un identificador declarado como una clase: " + t.val + " declarado en la linea " + simbolo_anterior.GetLine() + " columna " + simbolo_anterior.GetColumn() + " no corresponde a una clase");
+										 		SemErr("Se esperaba un tipo o un identificador declarado como una clase: '" + simbolo_anterior.GetNombre() + "' declarado en la linea " + simbolo_anterior.GetLine() + " columna " + simbolo_anterior.GetColumn() + " no fue declarado como una clase");
 										  		}
 										  	} 
 										  Simbolo simbolo = new Simbolo(t.val, type, 0);
@@ -474,7 +473,7 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 			 						   	  if (tabla.EstaEnActual(simbolo.GetNombre()))
 			 						   			{
 			 						   			Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
-			 						   			SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
+			 						   			SemErr("'" + simbolonuevo.GetNombre() + "' ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
 			 						   			}
 			 						   	  else
 			 						   	  		{
@@ -604,7 +603,7 @@ corchete_ab enteros	(.	if (simbolo.GetType() != entera)
 
 //*********************LLAMADA***********************************//
 
-Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del objeto
+Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del identificador anterior
 = (. TablaSimbolos ambito_clase = null;
 	 Simbolo simbolo_metodoargumento = null;
 	 System.out.println("Entramos en Llamada"); .) 
@@ -627,21 +626,20 @@ punto ident (. if (simbolo_objeto != null)
 				 				simbolo_metodoargumento = ambito_clase.GetSimbolo(t.val);
 				 				if (simbolo_metodoargumento.GetVisibilidad() == privado)
 				 					SemErr(simbolo_metodoargumento.GetNombre() + " no es publico.");
-				 				System.out.println("Todas las comprobaciones han sido satisfactorias");
 				 				}
 				 			}
 				 		} 
 				 	}.) 
 
 ((parent_ab (.if (simbolo_metodoargumento != null)
-				{
-				if (simbolo_metodoargumento.GetKind() != metodo) //Si hay un paréntesis tiene que ser un método, y debe ser público.
 					{
-					SemErr(simbolo_metodoargumento.GetNombre() + " no ha sido declarado como un metodo.");
-					}
-				else if (simbolo_metodoargumento.GetVisibilidad() == privado)
-				 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
-			 	}
+					if (simbolo_metodoargumento.GetKind() != metodo) //Si hay un paréntesis tiene que ser un método, y debe ser público.
+						{
+						SemErr("'" + simbolo_metodoargumento.GetNombre() + "' declarado en la linea " + simbolo_metodoargumento.GetLine() + " no fue declarado como un metodo");
+						}
+					else if (simbolo_metodoargumento.GetVisibilidad() == privado)
+					 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
+			 		}
 			 	.)
  VArgumentos<simbolo_metodoargumento, 0> parent_ce puntoComa)
  | InstExpresion<simbolo_metodoargumento>)
@@ -731,7 +729,7 @@ InstReturn <out int tipoDev>
 	int type; .)
 = 	   (.System.out.println("Entramos en InstReturn");
 		 simboloClaseObjeto = null;.)
-(rreturn [VExpresion<out type> (.   System.out.println("Return devuelve un tipo:"+type);
+(rreturn [VExpresion<out type> (.   System.out.println("Return devuelve un tipo:" + type);
 									tipoDev= type; .) ] puntoComa)
 .
 
@@ -1117,61 +1115,107 @@ Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
 //******EXPRESIONES VERSIÓN DE VICTOR*************************************************************/
 
 VExpresion <out int tipoDev>
-= (.System.out.println("Entramos en VExpresion");
+=  (.System.out.println("Entramos en la nueva version de VExpresion");
 	tipoDev=undef;
 	int type=undef;.)
-   (
-    ValorFinalExp <out tipoDev> [(Operador_Logico VExpresion2 <out type> (.if ((tipoDev != bool) || (type != bool))
-    																	   		SemErr("Error de tipos");.)
-    							 |Operador_Aritmetico VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
-    																	   		SemErr("Error de tipos");.)
-    							 |Operador_Relacional VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
-    																	   		SemErr("Error de tipos");
-    																	   	   else
-    																	   	   	tipoDev = bool;.)
-    
-    )]
-   | op_menos ValorFinalExp <out tipoDev> (.if (tipoDev != entera)
-   									  		SemErr("Error de tipos");.)
-   								[(Operador_Logico VExpresion2 <out type> (.if ((tipoDev != bool) || (type != bool))
-    																	   		SemErr("Error de tipos");.)
-    							 |Operador_Aritmetico VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
-    																	   		SemErr("Error de tipos");.)
-    							 |Operador_Relacional VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
-    																	   		SemErr("Error de tipos");
-    																	   	   else
-    																	   	   	tipoDev = bool;.)
-    
-    )]
-   								
-   | "!" ValorFinalExp <out tipoDev> (.if (tipoDev != bool)
-   									  		SemErr("Error de tipos");.)
-   								[(Operador_Logico VExpresion2 <out type> (.if ((tipoDev != bool) || (type != bool))
-    																	   		SemErr("Error de tipos");.)
-    							 |Operador_Aritmetico VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
-    																	   		SemErr("Error de tipos");.)
-    							 |Operador_Relacional VExpresion2 <out type> (.if ((tipoDev != entera) || (type != entera))
-    																	   		SemErr("Error de tipos");
-    																	   	   else
-    																	   	   	tipoDev = bool;.)
-    
-    )]
-   | parent_ab VExpresion<out tipoDev> parent_ce
-   )
-.
-
-VExpresion2 <out int tipoDev>
-= (.System.out.println("Entramos en VExpresion2");
-	tipoDev=undef;
-	int type = undef;.)
 	(
-	ValorFinalExp<out tipoDev> [(Operador_Aritmetico |Operador_Logico | Operador_Relacional) VExpresion2<out type>
-					(.if (tipoDev != type)
-						SemErr("Error de tipos");.)
-	]
-	|  parent_ab VExpresion<out tipoDev> parent_ce
-	)
-.
+	parent_ab VExpresion <out tipoDev> parent_ce | VCambio_Signo <out tipoDev> | VNegacion <out tipoDev>
+	| ValorFinalExp <out tipoDev>	[VExpSuma <out type>		(. if ((tipoDev != entera) || (type != entera))
+													 					SemErr("Error de tipos en la expresion");
+						  						     			   else
+															 			tipoDev=type;.)
+					 				| VExpMul <out type>		(. if ((tipoDev != entera) || (type != entera))
+															 			SemErr("Error de tipos en la expresion");
+															 	   else
+															 	   		tipoDev=type;.)
+						 			| VExpAND <out type>		(. if ((tipoDev != bool) || (type != bool))
+															 			SemErr("Error de tipos en la expresion");
+																   else
+															 	   		tipoDev=type;.)
+						 			| VExpOR  <out type>		(. if ((tipoDev != bool) || (type != bool))
+															 			SemErr("Error de tipos en la expresion");
+																   else
+															 	   		tipoDev=type;.)
+						 			| VExpRelacional <out type> (. if ((tipoDev != entera) || (type != entera))
+															 			SemErr("Error de tipos en la expresion");
+															 	   else
+															 	   		tipoDev = bool;.)
+						 			]
+
+)
+ .
+
+
+
+VCambio_Signo <out int tipoDev>
+ = (. System.out.println("Entramos VCambio_Signo");
+ 	  int type = entera;
+ 	  tipoDev = undef;
+ 	  if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
+ 	  		SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");.)
+ 	op_menos (ValorFinalExp <out tipoDev> [VExpSuma <out type> | VExpMul <out type>] (. if ((tipoDev != entera) || (type != entera))
+ 																							SemErr("Error de tipos en la expresion");.) 
+ 			 | parent_ab VExpresion <out tipoDev> parent_ce (.if (tipoDev != entera)
+ 			 											   		SemErr("VCambio_Signo: Error de tipos en la expresion");.)
+ 			 
+ 			 )
+ .
+
+VNegacion <out int tipoDev>
+ = (. System.out.println("Entramos VNegacion");
+ 	  int type = bool;
+ 	  tipoDev = undef;.)
+ 	op_negacion (ValorFinalExp <out tipoDev> [VExpAND <out type> | VExpOR <out type>] (. if ((tipoDev != bool) || (type != bool))
+ 																							SemErr("Error de tipos en la expresion");.) 
+ 			 | parent_ab VExpresion <out tipoDev> parent_ce (.if (tipoDev != entera)
+ 			 											   		SemErr("VNegacion: Error de tipos en la expresion");.)
+ 			 
+ 			 )
+ .
+ 
+ VExpSuma <out int tipoDev>
+  = (.System.out.println("Entramos VExpSuma");
+  	  tipoDev=undef;.)
+    (op_mas | op_menos) VExpresion<out tipoDev> (.if (tipoDev != entera)
+    											 		SemErr("VExpSuma: Error de tipos en la expresion");.)
+    .
+    
+ VExpMul <out int tipoDev>
+  = (. System.out.println("Entramos VExpMul");
+  	   int type = entera;
+  	   tipoDev = undef;.)
+    (op_producto | op_division) (ValorFinalExp<out tipoDev> [VExpSuma <out type> | VExpMul <out type>]
+    					   		 | parent_ab VExpresion <out tipoDev> parent_ce) (. if ((tipoDev != entera) || (type != entera))
+    					   													  			SemErr("ExpMul: Error de tipos en la expresion");.)
+    .
+    
+ VExpAND <out int tipoDev>
+  = (.System.out.println("Entramos VExpAND");
+  	   int type = bool;
+  	   tipoDev = undef;.)
+    (op_and (ValorFinalExp<out tipoDev> [VExpAND <out type> | VExpOR <out type>]
+    					   		 | parent_ab VExpresion <out tipoDev> parent_ce) (. if ((tipoDev != bool) || (type != bool))
+    					   		 														{
+    					   		 														System.out.println(tipoDev + type);
+    					   													  			SemErr("VExpAND: Error de tipos en la expresion");
+    					   													  			}.)
+    					   													  			
+    					   	)
+    .
+    
+ VExpOR <out int tipoDev>
+  = (.System.out.println("Entramos VExpOR");
+  	  tipoDev=undef;.)
+    (op_or) VExpresion<out tipoDev> (.if (tipoDev != bool)
+      								 		SemErr("VExpoOR: Error de tipos en la expresion");.)
+    .
+    
+ VExpRelacional <out int tipoDev>
+ = (.System.out.println("Entramos VExpRelacional");
+ 	 tipoDev=undef;.)
+   (Operador_Relacional) VExpresion <out tipoDev> (.if (tipoDev != entera)
+      								 					SemErr("VEXPRel: Error de tipos en la expresion");.)
+   .
 
 ValorFinalExp <out int tipoDev>
 = (. tipoDev = undef;
@@ -1197,9 +1241,13 @@ ValorFinalExp <out int tipoDev>
 			.)
 	
 	[((parent_ab (. if  (esta)
-				  {
-				  tipoDev = simbolo.GetTipoRetorno();
-				  } .)
+				  		{
+				  		tipoDev = simbolo.GetTipoRetorno();
+				  		}
+				  		
+				  	if (simbolo.GetKind() != funcion)
+					 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion o metodo");
+				   .)
 	 VArgumentos<simbolo, aux> parent_ce)
 	 
 	 //Este es el caso de que sea un método de una clase 
@@ -1236,8 +1284,12 @@ ValorFinalExp <out int tipoDev>
 	 		  [parent_ab (. if (simbolo_metodoatributo.GetKind() != metodo)
 	 		  					SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
 	 		  				else
+	 		  					{
 	 		  					simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 	 		  					tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+	 		  					}
+	 		  				
+	 		  				
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  
