@@ -83,7 +83,7 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5;
+	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5, vector=6;
 	// DeclaraciÃ³n de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3, parametro=4;
 	//DeclaraciÃ³n de visibilidad
@@ -101,6 +101,7 @@ public class Parser {
 	// algo distinto de void
 	public boolean hayreturn = false;
 
+	Tercetos tercetos = new Tercetos();
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
@@ -230,7 +231,8 @@ public class Parser {
 					Subprograma(simbolo);
 				} else if (la.kind == 30) {
 					Vector(simbolo);
-					simbolo.SetToVector(); 
+					simbolo.SetToVector();
+					simbolo.SetType(vector); 
 					Expect(42);
 				} else if (la.kind == 41 || la.kind == 42) {
 					DecVar(simbolo);
@@ -759,6 +761,8 @@ public class Parser {
 					} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 						if (la.kind == 30) {
 							Vector(simbolo);
+							simbolo.SetToVector();
+							simbolo.SetType(vector);
 							Expect(42);
 						} else {
 							DecVar(simbolo);
@@ -821,7 +825,7 @@ public class Parser {
 	}
 
 	void Llamada(Simbolo simbolo_objeto) {
-		TablaSimbolos ambito_clase = null;
+		TablaSimbolos ambito_clase = null; //AtenciÃ³n!! Llamada solo sirve para llamar a un mÃ©todo.
 		Simbolo simbolo_metodoargumento = null;
 		System.out.println("Entramos en Llamada"); 
 		Expect(28);
@@ -872,7 +876,13 @@ public class Parser {
 	void InstExpresion(Simbolo simbolo) {
 		int type=undef;
 		System.out.println("Entramos en InstExpresion");
-		simboloClaseObjeto = null; 
+		simboloClaseObjeto = null;
+		if (!(t.val.contentEquals("]")))
+				{
+		    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
+					SemErr("Operacion no permitida: La parte izquierda de la asignacion es un vector");
+		}
+		 		 
 		if (la.kind == 31) {
 			Get();
 			VArgumentos(simbolo, 0);
@@ -908,8 +918,10 @@ public class Parser {
 			type = VExpresion();
 			try
 			{
-			if (simbolo.GetType() != type)
-			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
+			if ((simbolo.GetType() != type) && (simbolo.GetType() != vector))
+			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
+			  	else if ((simbolo.GetType() == vector) && (type != entera))
+			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
 			else if (type == identificador)
 				{
 				if (simbolo.GetClase() != simboloClaseObjeto)
@@ -1775,6 +1787,7 @@ public class Parser {
 					}
 				} else {
 					DarPosVector(simbolo);
+					tipoDev=entera;
 				}
 			}
 		} else if (la.kind == 2) {

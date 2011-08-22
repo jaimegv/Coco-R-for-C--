@@ -8,7 +8,7 @@ import java.util.Queue;
 public class Simbolo {
 	
 	// Declaracion de constantes para tipos (type)
-	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5;
+	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5, vector=6;
 	// Declaración de constantes de tipo de scopes (kind)
 	final int var=0, funcion=1, clase=2, metodo=3, parametro=4;
 	//Declaración de visibilidad

@@ -9,7 +9,7 @@ COMPILER CEMASMAS1
 //	import java.util.*;
 // Add auxiliary methods and declaration here.
 	// Declaracion de constantes para tipos
-	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5;
+	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5, vector=6;
 	// Declaración de constantes de tipo de scopes
 	final int var=0, funcion=1, clase=2, metodo=3, parametro=4;
 	//Declaración de visibilidad
@@ -27,6 +27,7 @@ COMPILER CEMASMAS1
 	// algo distinto de void
 	public boolean hayreturn = false;
 
+	Tercetos tercetos = new Tercetos();
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
@@ -220,7 +221,8 @@ CEMASMAS
 										}
 			 						.)
 			 					  	(Subprograma <simbolo>
-			 					  		|  Vector<simbolo> (. simbolo.SetToVector(); .) 
+			 					  		|  Vector<simbolo> (. simbolo.SetToVector();
+			 					  							  simbolo.SetType(vector); .) 
 			 					  				puntoComa 
 			 					  			| DecVar<simbolo>
 						 				| 	(.	String Clase= (String) t.val; .)
@@ -501,7 +503,9 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 			 							   		}	
 			 							   	.) 
 			(Subprograma <simbolo>
-		 | (Vector<simbolo> puntoComa | DecVar<simbolo> ))))}
+		 | (Vector<simbolo>
+		   (.simbolo.SetToVector();
+		   	 simbolo.SetType(vector);.) puntoComa | DecVar<simbolo> ))))}
 .
 
 
@@ -624,7 +628,7 @@ corchete_ab enteros	(.	if (simbolo.GetType() != entera)
 //*********************LLAMADA***********************************//
 
 Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del identificador anterior
-= (. TablaSimbolos ambito_clase = null;
+= (. TablaSimbolos ambito_clase = null; //Atención!! Llamada solo sirve para llamar a un método.
 	 Simbolo simbolo_metodoargumento = null;
 	 System.out.println("Entramos en Llamada"); .) 
 punto ident (. if (simbolo_objeto != null)
@@ -726,15 +730,23 @@ Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o me
 InstExpresion <Simbolo simbolo>
 =	(. int type=undef;
 	   System.out.println("Entramos en InstExpresion");
-	   simboloClaseObjeto = null; .)
+	   simboloClaseObjeto = null;
+	   if (!(t.val.contentEquals("]")))
+	   		{
+	  	    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
+	   			SemErr("Operacion no permitida: La parte izquierda de la asignacion es un vector");
+			}
+	   		 .)
 				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
 				| (op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
 													VExpresion<out type>
 													(. try
 															{
-															if (simbolo.GetType() != type)
-														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre"+simbolo.GetNombre()+simbolo.GetType()+" comparado con "+type);
+															if ((simbolo.GetType() != type) && (simbolo.GetType() != vector))
+														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
+														   	else if ((simbolo.GetType() == vector) && (type != entera))
+														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
 															else if (type == identificador)
 																{
 																if (simbolo.GetClase() != simboloClaseObjeto)
@@ -1326,7 +1338,7 @@ ValorFinalExp <out int tipoDev>
 	 		  
 	 		  
 	 		  //CASO DE QUE SEA UN VECTOR
-	 							   | (DarPosVector<simbolo>))]
+	 							   | (DarPosVector<simbolo>) (.tipoDev=entera;.))]
   
   | enteros (. tipoDev = entera;.)
   | ttrue (. tipoDev = bool;.)
