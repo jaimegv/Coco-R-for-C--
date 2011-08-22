@@ -208,7 +208,7 @@ public class Parser {
 				Main(type, nombre);
 			} else if (la.kind == 1) {
 				Get();
-				Simbolo simbolo = new Simbolo(t.val, type, 0);
+				Simbolo simbolo = new Simbolo(t.val, type, var);
 				simbolo.SetLine(t.line);
 				simbolo.SetColumn(t.col);
 				if ((simbolo_dev != null) && (simbolo_dev.GetKind() == clase))
@@ -341,6 +341,7 @@ public class Parser {
 		Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 		Simbolo simbolo_clase = null;
 		hayreturn = false;
+		tabla.InsertarEnActual(simbolo_funcion);
 		Expect(25);
 		tabla.NuevoAmbito(simbolo_funcion);
 		simbolo_funcion.SetKind (funcion);
@@ -372,6 +373,7 @@ public class Parser {
 			hayreturn = false; 
 		  
 		Expect(36);
+		tabla.CerrarAmbito();
 	}
 
 	void Subprograma(Simbolo simbolo_funcion) {

@@ -199,7 +199,7 @@ CEMASMAS
 	 							) //Parentedid de Ttipo|voidd|ident
 			 			(Main <type, nombre>
 			 				| ident	
-			 						(. Simbolo simbolo = new Simbolo(t.val, type, 0);
+			 						(. Simbolo simbolo = new Simbolo(t.val, type, var);
 			 						   simbolo.SetLine(t.line);
 			 						   simbolo.SetColumn(t.col);
 			 						   if ((simbolo_dev != null) && (simbolo_dev.GetKind() == clase))
@@ -427,7 +427,8 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 //******************************************************************//
 Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 								   Simbolo simbolo_clase = null;
-								   hayreturn = false;.)
+								   hayreturn = false;
+								   tabla.InsertarEnActual(simbolo_funcion);.)
 	   main   (.tabla.NuevoAmbito(simbolo_funcion);
 			  simbolo_funcion.SetKind (funcion);
 			  simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());
@@ -452,7 +453,7 @@ Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",
 															   		else
 															   			hayreturn = false; 
 	   															   .)
-	    llave_ce
+	    llave_ce (.tabla.CerrarAmbito();.)
 .
 
 Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .) 

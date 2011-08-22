@@ -167,11 +167,11 @@ public boolean Es_Vector ()
 	return this.es_vector;
 	}
 
-public int GetTamano()
+/*public int GetTamano()
 	{
 	return this.tamano;
 	}
-
+*/
 public Object GetValor()
 	{
 	 if (this.inicializada)
@@ -243,7 +243,12 @@ public int Actualiza_Tamano ()
 			return tamano;
 		else if (type == identificador)
 			{
-			this.tamano = this.ambito_asociado.GetDesplazamiento();
+			this.tamano = this.clase_perteneciente.GetAmbitoAsociado().GetDesplazamiento();
+			return this.tamano;
+			}
+		else if (type == cadena)
+			{
+			this.tamano = 20;
 			return this.tamano;
 			}
 		else

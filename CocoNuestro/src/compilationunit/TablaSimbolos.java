@@ -58,7 +58,8 @@ public class TablaSimbolos {
             	}
 			}
 		tabla.addElement(simbolo);
-		this.desplazamiento = this.desplazamiento + simbolo.GetTamano();
+		System.out.println(simbolo.GetNombre());
+		this.desplazamiento = this.desplazamiento + simbolo.Actualiza_Tamano();
 		return 0;
 		}
 	
@@ -117,15 +118,15 @@ public class TablaSimbolos {
 	
 	public int ActualizarDesplazamiento ()
 		{
-		int desplazamiento = 0;
+		this.desplazamiento = 0;
 		Simbolo simbolito = null;
 		for(int i=0; i< tabla.size(); i++)
 			{
 			simbolito = (Simbolo) tabla.elementAt(i);
 			System.out.println("El tamano del simbolo " + simbolito.GetNombre() + " es: " + simbolito.Actualiza_Tamano());
-			desplazamiento = desplazamiento + simbolito.Actualiza_Tamano();
+			this.desplazamiento = this.desplazamiento + simbolito.Actualiza_Tamano();
 			}
-		return desplazamiento;
+		return this.desplazamiento;
 		}
 
 	}
