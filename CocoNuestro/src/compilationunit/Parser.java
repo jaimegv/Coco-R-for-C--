@@ -169,6 +169,9 @@ public class Parser {
 	void CEMASMAS1() {
 		tabla = new Tablas();	
 		CEMASMAS();
+		int desplazamiento; 
+		desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
+		System.out.println("El desplazamiento del ambito global es " + desplazamiento); 
 	}
 
 	void CEMASMAS() {
@@ -231,8 +234,6 @@ public class Parser {
 					Subprograma(simbolo);
 				} else if (la.kind == 30) {
 					Vector(simbolo);
-					simbolo.SetToVector();
-					simbolo.SetType(vector); 
 					Expect(42);
 				} else if (la.kind == 41 || la.kind == 42) {
 					DecVar(simbolo);
@@ -400,7 +401,6 @@ public class Parser {
 	}
 
 	void Vector(Simbolo simbolo) {
-		simbolo.SetToVector();
 		Expect(30);
 		Expect(2);
 		if (simbolo.GetType() != entera)
@@ -761,8 +761,6 @@ public class Parser {
 					} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
 						if (la.kind == 30) {
 							Vector(simbolo);
-							simbolo.SetToVector();
-							simbolo.SetType(vector);
 							Expect(42);
 						} else {
 							DecVar(simbolo);

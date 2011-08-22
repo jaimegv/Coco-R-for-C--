@@ -40,6 +40,7 @@ public class Tablas {
 	public void CerrarAmbito() 
 	//¡Cerrar un ambito no es destruirlo!
 		{
+		this.ambito_actual.ActualizarDesplazamiento();
 		TablaSimbolos ambitopadre = this.ambito_actual.Ambito_Padre();
 		this.ambito_actual = ambitopadre;
 		}

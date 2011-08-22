@@ -20,7 +20,7 @@ public class Simbolo {
 	private int kind;		// varible, funcion, metodo...
 	private boolean inicializada;
 	private boolean es_vector; // Indica si la variable es de tipo vector
-	private int tamano;   	//En caso de ser vector, indica el tamaño
+	private int tamano;   	//Tamaño de la variable
 	private Vector valor;   //Aquí se guardará el valor de la variable. En caso de ser un vector, sus valores.
 	private int line;		// línea dónde se encontró el símbolo
 	private int column;		// columna dónde se encontró el símbolo
@@ -92,15 +92,17 @@ public void SetTipoRetorno(int tiporetorno){
 public void SetToVector(int tamano)
 	{
 	this.es_vector = true;
+	this.type = vector;
 	this.tamano = tamano;
 	}
-
+/*
 public void SetToVector()
 	{
+	this.type = vector;
 	es_vector = true;
 	tamano = 1;
 	}
-
+*/
 public void SetValor(Object valor)
 {
 	this.valor.insertElementAt(valor, 0);
@@ -228,5 +230,33 @@ public void AnadirParametro (Simbolo simbolo)
 	this.parametros.addElement(simbolo);
 	}
 
+public int Actualiza_Tamano ()
+	{
+	if ((this.kind == var) || (this.kind == parametro))
+		{
+		if ((type == entera) || (type == bool))
+			{
+			this.tamano = 1;
+			return tamano;
+			}
+		else if (type == vector)
+			return tamano;
+		else if (type == identificador)
+			{
+			this.tamano = this.ambito_asociado.GetDesplazamiento();
+			return this.tamano;
+			}
+		else
+			{
+			this.tamano = 0;
+			return this.tamano;
+			}
+		}
+	else
+		{
+		this.tamano = 0;
+		return this.tamano;
+		}
+	}
 
 }

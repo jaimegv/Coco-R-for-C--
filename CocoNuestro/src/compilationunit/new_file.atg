@@ -154,7 +154,9 @@ PRODUCTIONS
 //   Empty = "BEGIN" { Statement } "END".
 //   Statement = ident "=" number { "+" number } .
 CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
-= CEMASMAS
+= CEMASMAS (. int desplazamiento; 
+			  desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
+			  System.out.println("El desplazamiento del ambito global es " + desplazamiento); .)
 .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
@@ -221,8 +223,7 @@ CEMASMAS
 										}
 			 						.)
 			 					  	(Subprograma <simbolo>
-			 					  		|  Vector<simbolo> (. simbolo.SetToVector();
-			 					  							  simbolo.SetType(vector); .) 
+			 					  		|  Vector<simbolo> 
 			 					  				puntoComa 
 			 					  			| DecVar<simbolo>
 						 				| 	(.	String Clase= (String) t.val; .)
@@ -503,9 +504,7 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 			 							   		}	
 			 							   	.) 
 			(Subprograma <simbolo>
-		 | (Vector<simbolo>
-		   (.simbolo.SetToVector();
-		   	 simbolo.SetType(vector);.) puntoComa | DecVar<simbolo> ))))}
+		 | (Vector<simbolo> puntoComa | DecVar<simbolo> ))))}
 .
 
 
@@ -608,7 +607,7 @@ Parametros <Simbolo simbolo_nombre_funcion>
 						.)
 .
 
-Vector <Simbolo simbolo> = (. simbolo.SetToVector();.)
+Vector <Simbolo simbolo> =
 corchete_ab enteros	(.	if (simbolo.GetType() != entera)
 							SemErr("El contenido de un vector debe ser de tipo entero");
 						try {										
