@@ -1,35 +1,15 @@
-int pene;
-int lista_compra[20];
-
-class Persona
-{
-private:
-	int var_privada;
-	Persona papa;
-public:
-	int talla;
-	Persona daPadre();
-	int daPepe(int);
+// Nuevo ambito-global
+class Persona {
+	private:
+		int var_privada;
+	public:
+		int daEdad (int, bool);
 };
 
-class Perro {};
-
-Perro Persona::daPadre(void) {
-	int num;
-	num=var_privada+talla;
-	return papa;
+int Persona::daEdad(int numero, bool hola) {
+	return var_privada;
 }
-
-/*
-int Persona::daPepe (int numero) {
-//	numero=numero+pene;
-	return talla;
-}
-*/
 
 int main () {
-	Persona juan;
-
-	pene=juan.talla;
-	return 2; 
+	return 2;
 }
