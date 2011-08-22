@@ -101,7 +101,10 @@ public class Parser {
 	// algo distinto de void
 	public boolean hayreturn = false;
 
+	// Clase tercetos.
 	Tercetos tercetos = new Tercetos();
+	
+	
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 

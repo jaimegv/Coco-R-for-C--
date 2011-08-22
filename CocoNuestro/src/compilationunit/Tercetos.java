@@ -39,7 +39,7 @@ public class Tercetos {
     
     /*
      * Aginar valor a variable
-     * Se le tiene que pasar el nombre de la variable obtenida de darTemporal
+     * Se tiene que pasar el nombre de la variable obtenida de darTemporal mas el valor a asignar
      */
     public String da_valor_temp (String temporal, String valor){
         return "TEMP," + temporal + "," + valor + "\n";
