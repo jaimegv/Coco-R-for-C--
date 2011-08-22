@@ -22,18 +22,21 @@ public class TablaSimbolos {
 	//Declaración de visibilidad
 	final int privado=0, publico=1;
 	
+	private Simbolo simbolo_asociado;
 	private TablaSimbolos ambito_padre;
 	private Vector tabla;
 	private int desplazamiento;
 	
 	public TablaSimbolos()
 		{
+		this.simbolo_asociado = null;
 		this.tabla = new Vector();
 		this.ambito_padre = null;
 		}
 	
-	public TablaSimbolos(TablaSimbolos ambito_padre)
+	public TablaSimbolos(TablaSimbolos ambito_padre, Simbolo simbolo_asociado)
 		{
+		this.simbolo_asociado = simbolo_asociado;
 		this.tabla = new Vector();
 		this.ambito_padre = ambito_padre;
 		}
@@ -41,7 +44,7 @@ public class TablaSimbolos {
 	public int InsertarSimbolo (Simbolo simbolo)
 		{
 		//Inserta un nuevo simbolo en la tabla
-		//Si se encuentra un simbolo con el mismo nombre devuelve -1 y e.o.c.
+		//Si se encuentra un simbolo con el mismo nombre devuelve -1 y e.o.c. 0
 		Simbolo simbolito;
 		simbolito = null;
 		for(int i=0; i< tabla.size(); i++)

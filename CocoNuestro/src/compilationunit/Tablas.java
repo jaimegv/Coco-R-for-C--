@@ -32,7 +32,7 @@ public class Tablas {
 		{
 		// Nuevo ambito a desarrollar que será el actual
 		// su padre es el actual ambito
-		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual);	// pasamos como arg la tabla padre
+		TablaSimbolos ambito_nuevo = new TablaSimbolos(ambito_actual, simbolo);	// pasamos como arg la tabla padre
 		simbolo.SetAmbitoAsociado(ambito_nuevo);
 		ambito_actual = ambito_nuevo;
 		}
