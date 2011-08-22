@@ -120,6 +120,11 @@ public class Tablas {
 		return this.ambito_actual.Esta(nombre);
 		}
 	
+	public Simbolo GetSimboloActual (String nombre)
+		{
+		return this.ambito_actual.GetSimbolo(nombre);
+		}
+	
 	public void AbrirAmbito(TablaSimbolos ambito_a_abrir)
 		{
 		ambito_actual = ambito_a_abrir;
