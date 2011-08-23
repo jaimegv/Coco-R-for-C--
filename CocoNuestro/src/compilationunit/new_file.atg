@@ -1,8 +1,19 @@
+/*
+Autores: Víctor Gómez Aragoneses
+		 Luis Ildefonso Gómez Solana
+
+
+
+
+
+*/
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Queue;
+import java.io.*;
+import java.util.*;
 
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
@@ -29,8 +40,11 @@ COMPILER CEMASMAS1
 
 	// Clase tercetos.
 	Tercetos tercetos = new Tercetos();
+	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
+    LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
 	
-	
+	GCF codigo_final;
+	String fichero = new String("/home/vickop/Escritorio/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
@@ -159,7 +173,12 @@ PRODUCTIONS
 CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 = CEMASMAS (. int desplazamiento; 
 			  desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
-			  System.out.println("El desplazamiento del ambito global es " + desplazamiento); .)
+			  System.out.println("El desplazamiento del ambito global es " + desplazamiento);
+			  /*Tercetos tercetopolla = new Tercetos();
+			  String temp = tercetopolla.darTemporal();
+			  tupla_Tercetos tupla_Temp = new tupla_Tercetos (tabla.GetAmbitoActual(), temp);
+			  colaMain.add(tupla_Temp);
+			  codigo_final = new GCF(colaTercetos, colaMain, tabla, fichero);*/.)
 .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
