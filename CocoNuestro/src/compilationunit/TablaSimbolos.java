@@ -123,7 +123,9 @@ public class TablaSimbolos {
 		for(int i=0; i< tabla.size(); i++)
 			{
 			simbolito = (Simbolo) tabla.elementAt(i);
-			System.out.println("El tamano del simbolo " + simbolito.GetNombre() + " es: " + simbolito.Actualiza_Tamano());
+			if (simbolito.Actualiza_Tamano() != 0)
+				simbolito.SetDesplazamiento(desplazamiento);
+			System.out.println("El tamano del simbolo " + simbolito.GetNombre() + " es: " + simbolito.Actualiza_Tamano() + " y su desplazamiento es " + simbolito.GetDesplazamiento());
 			this.desplazamiento = this.desplazamiento + simbolito.Actualiza_Tamano();
 			}
 		return this.desplazamiento;
