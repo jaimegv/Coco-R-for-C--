@@ -1,0 +1,26 @@
+class polla
+       {
+       public:
+               int hola;
+       };
+
+
+
+
+
+polli polle(int polla[5], char* zorra)
+       {
+       int pollo;
+       return 2;
+       }
+
+int pollo;
+
+int main (void)
+       {
+       int pollo[5];
+
+       cout << pollo[4];
+
+       //max = (a > b) ? a : b;
+       }
