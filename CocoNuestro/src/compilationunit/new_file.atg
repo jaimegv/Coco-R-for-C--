@@ -1,11 +1,6 @@
 /*
 Autores: Víctor Gómez Aragoneses
 		 Luis Ildefonso Gómez Solana
-
-
-
-
-
 */
 import java.util.Vector;
 import java.util.HashMap;
@@ -44,7 +39,8 @@ COMPILER CEMASMAS1
     LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
 	
 	GenFinal codigo_final;
-	String fichero = new String("/home/vickop/Escritorio/CodigoObjeto");
+	// Fichero de salida para el codigo Ensamblador
+	String fichero = new String("/tmp/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
