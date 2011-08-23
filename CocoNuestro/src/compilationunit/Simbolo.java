@@ -36,6 +36,9 @@ public class Simbolo {
 	private Simbolo clase_devuelta;		//Si es una función, indica la clase del objeto devuelto, y tiporetorno será igual a identificador.
 	private TablaSimbolos ambito_asociado; //Si es una función o un método, indicará cuál es el ámbito asociado
 	
+	private int desplazamiento; //Esto indicara que posicion de la tabla de simbolos ocupa.
+								//Sera necesario para localizar las variables locales en la GCF
+	
 
 
 public Simbolo(String nombre, int type, int kind){
@@ -51,6 +54,7 @@ public Simbolo(String nombre, int type, int kind){
 	   this.clase_perteneciente = null;
 	   this.clase_devuelta = null;
 	   this.ambito_asociado = null;
+	   this.desplazamiento = -1;
 
 	}
 
@@ -122,6 +126,11 @@ public void SetAmbitoAsociado(TablaSimbolos ambito_asociado)
 public void SetClaseDevuelta (Simbolo simbolo_clase)
 	{
 	this.clase_devuelta = simbolo_clase;
+	}
+
+public void SetDesplazamiento (int desplazamiento)
+	{
+	this.desplazamiento = desplazamiento;
 	}
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
@@ -221,6 +230,11 @@ return this.ambito_asociado;
 public Simbolo GetClaseDevuelta ()
 	{
 	return this.clase_devuelta;
+	}
+
+public int GetDesplazamiento ()
+	{
+	return this.desplazamiento;
 	}
 //************************************************//////
 
