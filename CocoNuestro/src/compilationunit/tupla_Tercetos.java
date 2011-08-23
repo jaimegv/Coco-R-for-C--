@@ -1,35 +1,29 @@
 package compilationunit;
 
 class tupla_Tercetos {
-    String clase, metodo, terceto;
+    String terceto;
+    TablaSimbolos ambito_actual;
 
-    public tupla_Tercetos(String clase, String metodo, String terceto){
-        this.clase = clase;
-        this.metodo = metodo;
+    public tupla_Tercetos(TablaSimbolos ambito_actual, String terceto){
+        this.ambito_actual = ambito_actual;
         this.terceto = terceto;
     }
 
-    public String getClase(){
-        return clase;
+    public TablaSimbolos GetAmbitoActual(){
+        return this.ambito_actual;
     }
 
-    public String getMetodo(){
-        return metodo;
-    }
 
-    public String getTerceto (){
+    public String GetTerceto (){
         return terceto;
         }
 
-    public void setClase(String clase){
-        this.clase = clase;
+
+    public void SetAmbitoActual(TablaSimbolos ambito) {
+        this.ambito_actual = ambito;
     }
 
-    public void setMetodo(String metodo) {
-        this.metodo = metodo;
-    }
-
-    public void setTerceto (String terceto) {
+    public void SetTerceto (String terceto) {
         this.terceto = terceto;
 
     }

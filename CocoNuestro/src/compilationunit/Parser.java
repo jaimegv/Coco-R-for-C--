@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Queue;
+import java.io.*;
+import java.util.*;
 
 // Set the name of your grammar here (and at the end of this grammar):
 
@@ -102,9 +104,12 @@ public class Parser {
 	public boolean hayreturn = false;
 
 	// Clase tercetos.
-	Tercetos tercetos = new Tercetos();
+	Tercetos terceto_actual = new Tercetos();
+	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
+    LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
 	
-	
+	GenFinal codigo_final;
+	String fichero = new String("/home/vickop/Escritorio/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
@@ -174,7 +179,9 @@ public class Parser {
 		CEMASMAS();
 		int desplazamiento; 
 		desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
-		System.out.println("El desplazamiento del ambito global es " + desplazamiento); 
+		System.out.println("El desplazamiento del ambito global es " + desplazamiento);
+		terceto_actual = new Tercetos();
+		codigo_final = new GenFinal(colaTercetos, tabla, fichero);
 	}
 
 	void CEMASMAS() {
@@ -344,6 +351,7 @@ public class Parser {
 		Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 		Simbolo simbolo_clase = null;
 		hayreturn = false;
+		simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
 		tabla.InsertarEnActual(simbolo_funcion);
 		Expect(25);
 		tabla.NuevoAmbito(simbolo_funcion);

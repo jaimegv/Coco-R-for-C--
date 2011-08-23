@@ -39,11 +39,11 @@ COMPILER CEMASMAS1
 	public boolean hayreturn = false;
 
 	// Clase tercetos.
-	Tercetos tercetos = new Tercetos();
+	Tercetos terceto_actual = new Tercetos();
 	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
     LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
 	
-	GCF codigo_final;
+	GenFinal codigo_final;
 	String fichero = new String("/home/vickop/Escritorio/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
@@ -174,11 +174,8 @@ CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 = CEMASMAS (. int desplazamiento; 
 			  desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
 			  System.out.println("El desplazamiento del ambito global es " + desplazamiento);
-			  /*Tercetos tercetopolla = new Tercetos();
-			  String temp = tercetopolla.darTemporal();
-			  tupla_Tercetos tupla_Temp = new tupla_Tercetos (tabla.GetAmbitoActual(), temp);
-			  colaMain.add(tupla_Temp);
-			  codigo_final = new GCF(colaTercetos, colaMain, tabla, fichero);*/.)
+			  terceto_actual = new Tercetos();
+			  codigo_final = new GenFinal(colaTercetos, tabla, fichero);.)
 .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
@@ -450,6 +447,7 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 								   Simbolo simbolo_clase = null;
 								   hayreturn = false;
+								   simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
 								   tabla.InsertarEnActual(simbolo_funcion);.)
 	   main   (.tabla.NuevoAmbito(simbolo_funcion);
 			  simbolo_funcion.SetKind (funcion);
