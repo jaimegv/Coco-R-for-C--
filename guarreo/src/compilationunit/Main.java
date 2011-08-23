@@ -17,16 +17,17 @@ public class Main {
         boolean mergeErrors = false;
                 String inputName = null;
 
-
+/*
                 for (int i = 0; i < args.length; i++) {
                         if (args[i].toLowerCase().equals("-l")) mergeErrors = true;
                         else inputName = args[i];
                 }
-
+*/
         //Por ahora se pasará el archivo directamente.
 
 //        inputName = "F:\\Universidad\\4º\\Compiladores\\pruebas_definitivas\\prueba1\\PruebaWeb.java";
-        inputName = "/home/vickop/Escritorio/coco";
+// para hacerlo más generalista ponre en "run as" un fichero de entrada
+        inputName = "/home/pirois/Escritorio/holap";
 //    inputName = "F:\\Universidad\\4º\\Compiladores\\pruebas_definitivas\\prueba1\\prueba1.java";
 //        inputName = "F:\\Universidad\\4º\\Compiladores\\pruebas_definitivas\\prueba3\\prueba3.java";
 
@@ -34,15 +35,18 @@ public class Main {
                 if (inputName == null) {
                         System.err.println("No hay archivo de entrada seleccionado");
                         System.exit(1);
+                } else {
+                	System.out.println("HAY fichero");
                 }
 
                 int pos = inputName.lastIndexOf('/');
                 if (pos < 0) pos = inputName.lastIndexOf('\\');
                 String dir = inputName.substring(0, pos+1);
 
+                System.out.println("HAY fichero"+inputName);
                 Scanner.Init(inputName);
-                Errors.Init(inputName, dir, mergeErrors);
-        Parser parser = new Parser();
+                //Errors.Init(inputName, dir, mergeErrors);
+                Parser parser = new Parser();
         
                 parser.Parse();
         

@@ -1657,7 +1657,7 @@ public class Parser {
         Get();
         compilationunit();
         ImprimeTablaSimbolos();
-        ficherosalida = "/home/vickop/Escritorio/asd";
+        ficherosalida = "/home/pirois/Escritorio/aki";
         codigoFinal = new GCF (colaTercetos, colaMain, tablasimbolos, ficherosalida);
         Esperado(0);
 

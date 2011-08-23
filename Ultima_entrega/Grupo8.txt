@@ -3,7 +3,6 @@ Proyecto Compiladores.
 Grupo 8.
 
 Integrantes:
- - Luis Ildefonso Gómez Solana L040078
- - Fernando Arias Porras k030035
- - Víctor Gómez Aragoneses L040071
+ - Luis Ildefonso Gómez Solana 040078
+ - Víctor Gómez Aragoneses 040071
 

@@ -3,7 +3,7 @@
 Contiene las siguientes entradas 
 Simbolos.......
 -----------------------------------------
-Simbolo:  polla
+Simbolo:  Bicicleta
 Tipo:  clase
 Linea:  1
 Desplazamiento:  0
@@ -13,10 +13,24 @@ Desplazamiento:  0
 ************************************************************ 
 ***********Imprimiendo las tablas padre (clases)************ 
 ************************************************************ 
-xxxxxxxxxxxxxxxxxxx  Imprimiendo la tabla [polla]  xxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxx  Imprimiendo la tabla [Bicicleta]  xxxxxxxxxxxxxxxxxxx
 Desplazamiento total: 0
 Tabla superior: Abuelo
 Simbolos.......
+-----------------------------------------
+Simbolo:  danumero
+Tipo:  método
+Linea:  3
+Desplazamiento:  0
+Numero de argumentos:  0
+Tipo de retorno:  entero
+-----------------------------------------
+Simbolo:  main
+Tipo:  método
+Linea:  7
+Desplazamiento:  0
+Numero de argumentos:  0
+Tipo de retorno:  entero
 -----------------------------------------
 
 
@@ -25,5 +39,39 @@ Simbolos.......
 ************************************************************ 
 ***********Imprimiendo las tablas hijo (métodos)************ 
 ************************************************************ 
+xxxxxxxxxxxxxxxxxxx  Imprimiendo la tabla [danumero]  xxxxxxxxxxxxxxxxxxx
+Desplazamiento total: 1
+Tabla superior: Bicicleta
+Simbolos.......
+-----------------------------------------
+Simbolo:  $temporal2
+Tipo:  entero
+Linea:  0
+Desplazamiento:  0
+-----------------------------------------
+
+
+xxxxxxxxxxxxxxxxxxx  Imprimiendo la tabla [main]  xxxxxxxxxxxxxxxxxxx
+Desplazamiento total: 3
+Tabla superior: Bicicleta
+Simbolos.......
+-----------------------------------------
+Simbolo:  $temporal6
+Tipo:  entero
+Linea:  0
+Desplazamiento:  2
+-----------------------------------------
+Simbolo:  $temporal4
+Tipo:  entero
+Linea:  0
+Desplazamiento:  1
+-----------------------------------------
+Simbolo:  bicicleta
+Tipo:  entero
+Linea:  8
+Desplazamiento:  0
+-----------------------------------------
+
+
 
 
