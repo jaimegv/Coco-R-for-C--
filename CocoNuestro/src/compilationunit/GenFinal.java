@@ -68,7 +68,11 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         simbolo = tabla_aux.GetSimbolo("main");
         String etiqueta_main;
         etiqueta_main = simbolo.GetEtiqueta();
-        bw.write("CALL /" + etiqueta_main);
+        bw.write("CALL /" + etiqueta_main + " ; VAMOS AL MAIN\n");
+        bw.write("POP .IX ; Recuperamos el marco de pila\n");
+        bw.write("MOVE .IX, .SP\n");
+        bw.write("HALT ;Cuando se vuelva del Main se terminara la ejecucion\n");
+//        ProcesarTercetos(colaTercetos, tabla);
         bw.close();
     }
        
@@ -82,5 +86,9 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         
  
     }
+
+//private void (LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla)
+
+
 
 }

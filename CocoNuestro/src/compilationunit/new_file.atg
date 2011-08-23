@@ -29,6 +29,9 @@ COMPILER CEMASMAS1
 	// En realidad es una solucion un poco chapuza, pero es necesario tenerlo aqui
 	public Simbolo simboloClaseObjeto = null;
 	
+	//Utilizaremos este simbolo para ir anadiendo los valores temporales a la tabla de simbolos
+	public Simbolo simboloNuevoTemporal = null;
+	
 	// Esta variable indicará si se ha producido un return en una funcion/metodo que devuelva
 	// algo distinto de void
 	public boolean hayreturn = false;
@@ -410,7 +413,7 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 													SemErr("Error tipos declaracion Metodo.");
 												}
 											.)
-											llave_ab
+											llave_ab (.simMetodo.SetEtiqueta(terceto_actual.darEtiqueta());.)
 												Cuerpo<simMetodo> (.if ((simMetodo.GetTipoRetorno() != vacio) && !hayreturn)
 																		SemErr("El metodo tiene que devolver el tipo especificado en la declaracion (no hay sentencia return)");
 																	else
@@ -698,6 +701,7 @@ punto ident (. if (simbolo_objeto != null)
 Subprograma <Simbolo simbolo_funcion> = (.  tabla.NuevoAmbito(simbolo_funcion);
 											simbolo_funcion.SetKind (funcion);
 											simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno.
+											simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
 											if (simbolo_funcion.GetTipoRetorno() == identificador)
 												{
 												simbolo_funcion.SetClaseDevuelta(simbolo_funcion.GetClase()); //Cuando se ha creado el simbolo que nos pasan, en Clase se ha metido el símbolo de la clase que vamos a devolver.
@@ -715,13 +719,6 @@ parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funci
 
 
 
-
-
-//***********************************************************//
-/******************Llamadas*****************************/
-LlamMet = ident punto ident { parent_ab parent_ce | parent_ab {Argumentos} parent_ce}
-.
-
 /******************INSTRUCCIONES****************************/
 Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o metodo que este activa en ese momento.
 (. int type = undef; .)
@@ -732,10 +729,6 @@ Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o me
 							  		{
 							  		if (simbolo_funcion.GetClaseDevuelta() != simboloClaseObjeto)
 							  			{
-							  			System.out.println(simboloClaseObjeto.GetNombre());
-							  			System.out.println("mierda");
-							  			System.out.println(simbolo_funcion.GetClaseDevuelta().GetNombre());
-							  			System.out.println("Chocho!!!!!");
 							  			SemErr("return devuelve una clase distinta a la declarada.");
 							  			}
 							  		}
@@ -882,293 +875,7 @@ DarPosVector <Simbolo sim> (.int tipoDev; .)
  		corchete_ce
 .
 
-/******************EXPRESIONES*****************************/
-/*
-Expresion<out int type> 
-= (. type=undef; .)
-(	enteros (.	type=entera;	.)
-	| cadenaCar (.	type=cadena;	.)
-	| true	(.	type=bool;	.)
-	| false	(.	type=bool;	.)
-).
-*/
-Expresion <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1;
-.)
- = Expresion2 <out type> Expresion1	<out type1>	(.	if (type==type1) {
- 														tipoDev=type;
- 													} else if (type1==undef) {
- 														tipoDev=type;
- 													} else {
- 														SemErr("Error en Expresion");
- 													}
-												.)
-.
 
-Expresion1 <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1, type2; 
-.)
-= ["?" Expresion<out type>":" Expresion <out type1> Expresion1 <out type2>]
-.
-
-Expresion2 <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1;
-.)
-= Expresion3 <out type> Expresion21 <out type1> (.  if (type1==undef) {	// no hay segunda parte expr
-														tipoDev=type;
-													} else if (type1==entera) {	// Expresion con op_relacional
-														if (type==type1) {
-															tipoDev=entera;		// op_relacional ok!
-														} else {
-															SemErr("OpRelacional: Error argumentos.");
-														}
-													} else if (type1==bool) {	// Expresion con op_logico
-														if (type==type1) {
-															tipoDev=bool;	// op_logico ok!
-														} else {
-															SemErr("OpLogica: Error argumentos");
-														}
-													} else {
-														SemErr("Operacion Expr2 problems"+type+" "+type1);
-													}
-												.)
-.
-
-Expresion21 <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1;
-.)
-= [Operador_Logico Expresion3 <out type> Expresion21 <out type1> (.	if (type==bool) {
-																		if (type1==undef) {	// todo ok!
-																			tipoDev=type;
-																		} else if (type1==bool) {	//2º ok!
-																			tipoDev=type;
-																		} else {				// 2º arg problem
-																			SemErr("OpLogica: Error argumentos.");
-																		}
-																	} else {	// error en 1º arg
-																		tipoDev=type;	// lo envio para q salte el error
-																		SemErr("OpLogica: Error argumentos.");
-																	}
-																.)]
-| [Operador_Relacional Expresion3 <out type> Expresion21 <out type1> (.	if (type==entera) {
-																			if (type1==undef) {	// todo ok!
-																				tipoDev=type;
-																			} else if (type1==entera) {	//2º ok!
-																				tipoDev=type;
-																			} else {				// 2º arg problem
-																				SemErr("OpRelacional: Error argumentos");
-																			}
-																		} else {	// error en 1º arg
-																			tipoDev=type;	// lo envio para q salte el error
-												 
-												 							SemErr("OpRelacional: Error argumentos");
-																		}
-																.)
-												]
-.
-
-/***********PRUEBAS_PRECEDENCIA_OP*******************/
-Exp <out int tipoDev, Simbolo sim>
-(.	tipoDev=undef;				// Si devuelvo este tipo es q algo fue mal!
-	int valor=0, suma;
-	int numErr=errors.count;	// Numero de errores actuales
-.)
-= [ ExpAritmetica<out suma>		(. if (numErr == errors.count) {	// todo fue ok!
-										System.out.println("vas a sumar a "+valor+" el valor de"+suma);
-										valor=suma+valor; 
-								} .)
-	]
-	(. if (numErr == errors.count) {
-			sim.SetValor(valor);
-			tipoDev=entera;
-		} .)
-.
-
-ExpAritmetica <out int suma>
-(.	int numErr=errors.count;	// Numero de errores actuales
-	int valor=0, valor1=0, valor2=0;		// inicializo
-	suma=0;
-	System.out.println("Estas en ExpArirmetica!");
-.)
-=	ExpProducto<out valor> 	(. if (numErr == errors.count) {	// todo fue ok!
-									System.out.println("Una parte vale"+valor);
-									suma= valor;
-								} .)
-								[{ op_mas ExpProducto<out valor1>
-									(. if (numErr == errors.count) {	// todo fue ok! 	
-										System.out.println("sumando! a "+suma+"el nuevo "+valor1);
-									//	sim.SetValor(((Number) sim.GetValor()).intValue() + valor1);
-										suma= suma+valor1; 
-										} .)
-								| (.System.out.println("antes de restar!");.)
-										op_menos ExpProducto<out valor2>
-									(. 	if (numErr == errors.count) {	// todo fue ok!
-										System.out.println("restando!");
-										//sim.SetValor(((Number) sim.GetValor()).intValue() - valor2);
-										suma= suma-valor2; 
-										} .)
-								}]
-(. System.out.println("Simbolo sale con valor:"+suma); .)
-.
-
-ExpProducto <out int total>
-(.	int valor=0, valor1=0, valor2=1;
-	total=0;
-	System.out.println("Estas en expProducto"+la.val);
-.)
-= ExpCambioSigno<out valor> (.	total=valor; .)
-                [{ op_producto ExpCambioSigno<out valor1> 
-                				(. System.out.println("multiplicaste!");
-                					total=total * valor1; .)
-                	| op_division ExpCambioSigno<out valor2>
-                				(. System.out.println("dividiste!");
-                					total=total / valor2; .)
-				}]
-    			(. System.out.println("Valor de una parte"+total); .)
-.
- 
-ExpCambioSigno <out int valor>
-(.	int valor1=0;	// inicializo
-	int sum=0;
-	valor=0;		// Inicialiazo
-	System.out.println("Entraste en camb Signo");
-.)
-=  
-op_menos
-	ExpCambioSigno<out valor1>							(. valor = -valor1; .)
-	| parent_ab ExpAritmetica<out int suma> parent_ce 	(. valor=suma;		.)
-	| ident	(. if (tabla.EstaEnActual(t.val)) {	// busco si esta el simbolo
-					Simbolo sim = tabla.GetSimboloRecur(t.val);
-					if (sim.GetKind()==var) {	// Es var. entera
-						valor = ((Number) sim.GetValor()).intValue();	// asigno el val del ident
-					} else if (((sim.GetKind()==funcion) || (sim.GetKind()==metodo))	// funcion o metodo 
-									&& (sim.GetTipoRetorno()==entera)) {	// Devuelve un entero
-						System.out.println("NO HAY ASIGNACION TODAVIA");
-						System.out.println("Identificador de una funcion o metodo que devuelve un entero, ok!");
-					} else {	// sino valor entero->error"
-						SemErr("Identificador no devuelve Entero!");
-					}
-				} else {
-					SemErr("Error: Identificador no existe");
-				}
-			.)
-	| enteros (. valor = Integer.parseInt(t.val); .)
-	| ExpOperadores<out valor> (. 	if (valor==entera)	{
-										System.out.println("es entero");
-									} else {
-										SemErr("No es entero!es un:"+t.val);
-									}
-								.)
-.
-
-ExpOperadores <out int tipoDev> 
-(.  tipoDev=undef;
-	int type1, type;
-	System.out.println("estas en expoperadores");
-.)
-= 
-| cadenaCar		(. tipoDev=cadena;	.) 
-| "true"		(. tipoDev=bool;	.)
-| "false"		(. tipoDev=bool;	.)
-.
-
-/****************************************************/
-Expresion3 <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1;
-.)
-= Expresion4 <out type> Expresion31 <out type1> (. 	if (type1==undef) {
-														tipoDev=type;
-													} else if ((type==type1) && (type1==entera)) {
-														tipoDev=type;
-													} else {
-														SemErr("Operacion Arit sobre tipos no enteros");
-													}
-												  .)
-.
-
-Expresion31 <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1;
-.)
-= [Operador_Aritmetico Expresion4 <out type> Expresion31 <out type1> (. if (type1==undef) {	// No hay 2º parte
-																			if (type==entera) {	// todo ok!
-																				tipoDev=type;
-																			} else {			// NO es un tipo ENTERO
-																				SemErr("Operacion Arit con arg no entero");
-																			}
-																		} else {	// hay otro expresion
-																			if ((type==type1) && (type==entera)) {	// las dos son
-																				tipoDev=type;
-																			} else {
-																				SemErr("Operacion Arit sobre tipos no enteros");
-																			}
-																		}
-																	  .)
-																	]
-.
-
-Expresion4 <out int tipoDev>
-(.	tipoDev=undef;
-	int type, type1, type2;
-.)
-= op_negacion Expresion4 <out type> (.	if (type==bool) {
-											tipoDev=type;
-										} else {
-											SemErr("OpNegLogico: Error argumento.");
-										}
-									.)
-| op_menos Expresion4<out type1>	(.	if (type1==entera) {
-											tipoDev=type1;
-										} else {
-											SemErr("OpNegAritmetico: Error argumento.");
-										}
-									.)
-| Expresion5 <out type2> (. tipoDev=type2; .)
-.
-
-/* Expresion 5 recoge todos los siguientes supuestos:
-
-			Constructor
-			ident
-			ident.ident
-			ident (Argumentos)
-			enteros
-			Todas aquellas Expresiones que contienen los siguientes operadores
-					
-							Aritméticos (+)
-							Relación    (<)
-							Lógicos   	(!)  
-							Asignacion 	(=)
-							Condicional
-							Acceso a miembros de una clase (.)
-							Acceso a un vector ([])
-*/
-
-
-Expresion5 <out int tipoDev> 
-(.  tipoDev=undef;
-	int type1, type;
-.)
-= 
-"(" Expresion <out type1> ")"	(. tipoDev=type1; .)
-| "new" ident "("Argumentos")"       /*Constructor*/
-| ident ["."ident ["("Argumentos")"] 
-	| "("Argumentos")"
-	| "["Expresion <out type> "]" (. tipoDev=type;.)]
-| enteros		(. tipoDev=entera;	.)
-| cadenaCar		(. tipoDev=cadena;	.) 
-| "true"		(. tipoDev=bool;	.)
-| "false"		(. tipoDev=bool;	.)
-.
-
-Expresion_Entera = (enteros | ident) [Operador_Aritmetico Expresion_Entera]
-					| parent_ab Expresion_Entera parent_ce [Operador_Aritmetico Expresion_Entera]
-.
 //******EXPRESIONES VERSIÓN DE VICTOR*************************************************************/
 
 VExpresion <out int tipoDev>
@@ -1385,12 +1092,6 @@ VArgumentos <Simbolo simbolo, int pos>
 .
 
 /**********************************************************/
-
-Argumentos
-=	(. int type=undef; .)
-[Expresion<out type> {"," Argumentos}]
-.
-
 
 Operador_Aritmetico = op_mas | op_menos | op_producto | op_division
 .
