@@ -34,9 +34,12 @@ public class Tercetos{
     }
     
     public String EtiquetaMetodo(String etiqueta){
-
             return "ETIQUETA_METODO,"+etiqueta+",,\n";
     }
+    
+    public String EtiquetaSubprograma (String etiqueta){
+        return "ETIQUETA_SUBPROGRAMA,"+etiqueta+",,\n";	// atentos q el main esta aqui dentro 
+    }													// esta aqui dentro
     
     public String InsertarEtiqueta(String etiqueta){
 

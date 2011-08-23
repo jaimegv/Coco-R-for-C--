@@ -37,7 +37,8 @@ COMPILER CEMASMAS1
 	public boolean hayreturn = false;
 
 	// Clase tercetos.
-	Tercetos terceto_actual = new Tercetos();
+	Tercetos tercetos = new Tercetos();
+	String terceto_actual;
 	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
     LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
 	
@@ -173,8 +174,15 @@ CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 = CEMASMAS (. int desplazamiento; 
 			  desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
 			  System.out.println("El desplazamiento del ambito global es " + desplazamiento);
-			  terceto_actual = new Tercetos();
-			  codigo_final = new GenFinal(colaTercetos, tabla, fichero);.)
+			  tercetos = new Tercetos();
+			  try {
+			  	if (errors.count==0) {	// todo ok! 
+			  		codigo_final = new GenFinal(colaTercetos, tabla, fichero);
+			  	}
+			  } catch( Exception e ) {	// Codigo Final genera excepcion
+			  	System.err.println("Generación de Código Final desbocado.");
+			  }
+			.)
 .
 
 // Punto de entrada del codigo fuente, acabará SIEMPRE en un MAIN
@@ -413,7 +421,7 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 													SemErr("Error tipos declaracion Metodo.");
 												}
 											.)
-											llave_ab (.simMetodo.SetEtiqueta(terceto_actual.darEtiqueta());.)
+											llave_ab (.simMetodo.SetEtiqueta(tercetos.darEtiqueta());.)
 												Cuerpo<simMetodo> (.if ((simMetodo.GetTipoRetorno() != vacio) && !hayreturn)
 																		SemErr("El metodo tiene que devolver el tipo especificado en la declaracion (no hay sentencia return)");
 																	else
@@ -446,11 +454,17 @@ DecMetodo<String Clase, int tipoRetorno, String Nombre>	// Nombre= caso de tipoR
 Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 								   Simbolo simbolo_clase = null;
 								   hayreturn = false;
-								   simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
-								   tabla.InsertarEnActual(simbolo_funcion);.)
+								   simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
+								   tabla.InsertarEnActual(simbolo_funcion);								   
+								 .)
 	   main   (.tabla.NuevoAmbito(simbolo_funcion);
 			  simbolo_funcion.SetKind (funcion);
 			  simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());
+			  //Añadimos el terceto a la cola de tercetos!
+			  terceto_actual=tercetos.EtiquetaSubprograma(simbolo_funcion.GetEtiqueta());
+			  tupla_Tercetos tupla= new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_actual);
+			  colaTercetos.add(tupla);
+			  
 			  if (simbolo_funcion.GetTipoRetorno() == identificador)
 					{
 					if (!(tabla.EstaRecur(nombre)))
@@ -533,17 +547,17 @@ DecVar <Simbolo simbolo_anterior>
 = (.simboloClaseObjeto = null;
 	int type = undef;.)
 [op_asig VExpresion<out type>	(. if (type != simbolo_anterior.GetType())
-											 		SemErr("Error de tipos en la inicializacion de la variable");
-											 	else if (type == identificador)
-											 		{
-											 		if (simbolo_anterior.GetClase() == null)
-											 			SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
-											 		else if (simbolo_anterior.GetClase() != simboloClaseObjeto)
-											 			SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
-											 		}
-											 	else
-											 		simbolo_anterior.SetValor(null); //Así la variable constará como inicializada
-											 		simboloClaseObjeto = null;
+								 	SemErr("Error de tipos en la inicializacion de la variable");
+								 	else if (type == identificador)
+								 		{
+								 		if (simbolo_anterior.GetClase() == null)
+								 			SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
+								 		else if (simbolo_anterior.GetClase() != simboloClaseObjeto)
+								 			SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
+								 		}
+								 	else
+								 		simbolo_anterior.SetValor(null); //Así la variable constará como inicializada
+								 		simboloClaseObjeto = null;
 								.)
 							] puntoComa
 .
@@ -701,7 +715,9 @@ punto ident (. if (simbolo_objeto != null)
 Subprograma <Simbolo simbolo_funcion> = (.  tabla.NuevoAmbito(simbolo_funcion);
 											simbolo_funcion.SetKind (funcion);
 											simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno.
-											simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
+											simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
+											// Una vez generada la eti añado a la cola de tercetos
+											
 											if (simbolo_funcion.GetTipoRetorno() == identificador)
 												{
 												simbolo_funcion.SetClaseDevuelta(simbolo_funcion.GetClase()); //Cuando se ha creado el simbolo que nos pasan, en Clase se ha metido el símbolo de la clase que vamos a devolver.
@@ -1013,7 +1029,6 @@ ValorFinalExp <out int tipoDev>
 					 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion o metodo");
 				   .)
 	 VArgumentos<simbolo, aux> parent_ce)
-	 
 	 //Este es el caso de que sea un método de una clase 
 	 | (punto ident (.Simbolo simbolo_metodoatributo = null;
 	 				  Simbolo simbolo_clase = simbolo.GetClase();
@@ -1042,8 +1057,6 @@ ValorFinalExp <out int tipoDev>
 	 				 				}
 	 				 			}
 	 				  		}
-
-	 				  		
 	 				 .)
 	 		  [parent_ab (. if (simbolo_metodoatributo.GetKind() != metodo)
 	 		  					SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
@@ -1052,21 +1065,15 @@ ValorFinalExp <out int tipoDev>
 	 		  					simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 	 		  					tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 	 		  					}
-	 		  				
-	 		  				
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
-	 		  
-	 		  
-	 		  
-	 		  
 	 		  //CASO DE QUE SEA UN VECTOR
 	 							   | (DarPosVector<simbolo>) (.tipoDev=entera;.))]
   
-  | enteros (. tipoDev = entera;.)
+  | enteros (.	tipoDev = entera;.)
   | ttrue (. tipoDev = bool;.)
   | ffalse (. tipoDev = bool;.)
-  | cadenaCar (. tipoDev = cadena;.))
+  | cadenaCar (. tipoDev = cadena;.) )
 .
 
 VArgumentos <Simbolo simbolo, int pos>

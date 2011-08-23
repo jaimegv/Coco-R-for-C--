@@ -107,12 +107,14 @@ public class Parser {
 	public boolean hayreturn = false;
 
 	// Clase tercetos.
-	Tercetos terceto_actual = new Tercetos();
+	Tercetos tercetos = new Tercetos();
+	String terceto_actual;
 	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
     LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
 	
 	GenFinal codigo_final;
-	String fichero = new String("/home/vickop/Escritorio/CodigoObjeto");
+	// Fichero de salida para el codigo Ensamblador
+	String fichero = new String("/tmp/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
@@ -183,8 +185,15 @@ public class Parser {
 		int desplazamiento; 
 		desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
 		System.out.println("El desplazamiento del ambito global es " + desplazamiento);
-		terceto_actual = new Tercetos();
-		codigo_final = new GenFinal(colaTercetos, tabla, fichero);
+		tercetos = new Tercetos();
+		try {
+			if (errors.count==0) {	// todo ok! 
+				codigo_final = new GenFinal(colaTercetos, tabla, fichero);
+			}
+		} catch( Exception e ) {	// Codigo Final genera excepcion
+			System.err.println("GeneraciÃ³n de CÃ³digo Final desbocado.");
+		}
+		
 	}
 
 	void CEMASMAS() {
@@ -354,12 +363,18 @@ public class Parser {
 		Simbolo simbolo_funcion = new Simbolo("main",type,funcion);
 		Simbolo simbolo_clase = null;
 		hayreturn = false;
-		simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
-		tabla.InsertarEnActual(simbolo_funcion);
+		simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
+		tabla.InsertarEnActual(simbolo_funcion);								   
+		
 		Expect(25);
 		tabla.NuevoAmbito(simbolo_funcion);
 		simbolo_funcion.SetKind (funcion);
 		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType());
+		//AÃ±adimos el terceto a la cola de tercetos!
+		terceto_actual=tercetos.EtiquetaSubprograma(simbolo_funcion.GetEtiqueta());
+		tupla_Tercetos tupla= new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_actual);
+		colaTercetos.add(tupla);
+		
 		if (simbolo_funcion.GetTipoRetorno() == identificador)
 		{
 		if (!(tabla.EstaRecur(nombre)))
@@ -394,7 +409,9 @@ public class Parser {
 		tabla.NuevoAmbito(simbolo_funcion);
 		simbolo_funcion.SetKind (funcion);
 		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el sÃ­mbolo que nos pasan, en type se ha metido el tipo de retorno.
-		simbolo_funcion.SetEtiqueta(terceto_actual.darEtiqueta());
+		simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
+		// Una vez generada la eti aÃ±ado a la cola de tercetos
+		
 		if (simbolo_funcion.GetTipoRetorno() == identificador)
 			{
 			simbolo_funcion.SetClaseDevuelta(simbolo_funcion.GetClase()); //Cuando se ha creado el simbolo que nos pasan, en Clase se ha metido el sÃ­mbolo de la clase que vamos a devolver.
@@ -500,7 +517,7 @@ public class Parser {
 		}
 		
 		Expect(29);
-		simMetodo.SetEtiqueta(terceto_actual.darEtiqueta());
+		simMetodo.SetEtiqueta(tercetos.darEtiqueta());
 		Cuerpo(simMetodo);
 		if ((simMetodo.GetTipoRetorno() != vacio) && !hayreturn)
 		SemErr("El metodo tiene que devolver el tipo especificado en la declaracion (no hay sentencia return)");
@@ -1271,7 +1288,6 @@ public class Parser {
 								}
 							}
 							}
-					 		
 					
 					if (la.kind == 31) {
 						Get();
@@ -1282,8 +1298,6 @@ public class Parser {
 							simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
 							tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 							}
-						
-						
 						 
 						VArgumentos(simbolo_metodoatributo, aux);
 						Expect(38);

@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 public class GenFinal {
     BufferedWriter bw;
@@ -72,7 +74,25 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         bw.write("POP .IX ; Recuperamos el marco de pila\n");
         bw.write("MOVE .IX, .SP\n");
         bw.write("HALT ;Cuando se vuelva del Main se terminara la ejecucion\n");
+        
 //        ProcesarTercetos(colaTercetos, tabla);
+        
+        /*
+         * Bucle para imprimir toda la cola de tercetos!
+         */
+        System.out.println("-----------------------------------");
+        System.out.println("Elementos de la lista "+colaTercetos);
+        //Iterator it2 = a.iterator();
+        System.out.println("afasd  -->"+colaTercetos.get(0).terceto);
+        Iterator<tupla_Tercetos> it = colaTercetos.iterator();
+        while (it.hasNext()) {
+            System.out.println(it.next().terceto);
+            System.out.println(it.next().GetAmbitoActual());
+        }
+        System.out.println("-----------------------------------");
+        
+        
+        // Importante! sino no se guarda nada en el fichero!
         bw.close();
     }
        

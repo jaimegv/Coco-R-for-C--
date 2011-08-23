@@ -7,15 +7,20 @@ public class Main {
 		if (arg.length != 1) {	// Tenemos que recibir el fichero de codigo
 			System.err.println("Error: Se espera un fichero de código de entrada.");
 		} else {
-			// Se recibe fichero de codigo!
-			Scanner scanner = new Scanner(arg[0]);
-			Parser parser = new Parser(scanner);
-			parser.Parse();
-			if (parser.errors.count == 0) {	// todo ok!
-				System.out.println(parser.errors.count + " errores detectados.");
-				System.out.println("Fichero Codigo Objeto almacenado en \""+parser.fichero+"\"");				
-			} else {	// Errores detectados
-				System.err.println(parser.errors.count + " errores detectados.");	
+			try {
+				// Se recibe fichero de codigo!
+				Scanner scanner = new Scanner(arg[0]);
+				Parser parser = new Parser(scanner);
+				parser.Parse();
+				if (parser.errors.count == 0) {	// todo ok!
+					System.out.println(parser.errors.count + " errores detectados.");
+					System.out.println("Fichero Codigo Objeto almacenado en \""+parser.fichero+"\"");				
+				} else {	// Errores detectados
+					System.err.println(parser.errors.count + " errores detectados.");	
+				}
+			} catch( Exception e ) {
+				// Captura de cualquier excepcion en ultima instancia
+				System.err.println("¡Tranquilo vaquero!");
 			}
 		}		
 	}
