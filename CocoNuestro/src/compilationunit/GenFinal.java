@@ -37,7 +37,7 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
     	}
     catch (IOException e) 
     	{
-         System.out.println("Parece que hay algun problema al escribir en el fichero de codigo objeto");
+         System.out.println("Error fichero de salida para Codigo Objeto.");
     	}
     
 
