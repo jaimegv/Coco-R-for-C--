@@ -16,6 +16,7 @@ public class Simbolo {
 	
 	
 	private String nombre;	// Nombre del objeto
+	private String etiqueta; //Esto servira, para, en caso de ser una funcion o un metodo, identificar la etiqueta a donde saltara
 	private int type;		// tipo del objeto
 	private int kind;		// varible, funcion, metodo...
 	private boolean inicializada;
@@ -132,6 +133,11 @@ public void SetDesplazamiento (int desplazamiento)
 	{
 	this.desplazamiento = desplazamiento;
 	}
+
+public void SetEtiqueta (String etiqueta)
+	{
+	this.etiqueta = new String(etiqueta);
+	}
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
 	   return this.nombre;
@@ -176,11 +182,6 @@ public boolean Es_Vector ()
 	return this.es_vector;
 	}
 
-/*public int GetTamano()
-	{
-	return this.tamano;
-	}
-*/
 public Object GetValor()
 	{
 	 if (this.inicializada)
@@ -235,6 +236,11 @@ public Simbolo GetClaseDevuelta ()
 public int GetDesplazamiento ()
 	{
 	return this.desplazamiento;
+	}
+
+public String GetEtiqueta ()
+	{
+	return this.etiqueta;
 	}
 //************************************************//////
 
