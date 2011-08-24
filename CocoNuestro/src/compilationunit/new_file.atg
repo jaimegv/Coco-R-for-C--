@@ -910,33 +910,33 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 	tupla_Tercetos tupla;.)
 	
 	(
-	(. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(),entera,var); .) 
+	(. simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); .) 
 	parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce
-	(. terceto = new String(terceto_actual.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+	(. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
 	   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 	   colaTercetos.add(tupla);
 	.)
 	 
 	|
 	
-	 (. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(),entera,var); .) 
+	 (. simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); .) 
 	 VCambio_Signo <out tipoDev/*, simbolo_op1*/> 
-	 (. terceto = new String(terceto_actual.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+	 (. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
 		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 		colaTercetos.add(tupla);	 
 	 .)
 	 
 	|
 	 
-	 (. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(),bool,var); .) 
+	 (. simbolo_op1 = new Simbolo(tercetos.darTemporal(),bool,var); .) 
 	 VNegacion <out tipoDev>
-	 (. terceto = new String(terceto_actual.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+	 (. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
 		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 		colaTercetos.add(tupla);	 
 	 .)
 	
 	|
-	 (. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(), undef , var); .) 
+	 (. simbolo_op1 = new Simbolo(tercetos.darTemporal(), undef , var); .) 
 	 ValorFinalExp <out tipoDev, simbolo_op1> 
 	 
 	 
@@ -1125,28 +1125,28 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
   | enteros (. tipoDev = entera;
   			   simbolo_resultado.SetType(entera);
   			   String terceto;
-  			   terceto = terceto_actual.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
+  			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
   			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
   			   colaTercetos.add(tupla);
   			   tabla.InsertarEnActual(simbolo_resultado);.)
   | ttrue 	(. tipoDev = bool;
 			   simbolo_resultado.SetType(bool);
   			   String terceto;  			 
-			   terceto = terceto_actual.asignacion_valor(simbolo_resultado.GetNombre(), 1);
+			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), 1);
 			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   colaTercetos.add(tupla);
 			   tabla.InsertarEnActual(simbolo_resultado);.)
   | ffalse 	(. tipoDev = bool;
   			   simbolo_resultado.SetType(bool);
   			   String terceto;
-			   terceto = terceto_actual.asignacion_valor(simbolo_resultado.GetNombre(), 0);
+			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), 0);
 			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   colaTercetos.add(tupla);
 			   tabla.InsertarEnActual(simbolo_resultado);.)
   | cadenaCar (. tipoDev = cadena;
   				 simbolo_resultado.SetType(cadena);
   				 String terceto;
-			   	 terceto = terceto_actual.asignacion(simbolo_resultado.GetNombre(), "\"" + t.val + "\"");
+			   	 terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), "\"" + t.val + "\"");
 			   	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   	 colaTercetos.add(tupla);
 			   	 tabla.InsertarEnActual(simbolo_resultado);.))
