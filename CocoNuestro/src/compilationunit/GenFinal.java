@@ -73,16 +73,13 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         bw.write("POP .IX ; Recuperamos el marco de pila\n");
         bw.write("MOVE .IX, .SP\n");
         bw.write("HALT ;Cuando se vuelva del Main se terminara la ejecucion\n");
-        
-//        ProcesarTercetos(colaTercetos, tabla);
-        
+                
         /*
          * Bucle para imprimir toda la cola de tercetos!
          */
         System.out.println("-----------------------------------");
         System.out.println("Elementos de la lista "+colaTercetos);
         System.out.println("Tamano de la lista:"+colaTercetos.size());
-        //Iterator it2 = a.iterator();
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
         while (it.hasNext()) {
             //this.separar(it.next().GetTerceto());
@@ -94,7 +91,11 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         }
         System.out.println("-----------------------------------");
         
-        
+        /*
+         * Ponemos un HALT, si se acaban los tercetos es final de MAIN
+         * Nota:podemos hacer un RET pero ahorramos problemas ocn un HALT
+         */
+        bw.write("RET; final de main");
         // Importante! sino no se guarda nada en el fichero!
         bw.close();
     }
@@ -103,12 +104,8 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
     	{
     	System.out.println("Tranquilo vaquero");
     	}
-        
-        
-        
-        
- 
     }
+
 
 private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {	
 	// Obtenemos los dos valores de la tupla
@@ -117,79 +114,73 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	
 	// Separamos los operando del terceto. operador, op1, op2...
 	this.separar(terceto_actual);
-	System.out.println("PROCESAR TERCETO.");
 	
-	if (operacion.equals("ASIGNACION")) {
-		System.out.println("Es una asignacion!!");
-    	EjecutarAsignacion(op1, op2, ambitoterceto);
+	System.out.println("PROCESAR TERCETO->"+operacion);
+	
+	if (operacion.equals("ASIGNACION")) {	// caso de asignar un entero a algo
+    	EjecutarAsignacion(op1, op2, ambitoterceto);	// paso el destino(op1) y el valor(op2)
+	} else if (operacion.equals("ETIQUETA_SUBPROGRAMA")) {
+		ComienzoSubprograma(op1, ambitoterceto);	// op1: nombre de la etiqueta
+	} else {
+		System.err.println("Operaion Terceto no contemplado->"+operacion);
 	}
 
 }
 
-/*private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla)
-	{
-	while (!colaTercetos.isEmpty()) 
-		{
-		String terceto_actual;
-		tupla_Tercetos tupla_actual;
-	    tupla_actual = colaTercetos.removeFirst();
-	    terceto_actual = tupla_actual.GetTerceto();
-	    TablaSimbolos ambitoterceto = tupla_actual.GetAmbitoActual();
-	    
-        this.separar(terceto_actual); //Esto se para el terceto en sus operandos
-        if (operacion.compareTo("ASIGNACION") == 0)
-        	EjecutarAsignacion(op1, op2, ambitoterceto);
-//        this.traducir(tabla);
-		}
-	
-	
-    try 
-    	{
-        bw.close();
-    	} 
-    catch (IOException e) 
-    	{
-            // TODO
-    	}
-	}
-*/
-
-
 //***********************************************************************************************
-	private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_terceto)
-		{
+/*
+ *	Crear el nuevo marco de pila, añade la etiqueta al codigo ensamblador 
+ */
+private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terceto) {
+	try {
+		// Recuperamos el desplazamiento para le Marco de pila
+		int despl_local=ambito_terceto.GetDesplazamiento();		
+		// Escribimos la etiqueta
+		bw.write(subprograma.toLowerCase() +":\n");
+		bw.write("MOVE .SP, .IX\n");						// Base del marco de pila
+		bw.write("ADD #-" + despl_local + ", .SP\n");	// Techo del Marco de pila
+		bw.write("MOVE .A, .SP\n");
 		
-	    try 
-	    	{
-	    	Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
-	    	int op2ent = Integer.parseInt(op2);
-	    	bw.write("ADD .IX, " + simbolo_op1.GetDesplazamiento() + "\n");//Tenemos en A la direccion donde dejamos el resultado de la asignacion
-	    	bw.write("MOVE .A, R5\n"); 
-	    	bw.write("MOVE "+ op2 + ", [.A]\n");
-	        //bw.close();
-	    	} 
-    catch (IOException e) 
-	    	{
-	            // TODO
-	    	}
-		}
+	} catch (IOException e) {
+		System.err.println("Error: Comienzo Subprograma.");
+	}
+}
+
+/*
+ * Ejecutar Asignacion es para casos donde el valor a asignar sea un ENTERO!
+ */
+private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_terceto)	{
+	try {
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		//int op2ent = Integer.parseInt(op2);
+		//bw.write("ADD .IX, " + simbolo_op1.GetDesplazamiento() + "\n");//Tenemos en A la direccion donde dejamos el resultado de la asignacion
+		//bw.write("MOVE .A, R5\n"); 
+		//bw.write("MOVE "+ op2 + ", [.A]\n");
+		bw.write("MOVE #"+op2+",#-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
+	    //bw.close();
+	} catch (IOException e) {
+        System.err.println("Error: Ejecutar Asignacion.");		
+    }
+}
+ 
+/*
+ * Operacion q dado un terceto-> ASIGNACION, temp0, 10-> separa cada uno en un operando global
+ */
+private void separar(String linea)	{
+    int u= linea.indexOf(",");
+    this.operacion=linea.substring(0,u); //cogemos la operación
+    linea=linea.substring(u+1);
     
-    private void separar(String linea)
-    	{
-        int u= linea.indexOf(",");
-        this.operacion=linea.substring(0,u); //cogemos la operación
-        linea=linea.substring(u+1);
-        
-        u= linea.indexOf(",");
-        op1=linea.substring(0,u);
-        linea=linea.substring(u+1);
+    u= linea.indexOf(",");
+    op1=linea.substring(0,u);
+    linea=linea.substring(u+1);
 
-        u= linea.indexOf(",");
-        op2=linea.substring(0,u);
-        linea=linea.substring(u+1);
+    u= linea.indexOf(",");
+    op2=linea.substring(0,u);
+    linea=linea.substring(u+1);
 
-        op3=linea.substring(0,linea.indexOf("\n"));
-    	}
+    op3=linea.substring(0,linea.indexOf("\n"));
+}
     
     
     public void traducir(Tablas tabla)
