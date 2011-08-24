@@ -107,8 +107,81 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
  
     }
 
-//private void (LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla)
+private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla)
+	{
+	while (!colaTercetos.isEmpty()) 
+		{
+		String terceto_actual;
+		tupla_Tercetos tupla_actual;
+	    tupla_actual = colaTercetos.removeFirst();
+	    terceto_actual = tupla_actual.GetTerceto();
+	    TablaSimbolos ambitoterceto = tupla_actual.GetAmbitoActual();
+	    
+        this.separar(terceto_actual); //Esto se para el terceto en sus operandos
+        if (operacion.compareTo("ASIGNACION") == 0)
+        	EjecutarAsignacion(op1, op2, ambitoterceto);
+//        this.traducir(tabla);
+		}
+	
+	
+    try 
+    	{
+        bw.write("mens1:     DATA \"Introduzca el numero:\" \n");
+        bw.write("eol:            DATA \"\\n\"\n"+etiquetasputs);
+        bw.write("valor_falso: DATA \"FALSE\"\n");
+        bw.write("valor_verdad: DATA \"TRUE\"\n");
+        bw.write("cadena_get: RES 1\n");
+        bw.close();
+    	} 
+    catch (IOException e) 
+    	{
+            // TODO
+    	}
+	}
 
+
+
+//***********************************************************************************************
+	private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_terceto)
+		{
+		
+	    try 
+	    	{
+	    	Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+	    	int op2ent = Integer.parseInt(op2);
+	    	bw.write("ADD .IX, " + simbolo_op1.GetDesplazamiento() + "\n");//Tenemos en A la direccion donde dejamos el resultado de la asignacion
+	    	bw.write("MOVE .A, R5\n"); 
+	    	bw.write("MOVE "+ op2 + ", [.A]\n");
+	        bw.close();
+	    	} 
+    catch (IOException e) 
+	    	{
+	            // TODO
+	    	}
+		}
+    
+    private void separar(String linea)
+    	{
+        int u= linea.indexOf(",");
+        this.operacion=linea.substring(0,u); //cogemos la operación
+        linea=linea.substring(u+1);
+        
+        u= linea.indexOf(",");
+        op1=linea.substring(0,u);
+        linea=linea.substring(u+1);
+
+        u= linea.indexOf(",");
+        op2=linea.substring(0,u);
+        linea=linea.substring(u+1);
+
+        op3=linea.substring(0,linea.indexOf("\n"));
+    	}
+    
+    
+    public void traducir(Tablas tabla)
+    	{
+    	
+    	}
 
 
 }

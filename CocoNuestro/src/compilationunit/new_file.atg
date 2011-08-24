@@ -545,8 +545,9 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 
 DecVar <Simbolo simbolo_anterior>
 = (.simboloClaseObjeto = null;
-	int type = undef;.)
-[op_asig VExpresion<out type>	(. if (type != simbolo_anterior.GetType())
+	int type = undef;
+	Simbolo simbolo_temp = null;.)
+[op_asig VExpresion<out type, simbolo_temp>	(. if (type != simbolo_anterior.GetType())
 								 	SemErr("Error de tipos en la inicializacion de la variable");
 								 	else if (type == identificador)
 								 		{
@@ -756,6 +757,7 @@ InstExpresion <Simbolo simbolo>
 =	(. int type=undef;
 	   System.out.println("Entramos en InstExpresion");
 	   simboloClaseObjeto = null;
+	   Simbolo simbolo_temp = null;
 	   if (!(t.val.contentEquals("]")))
 	   		{
 	  	    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
@@ -765,7 +767,7 @@ InstExpresion <Simbolo simbolo>
 				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
 				| (op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo) 
-													VExpresion<out type>
+													VExpresion<out type, simbolo_temp>
 													(. try
 															{
 															if ((simbolo.GetType() != type) && (simbolo.GetType() != vector))
@@ -791,10 +793,11 @@ InstExpresion <Simbolo simbolo>
 
 InstReturn <out int tipoDev>
 (.	tipoDev = undef;
-	int type; .)
+	int type;
+	Simbolo simbolo_temp = null; .)
 = 	   (.System.out.println("Entramos en InstReturn");
 		 simboloClaseObjeto = null;.)
-(rreturn [VExpresion<out type> (.   System.out.println("Return devuelve un tipo:" + type);
+(rreturn [VExpresion<out type, simbolo_temp> (.   System.out.println("Return devuelve un tipo:" + type);
 									tipoDev= type; 
 									hayreturn = true;.) ] puntoComa)
 .
@@ -804,9 +807,10 @@ InstReturn <out int tipoDev>
 InstIfElse <Simbolo simbolo_funcion>	
 (. int type, type1;
 	Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
+	Simbolo simbolo_temp = null;
 .) 
 =
-		iff VExpresion<out type> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
+		iff VExpresion<out type, simbolo_temp> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
 								  simbolo = new Simbolo ("IF", 0, 0);.) 
 	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) 
 	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
@@ -854,7 +858,8 @@ InstCin
 
 Arg_io<out int tipoDev>
 (. tipoDev=undef;
-   Simbolo sim = new Simbolo("Temp",0,0); .)
+   Simbolo sim = new Simbolo("Temp",0,0);
+   Simbolo simbolo_temp = null; .)
 =	ident (. if (!(tabla.EstaRecur(t.val)))
 			 	SemErr(t.val + " no esta definido");
 			 else if (sim.GetKind() == clase)
@@ -867,11 +872,12 @@ Arg_io<out int tipoDev>
 			 	} .) 
 		[DarPosVector <sim>]
 		| cadenaCar (. tipoDev = cadena; .)
-		| VExpresion<out tipoDev>
+		| VExpresion<out tipoDev, simbolo_temp>
 .
 
 DarPosVector <Simbolo sim> (.int tipoDev; .)
-		= (.System.out.println("Estamos en DarPosVector");.)
+		= (.System.out.println("Estamos en DarPosVector");
+			Simbolo simbolo_temp = null;.)
 			corchete_ab (.try
 							{ 
 							if (!(sim.Es_Vector()))
@@ -882,7 +888,7 @@ DarPosVector <Simbolo sim> (.int tipoDev; .)
 			 				System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
 							}
 			 			.)
- VExpresion <out tipoDev> (. if (tipoDev != entera)
+ VExpresion <out tipoDev, simbolo_temp> (. if (tipoDev != entera)
  									{
  									SemErr("La posicion del vector debe ser de tipo entero");
  									} 
@@ -894,13 +900,47 @@ DarPosVector <Simbolo sim> (.int tipoDev; .)
 
 //******EXPRESIONES VERSIÓN DE VICTOR*************************************************************/
 
-VExpresion <out int tipoDev>
+VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el temporal donde se almacenara arriba el resultado de la expresion
 =  (.System.out.println("Entramos en la nueva version de VExpresion");
 	tipoDev=undef;
-	int type=undef;.)
+	int type=undef;
+	Simbolo simbolo_op1=null;
+	Simbolo simbolo_op2=null;
+	String terceto;
+	tupla_Tercetos tupla;.)
+	
 	(
-	parent_ab VExpresion <out tipoDev> parent_ce | VCambio_Signo <out tipoDev> | VNegacion <out tipoDev>
-	| ValorFinalExp <out tipoDev>	[VExpSuma <out type>		(. if ((tipoDev != entera) || (type != entera))
+	(. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(),entera,var); .) 
+	parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce
+	(. terceto = new String(terceto_actual.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+	   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	   colaTercetos.add(tupla);
+	.)
+	 
+	|
+	
+	 (. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(),entera,var); .) 
+	 VCambio_Signo <out tipoDev/*, simbolo_op1*/> 
+	 (. terceto = new String(terceto_actual.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);	 
+	 .)
+	 
+	|
+	 
+	 (. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(),bool,var); .) 
+	 VNegacion <out tipoDev>
+	 (. terceto = new String(terceto_actual.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);	 
+	 .)
+	
+	|
+	 (. simbolo_op1 = new Simbolo(terceto_actual.darTemporal(), undef , var); .) 
+	 ValorFinalExp <out tipoDev, simbolo_op1> 
+	 
+	 
+	 								[VExpSuma <out type>		(. if ((tipoDev != entera) || (type != entera))
 													 					SemErr("Error de tipos en la expresion");
 						  						     			   else
 															 			tipoDev=type;.)
@@ -923,6 +963,7 @@ VExpresion <out int tipoDev>
 						 			]
 
 )
+
  .
 
 
@@ -931,11 +972,12 @@ VCambio_Signo <out int tipoDev>
  = (. System.out.println("Entramos VCambio_Signo");
  	  int type = entera;
  	  tipoDev = undef;
+ 	  Simbolo simbolo_temp = null;
  	  if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
  	  		SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");.)
- 	op_menos (ValorFinalExp <out tipoDev> [VExpSuma <out type> | VExpMul <out type>] (. if ((tipoDev != entera) || (type != entera))
+ 	op_menos (ValorFinalExp <out tipoDev, simbolo_temp> [VExpSuma <out type> | VExpMul <out type>] (. if ((tipoDev != entera) || (type != entera))
  																							SemErr("Error de tipos en la expresion");.) 
- 			 | parent_ab VExpresion <out tipoDev> parent_ce (.if (tipoDev != entera)
+ 			 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce (.if (tipoDev != entera)
  			 											   		SemErr("VCambio_Signo: Error de tipos en la expresion");.)
  			 
  			 )
@@ -944,10 +986,11 @@ VCambio_Signo <out int tipoDev>
 VNegacion <out int tipoDev>
  = (. System.out.println("Entramos VNegacion");
  	  int type = bool;
- 	  tipoDev = undef;.)
- 	op_negacion (ValorFinalExp <out tipoDev> [VExpAND <out type> | VExpOR <out type>] (. if ((tipoDev != bool) || (type != bool))
+ 	  tipoDev = undef;
+ 	  Simbolo simbolo_temp = null;.)
+ 	op_negacion (ValorFinalExp <out tipoDev, simbolo_temp> [VExpAND <out type> | VExpOR <out type>] (. if ((tipoDev != bool) || (type != bool))
  																							SemErr("Error de tipos en la expresion");.) 
- 			 | parent_ab VExpresion <out tipoDev> parent_ce (.if (tipoDev != entera)
+ 			 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce (.if (tipoDev != entera)
  			 											   		SemErr("VNegacion: Error de tipos en la expresion");.)
  			 
  			 )
@@ -955,26 +998,29 @@ VNegacion <out int tipoDev>
  
  VExpSuma <out int tipoDev>
   = (.System.out.println("Entramos VExpSuma");
-  	  tipoDev=undef;.)
-    (op_mas | op_menos) VExpresion<out tipoDev> (.if (tipoDev != entera)
+  	  tipoDev=undef;
+  	  Simbolo simbolo_temp = null;.)
+    (op_mas | op_menos) VExpresion<out tipoDev, simbolo_temp> (.if (tipoDev != entera)
     											 		SemErr("VExpSuma: Error de tipos en la expresion");.)
     .
     
  VExpMul <out int tipoDev>
   = (. System.out.println("Entramos VExpMul");
   	   int type = entera;
-  	   tipoDev = undef;.)
-    (op_producto | op_division) (ValorFinalExp<out tipoDev> [VExpSuma <out type> | VExpMul <out type>]
-    					   		 | parent_ab VExpresion <out tipoDev> parent_ce) (. if ((tipoDev != entera) || (type != entera))
+  	   tipoDev = undef;
+  	   Simbolo simbolo_temp = null;.)
+    (op_producto | op_division) (ValorFinalExp<out tipoDev, simbolo_temp> [VExpSuma <out type> | VExpMul <out type>]
+    					   		 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce) (. if ((tipoDev != entera) || (type != entera))
     					   													  			SemErr("ExpMul: Error de tipos en la expresion");.)
     .
     
  VExpAND <out int tipoDev>
   = (.System.out.println("Entramos VExpAND");
   	   int type = bool;
-  	   tipoDev = undef;.)
-    (op_and (ValorFinalExp<out tipoDev> [VExpAND <out type> | VExpOR <out type>]
-    					   		 | parent_ab VExpresion <out tipoDev> parent_ce) (. if ((tipoDev != bool) || (type != bool))
+  	   tipoDev = undef;
+  	   Simbolo simbolo_temp = null;.)
+    (op_and (ValorFinalExp<out tipoDev, simbolo_temp> [VExpAND <out type> | VExpOR <out type>]
+    					   		 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce) (. if ((tipoDev != bool) || (type != bool))
     					   		 														{
     					   		 														System.out.println(tipoDev + type);
     					   													  			SemErr("VExpAND: Error de tipos en la expresion");
@@ -985,19 +1031,21 @@ VNegacion <out int tipoDev>
     
  VExpOR <out int tipoDev>
   = (.System.out.println("Entramos VExpOR");
-  	  tipoDev=undef;.)
-    (op_or) VExpresion<out tipoDev> (.if (tipoDev != bool)
+  	  tipoDev=undef;
+  	  Simbolo simbolo_temp = null;.)
+    (op_or) VExpresion<out tipoDev, simbolo_temp> (.if (tipoDev != bool)
       								 		SemErr("VExpoOR: Error de tipos en la expresion");.)
     .
     
  VExpRelacional <out int tipoDev>
  = (.System.out.println("Entramos VExpRelacional");
- 	 tipoDev=undef;.)
-   (Operador_Relacional) VExpresion <out tipoDev> (.if (tipoDev != entera)
+ 	 tipoDev=undef;
+ 	 Simbolo simbolo_temp = null;.)
+   (Operador_Relacional) VExpresion <out tipoDev, simbolo_temp> (.if (tipoDev != entera)
       								 					SemErr("VEXPRel: Error de tipos en la expresion");.)
    .
 
-ValorFinalExp <out int tipoDev>
+ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 = (. tipoDev = undef;
 	 Simbolo simbolo = null;
 	 boolean esta = false;
@@ -1020,16 +1068,16 @@ ValorFinalExp <out int tipoDev>
 
 			.)
 	
-	[((parent_ab (. if  (esta)
+	[((parent_ab (. if  (esta)			// Esto es la llamada a una funcion
 				  		{
 				  		tipoDev = simbolo.GetTipoRetorno();
 				  		}
 				  		
 				  	if (simbolo.GetKind() != funcion)
-					 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion o metodo");
+					 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
 				   .)
 	 VArgumentos<simbolo, aux> parent_ce)
-	 //Este es el caso de que sea un método de una clase 
+	 //Este es el caso de que sea un método o atributo de una clase 
 	 | (punto ident (.Simbolo simbolo_metodoatributo = null;
 	 				  Simbolo simbolo_clase = simbolo.GetClase();
 	 				  TablaSimbolos ambitoclase;
@@ -1050,6 +1098,8 @@ ValorFinalExp <out int tipoDev>
 	 				 							SemErr(t.val + " es de tipo privado");
 	 				 			if (simbolo_metodoatributo.GetKind() == metodo)
 	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+	 				 				if (!la.val.contentEquals("("))
+	 				 					SemErr("Llamada invalida a metodo");
 	 				 			else if (simbolo_metodoatributo.GetKind() == var)
 	 				 				{
 	 				 				//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
@@ -1058,7 +1108,7 @@ ValorFinalExp <out int tipoDev>
 	 				 			}
 	 				  		}
 	 				 .)
-	 		  [parent_ab (. if (simbolo_metodoatributo.GetKind() != metodo)
+	 		  [parent_ab (. if (simbolo_metodoatributo.GetKind() != metodo) //Este es el caso de que sea un metodo
 	 		  					SemErr(simbolo_metodoatributo.GetNombre() + " no fue declarado como un metodo");
 	 		  				else
 	 		  					{
@@ -1068,20 +1118,48 @@ ValorFinalExp <out int tipoDev>
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
-	 							   | (DarPosVector<simbolo>) (.tipoDev=entera;.))]
+	 							   | (DarPosVector<simbolo>) (.tipoDev=entera;
+	 							   							   simbolo_resultado.SetType(entera);.))]
   
-  | enteros (.	tipoDev = entera;.)
-  | ttrue (. tipoDev = bool;.)
-  | ffalse (. tipoDev = bool;.)
-  | cadenaCar (. tipoDev = cadena;.) )
+
+  | enteros (. tipoDev = entera;
+  			   simbolo_resultado.SetType(entera);
+  			   String terceto;
+  			   terceto = terceto_actual.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
+  			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+  			   colaTercetos.add(tupla);
+  			   tabla.InsertarEnActual(simbolo_resultado);.)
+  | ttrue 	(. tipoDev = bool;
+			   simbolo_resultado.SetType(bool);
+  			   String terceto;  			 
+			   terceto = terceto_actual.asignacion_valor(simbolo_resultado.GetNombre(), 1);
+			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			   colaTercetos.add(tupla);
+			   tabla.InsertarEnActual(simbolo_resultado);.)
+  | ffalse 	(. tipoDev = bool;
+  			   simbolo_resultado.SetType(bool);
+  			   String terceto;
+			   terceto = terceto_actual.asignacion_valor(simbolo_resultado.GetNombre(), 0);
+			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			   colaTercetos.add(tupla);
+			   tabla.InsertarEnActual(simbolo_resultado);.)
+  | cadenaCar (. tipoDev = cadena;
+  				 simbolo_resultado.SetType(cadena);
+  				 String terceto;
+			   	 terceto = terceto_actual.asignacion(simbolo_resultado.GetNombre(), "\"" + t.val + "\"");
+			   	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			   	 colaTercetos.add(tupla);
+			   	 tabla.InsertarEnActual(simbolo_resultado);.))
+
 .
 
 VArgumentos <Simbolo simbolo, int pos>
 = (. int type=undef;
 	 Simbolo simbolo_nuevo = null; 
 	 System.out.println("Entramos en VArgumentos");
+	 Simbolo simbolo_temp = null;
 	 	.)
-[VExpresion<out type> (. if (simbolo != null)
+[VExpresion<out type, simbolo_temp> (. if (simbolo != null)
 							{
 							if  (pos >= simbolo.GetNParametros())
 											{
