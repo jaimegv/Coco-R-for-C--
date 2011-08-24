@@ -184,8 +184,12 @@ public class Tercetos{
     }
     
     public String elemento_vector (String ident, int indice, String temporal){
-        return "VECTOR," + ident + "," + indice + "," + temporal + ",\n";
-    }
+        return "ASIGNAR_TEMP_A_POSVECTOR," + ident + "," + indice + "," + temporal + ",\n";
+    }//Esto efectua temporal = ident[indice]
+    
+    public String a_elemento_vector (String ident, int indice, String temporal){
+        return "ASIGNAR_A_POSVECTOR_TEMP," + ident + "," + indice + "," + temporal + ",\n";
+    }//Esto efectua ident[indice] = temporal
     
     public String constructor (String ident){
         return "CONSTRUCTOR," + ident + ",,\n";

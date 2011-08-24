@@ -7,7 +7,7 @@ public class Main {
 		if (arg.length != 1) {	// Tenemos que recibir el fichero de codigo
 			System.err.println("Error: Se espera un fichero de código de entrada.");
 		} else {
-			try {
+//			try {
 				// Se recibe fichero de codigo!
 				Scanner scanner = new Scanner(arg[0]);
 				Parser parser = new Parser(scanner);
@@ -18,10 +18,10 @@ public class Main {
 				} else {	// Errores detectados
 					System.err.println(parser.errors.count + " errores detectados.");	
 				}
-			} catch( Exception e ) {
+//			} catch( Exception e ) {
 				// Captura de cualquier excepcion en ultima instancia
-				System.err.println("¡Tranquilo vaquero!");
-			}
+//				System.err.println("¡Tranquilo vaquero!");
+//			}
 		}		
 	}
 }

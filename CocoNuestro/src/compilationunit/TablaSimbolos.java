@@ -130,5 +130,10 @@ public class TablaSimbolos {
 			}
 		return this.desplazamiento;
 		}
+	
+	public Simbolo GetSimboloAsociado()
+		{
+		return this.simbolo_asociado;
+		}
 
 	}
