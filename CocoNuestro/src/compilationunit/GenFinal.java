@@ -60,9 +60,8 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         tabla_aux = tabla.GetAmbitoGlobal();  //buscamos la tabla de la clase del metodo principal
         desp_total = tabla_aux.GetDesplazamiento(); //cogemos el desp de la tabla de simbolos global
         bw.write ("ADD #-" + desp_total + ", .SP\n"); //sumamos desp_total de la tabla de simbolos padre al SP
-        System.out.println("guarrilla");
         bw.write("MOVE .A, .SP\n"); //actualizamos SP
-        bw.write("PUSH .IX\n");  //guardamos el IX para saber donde empiezan los atributos de la tabla de simbolos padre
+        bw.write("PUSH .IX\n");  	//guardamos el IX para saber donde empiezan los atributos de la tabla de simbolos padre
         bw.write ("MOVE .SP, .IX\n");  //actualizamos IX
         
         //Vamos a buscar el main para que el PC
@@ -89,9 +88,9 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
             //this.separar(it.next().GetTerceto());
         	tupla_actual = it.next();
             System.out.println("Terceto: "+tupla_actual.GetTerceto());
-            System.out.println("Tabla:"+tabla.GetAmbitoGlobal().GetDesplazamiento());
             System.out.println("Desplazamiento de la tabla para temp:"+tupla_actual.GetAmbitoActual().GetDesplazamiento());
             //System.out.println("Ambito_actual: "+it.next().GetAmbitoActual());
+            ProcesarTerceto(tupla_actual, tabla);
         }
         System.out.println("-----------------------------------");
         
@@ -111,7 +110,23 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
  
     }
 
-private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla)
+private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {	
+	// Obtenemos los dos valores de la tupla
+	String terceto_actual= tupla_actual.GetTerceto();	// Almacenara el String emitido por el GCI
+	TablaSimbolos ambitoterceto = tupla_actual.GetAmbitoActual();
+	
+	// Separamos los operando del terceto. operador, op1, op2...
+	this.separar(terceto_actual);
+	System.out.println("PROCESAR TERCETO.");
+	
+	if (operacion.equals("ASIGNACION")) {
+		System.out.println("Es una asignacion!!");
+    	EjecutarAsignacion(op1, op2, ambitoterceto);
+	}
+
+}
+
+/*private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla)
 	{
 	while (!colaTercetos.isEmpty()) 
 		{
@@ -130,12 +145,6 @@ private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas ta
 	
     try 
     	{
-        /*bw.write("mens1:     DATA \"Introduzca el numero:\" \n");
-        bw.write("eol:            DATA \"\\n\"\n"+etiquetasputs);
-        bw.write("valor_falso: DATA \"FALSE\"\n");
-        bw.write("valor_verdad: DATA \"TRUE\"\n");
-        bw.write("cadena_get: RES 1\n");
-        */
         bw.close();
     	} 
     catch (IOException e) 
@@ -143,7 +152,7 @@ private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas ta
             // TODO
     	}
 	}
-
+*/
 
 
 //***********************************************************************************************
@@ -157,7 +166,7 @@ private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas ta
 	    	bw.write("ADD .IX, " + simbolo_op1.GetDesplazamiento() + "\n");//Tenemos en A la direccion donde dejamos el resultado de la asignacion
 	    	bw.write("MOVE .A, R5\n"); 
 	    	bw.write("MOVE "+ op2 + ", [.A]\n");
-	        bw.close();
+	        //bw.close();
 	    	} 
     catch (IOException e) 
 	    	{
