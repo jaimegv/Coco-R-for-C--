@@ -476,7 +476,7 @@ Main<int type, String nombre> = (. Simbolo simbolo_funcion = new Simbolo("main",
 						else
 							simbolo_funcion.SetClaseDevuelta(simbolo_clase);
 					} .)   
-	   parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion>
+	   parent_ab [voidd] parent_ce llave_ab Cuerpo<simbolo_funcion>
 	   															   (.
 	   															    if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
 																   		{
@@ -716,6 +716,7 @@ punto ident (. if (simbolo_objeto != null)
 Subprograma <Simbolo simbolo_funcion> = (.  tabla.NuevoAmbito(simbolo_funcion);
 											simbolo_funcion.SetKind (funcion);
 											simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno.
+											simbolo_funcion.SetType(undef);
 											simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
 											// Una vez generada la eti añado a la cola de tercetos
 											
@@ -766,7 +767,7 @@ InstExpresion <Simbolo simbolo>
 	   		 .)
 				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
 				| (op_asig | op_asig_mas | op_asig_menos |
-					op_asig_producto | op_asig_division | op_asig_modulo) 
+					op_asig_producto | op_asig_division | op_asig_modulo) (.simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);.)
 													VExpresion<out type, simbolo_temp>
 													(. try
 															{
@@ -796,7 +797,8 @@ InstReturn <out int tipoDev>
 	int type;
 	Simbolo simbolo_temp = null; .)
 = 	   (.System.out.println("Entramos en InstReturn");
-		 simboloClaseObjeto = null;.)
+		 simboloClaseObjeto = null;
+		 simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);.)
 (rreturn [VExpresion<out type, simbolo_temp> (.   System.out.println("Return devuelve un tipo:" + type);
 									tipoDev= type; 
 									hayreturn = true;.) ] puntoComa)
@@ -888,6 +890,8 @@ DarPosVector <Simbolo sim> (.int tipoDev; .)
 			 				System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
 							}
 			 			.)
+			 			(.
+			 			.)
  VExpresion <out tipoDev, simbolo_temp> (. if (tipoDev != entera)
  									{
  									SemErr("La posicion del vector debe ser de tipo entero");
@@ -936,8 +940,8 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 	 .)
 	
 	|
-	 (. simbolo_op1 = new Simbolo(tercetos.darTemporal(), undef , var); .) 
-	 ValorFinalExp <out tipoDev, simbolo_op1> 
+
+	 ValorFinalExp <out tipoDev, simbolo_resultado> 
 	 
 	 
 	 								[VExpSuma <out type>		(. if ((tipoDev != entera) || (type != entera))
@@ -1097,13 +1101,25 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 	 				 						(tabla.GetAmbitoActual().Ambito_Padre() != ambitoclase))	//Si el método o atributo es privado
 	 				 							SemErr(t.val + " es de tipo privado");
 	 				 			if (simbolo_metodoatributo.GetKind() == metodo)
+	 				 				{
 	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
 	 				 				if (!la.val.contentEquals("("))
 	 				 					SemErr("Llamada invalida a metodo");
+	 				 				}
 	 				 			else if (simbolo_metodoatributo.GetKind() == var)
 	 				 				{
 	 				 				//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
+	 				 				String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
+	 				 				System.out.println(nombreatributo);
 	 				 				tipoDev = simbolo_metodoatributo.GetType();
+	 				 				
+	 				 				simbolo_resultado.SetType(entera);
+  			   						String terceto;
+  			   						terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), nombreatributo);
+  			   						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+  			  					 	colaTercetos.add(tupla);
+  			   						tabla.InsertarEnActual(simbolo_resultado);
+	 				 				
 	 				 				}
 	 				 			}
 	 				  		}
@@ -1124,6 +1140,7 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 
   | enteros (. tipoDev = entera;
   			   simbolo_resultado.SetType(entera);
+  			   System.out.println("Esto es una prueba");
   			   String terceto;
   			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
   			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
