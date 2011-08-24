@@ -35,6 +35,12 @@ COMPILER CEMASMAS1
 	// Esta variable indicará si se ha producido un return en una funcion/metodo que devuelva
 	// algo distinto de void
 	public boolean hayreturn = false;
+	
+	//Otra chapucilla
+	int indice_vector = -1;
+	
+	//Otra chapuza mas
+	Simbolo simboloObjetoGlob = null;
 
 	// Clase tercetos.
 	Tercetos tercetos = new Tercetos();
@@ -508,12 +514,16 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 										else if (la.val.contentEquals("["))
 												SemErr("No existe el tipo especificado");
 									 .)
-									 [DarPosVector<simbolo_anterior>]
+									 [(.Simbolo simbolo_lo_que_tiene_el_vector = new Simbolo("Estesimbolonovale", entera, var);.)
+									 DarPosVector<simbolo_anterior, simbolo_lo_que_tiene_el_vector>]
 											 	)
 									 
 									 
 									 
-									 (Llamada<simbolo_anterior> | InstExpresion <simbolo_anterior> |
+									 (Llamada<simbolo_anterior> 
+									 | 
+									 InstExpresion <simbolo_anterior> 									 
+									 |
 										  (ident (.
 										  if (estaba_declarado)
 										  	{
@@ -669,7 +679,8 @@ corchete_ab enteros	(.	if (simbolo.GetType() != entera)
 Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del identificador anterior
 = (. TablaSimbolos ambito_clase = null; //Atención!! Llamada solo sirve para llamar a un método.
 	 Simbolo simbolo_metodoargumento = null;
-	 System.out.println("Entramos en Llamada"); .) 
+	 System.out.println("Entramos en Llamada");
+	 simboloObjetoGlob = simbolo_objeto; .) 
 punto ident (. if (simbolo_objeto != null)
 				 	{
 				 	Simbolo simbolo_clase =  simbolo_objeto.GetClase();
@@ -705,7 +716,7 @@ punto ident (. if (simbolo_objeto != null)
 			 		}
 			 	.)
  VArgumentos<simbolo_metodoargumento, 0> parent_ce puntoComa)
- | InstExpresion<simbolo_metodoargumento>)
+ | InstExpresion<simbolo_metodoargumento> (.simboloObjetoGlob = null;.))
 .
 
 //**************************************************************//
@@ -763,7 +774,8 @@ InstExpresion <Simbolo simbolo>
 =	(. int type=undef;
 	   System.out.println("Entramos en InstExpresion");
 	   simboloClaseObjeto = null;
-	   Simbolo simbolo_temp = null;
+	   Simbolo simbolo_resultado = new Simbolo(tercetos.darTemporal(), undef, var);
+	   int ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
 	   if (!(t.val.contentEquals("]")))
 	   		{
 	  	    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
@@ -771,9 +783,10 @@ InstExpresion <Simbolo simbolo>
 			}
 	   		 .)
 				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
-				| (op_asig | op_asig_mas | op_asig_menos |
-					op_asig_producto | op_asig_division | op_asig_modulo) (.simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);.)
-													VExpresion<out type, simbolo_temp>
+				| 	//(. if .)
+					(op_asig | op_asig_mas | op_asig_menos |
+					op_asig_producto | op_asig_division | op_asig_modulo)
+													VExpresion<out type, simbolo_resultado>
 													(. try
 															{
 															if ((simbolo.GetType() != type) && (simbolo.GetType() != vector))
@@ -793,7 +806,28 @@ InstExpresion <Simbolo simbolo>
 														catch (NullPointerException e)
 															{
 															}
+														
 														.) 
+														(.
+														if (simbolo.GetType() == vector)
+															{
+															String terceto = new String(tercetos.a_elemento_vector(simbolo.GetNombre(), ind_vector, simbolo_resultado.GetNombre()));
+															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    colaTercetos.add(tupla_temp);
+			   												}
+			   											else if (simboloObjetoGlob != null) //En este caso sera en el que estemos ante un atributo de un objeto
+			   												{
+															String terceto = new String(tercetos.asignacion(simboloObjetoGlob.GetNombre() + "." + simbolo.GetNombre(), simbolo_resultado.GetNombre()));
+															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    colaTercetos.add(tupla_temp);			   												
+			   												}
+			   											else
+			   												{
+															String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    colaTercetos.add(tupla_temp);	
+			   												}
+															
+														.)
 														puntoComa)
 .
 
@@ -877,14 +911,14 @@ Arg_io<out int tipoDev>
 			 	sim = tabla.GetSimboloRecur(t.val);
 			 	tipoDev = sim.GetType();
 			 	} .) 
-		[DarPosVector <sim>]
+		[(.Simbolo simbolo_lo_que_tiene_el_vector = new Simbolo(tercetos.darTemporal(),entera,var);.)
+		DarPosVector <sim, simbolo_lo_que_tiene_el_vector>]
 		| cadenaCar (. tipoDev = cadena; .)
 		| VExpresion<out tipoDev, simbolo_temp>
 .
 
-DarPosVector <Simbolo sim> (.int tipoDev; .)
-		= (.System.out.println("Estamos en DarPosVector");
-			Simbolo simbolo_temp = null;.)
+DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
+		= (.System.out.println("Estamos en DarPosVector");.)
 			corchete_ab (.try
 							{ 
 							if (!(sim.Es_Vector()))
@@ -896,13 +930,15 @@ DarPosVector <Simbolo sim> (.int tipoDev; .)
 							}
 			 			.)
 			 			(.
+			 			simbolo_resultado.SetType(entera);
+			 			tabla.InsertarEnActual(simbolo_resultado);
 			 			.)
- VExpresion <out tipoDev, simbolo_temp> (. if (tipoDev != entera)
- 									{
- 									SemErr("La posicion del vector debe ser de tipo entero");
- 									} 
- 
- 		 .)	 
+ 						enteros (. 
+ 								 if (Integer.parseInt(t.val) >= sim.Actualiza_Tamano())
+ 								 	SemErr("Posicion fuera de rango");
+							   	 indice_vector = Integer.parseInt(t.val);
+							   	 tercetos.elemento_vector(sim.GetNombre(), Integer.parseInt(t.val), simbolo_resultado.GetNombre());
+								.)	 
  		corchete_ce
 .
 
@@ -1139,7 +1175,7 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
-	 							   | (DarPosVector<simbolo>) (.tipoDev=entera;
+	 							   | (DarPosVector<simbolo, simbolo_resultado>) (.tipoDev=entera;
 	 							   							   simbolo_resultado.SetType(entera);.))]
   
 
