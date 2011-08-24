@@ -87,6 +87,8 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         while (it.hasNext()) {
             //this.separar(it.next().GetTerceto());
             System.out.println("Terceto: "+it.next().GetTerceto());
+            System.out.println("Tabla:"+tabla.GetAmbitoGlobal().GetDesplazamiento());
+            System.out.println("Desplazamiento de la tabla para temp:"+it.next().GetAmbitoActual().GetDesplazamiento());
             //System.out.println("Ambito_actual: "+it.next().GetAmbitoActual());
         }
         System.out.println("-----------------------------------");
