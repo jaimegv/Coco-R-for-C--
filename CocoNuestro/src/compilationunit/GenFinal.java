@@ -83,11 +83,11 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         System.out.println("-----------------------------------");
         System.out.println("Elementos de la lista "+colaTercetos);
         //Iterator it2 = a.iterator();
-        System.out.println("afasd  -->"+colaTercetos.get(0).terceto);
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
         while (it.hasNext()) {
-            System.out.println(it.next().terceto);
-            System.out.println(it.next().GetAmbitoActual());
+            //this.separar(it.next().GetTerceto());
+            System.out.println("Terceto: "+it.next().GetTerceto());
+            //System.out.println("Ambito_actual: "+it.next().GetAmbitoActual());
         }
         System.out.println("-----------------------------------");
         
@@ -126,11 +126,12 @@ private void ProcesarTercetos(LinkedList<tupla_Tercetos> colaTercetos, Tablas ta
 	
     try 
     	{
-        bw.write("mens1:     DATA \"Introduzca el numero:\" \n");
+        /*bw.write("mens1:     DATA \"Introduzca el numero:\" \n");
         bw.write("eol:            DATA \"\\n\"\n"+etiquetasputs);
         bw.write("valor_falso: DATA \"FALSE\"\n");
         bw.write("valor_verdad: DATA \"TRUE\"\n");
         bw.write("cadena_get: RES 1\n");
+        */
         bw.close();
     	} 
     catch (IOException e) 
