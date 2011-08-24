@@ -82,13 +82,15 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
          */
         System.out.println("-----------------------------------");
         System.out.println("Elementos de la lista "+colaTercetos);
+        System.out.println("Tamano de la lista:"+colaTercetos.size());
         //Iterator it2 = a.iterator();
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
         while (it.hasNext()) {
             //this.separar(it.next().GetTerceto());
-            System.out.println("Terceto: "+it.next().GetTerceto());
+        	tupla_actual = it.next();
+            System.out.println("Terceto: "+tupla_actual.GetTerceto());
             System.out.println("Tabla:"+tabla.GetAmbitoGlobal().GetDesplazamiento());
-            System.out.println("Desplazamiento de la tabla para temp:"+it.next().GetAmbitoActual().GetDesplazamiento());
+            System.out.println("Desplazamiento de la tabla para temp:"+tupla_actual.GetAmbitoActual().GetDesplazamiento());
             //System.out.println("Ambito_actual: "+it.next().GetAmbitoActual());
         }
         System.out.println("-----------------------------------");
