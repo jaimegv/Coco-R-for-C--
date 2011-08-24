@@ -16,6 +16,10 @@ public class GenFinal {
     String etiquetasputs="";
     int num_param_actual = 0;
     int c_etiqueta;
+    LinkedList<String> lista_data = new LinkedList();
+    int lista_ini=3000;	// comienzo en memoria de la lista_data 
+    int count_char=lista_ini;	// Numero de characters emitidos en lista data
+    
 
 
 public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fichero) {
@@ -96,7 +100,20 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
          * Ponemos un HALT, si se acaban los tercetos es final de MAIN
          * Nota:podemos hacer un RET pero ahorramos problemas ocn un HALT
          */
-        bw.write("RET; final de main");
+        bw.write("MOVE .IX, .SP\n");		// Devuelvo la pila SP al commienzo 
+        bw.write("RET; final de main\n");
+
+        /*
+         * Tenemos en "lista_data" las posibles cadenas que se guardan a partir de una dir de memoria 
+         */
+        if (!lista_data.isEmpty()) {
+        	Iterator<String> iterador = lista_data.iterator();
+        	bw.write("\nORG "+lista_ini+"\n");	// A partir de aqui las cadenas
+        	while (iterador.hasNext()) {
+        		bw.write(iterador.next());
+        	}
+        } // else No hay ninguna cadena en el codigo
+
         // Importante! sino no se guarda nada en el fichero!
         bw.close();
     }
@@ -122,15 +139,40 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
     	EjecutarAsignacion(op1, op2, ambitoterceto);	// paso el destino(op1) y el valor(op2)
 	} else if (operacion.equals("ETIQUETA_SUBPROGRAMA")) {
 		ComienzoSubprograma(op1, ambitoterceto);		// op1: nombre de la etiqueta
-	} else if (operacion.equals("ASIGNA")) {	// "caracola"->temp
-		EjecutarAsigna(op1, op2, ambitoterceto);
+	} else if (operacion.equals("ASIGNACION_CADENA")) {	// ETI: data "HOLA"
+		EjecutarAsignaCad(op1, op2, ambitoterceto);
 	} else {
-		System.err.println("Operaion Terceto no contemplado->"+operacion);
+		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
 
 }
 
 //***********************************************************************************************
+
+/* Asignar temporal cadena
+ * 1- Anadimos a una cola de cadenas otro dato que sera guardado a partir de una direccion de mem. accesible
+ * por la etiqueta dada. pe: temporal20: DATA "HOLA"
+ * 2- Esta etiqueta es la que luego se apila en el ambito de dicho elem. Luego guardo a partir de IX el valor
+ * de dicho elemento
+ */
+private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		// 1- Anadimos a la lista de DATA esta etiqueta con su valor
+		lista_data.add(simbolo_op1.GetNombre()+": DATA "+ op2 + "\n");
+		// 2- Guardo la etiqueta en el marco de pila actual
+		bw.write("MOVE #"+ count_char +",#-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
+		count_char= count_char + op2.getBytes().length - 2;	// Resto 2 por las dobles comillas
+		System.out.println("Longitud en bytes:"+op2.length());
+		System.out.println("ahora con utf-8:"+op2.getBytes("UTF-8").length);
+		//bw.write("DATA "+op2+"\n");
+		// prueba impresion
+		bw.write("MOVE #-" + simbolo_op1.GetDesplazamiento() + "[.IX], .IY\n");
+		bw.write("WRSTR [.IY]\n");
+	} catch (IOException e) {
+        System.err.println("Error: Ejecutar Asigna.");		
+    }
+}
 /*
  * 
  */
@@ -149,6 +191,7 @@ private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_tercet
 
 /*
  * Ejecutar Asignacion es para casos donde el valor a asignar sea un ENTERO!
+ * Luego guardo a partir del IX el valor de dicho elemento
  */
 private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_terceto)	{
 	try {
@@ -165,7 +208,7 @@ private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_ter
 private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terceto) {
 	try {
 		// Recuperamos el desplazamiento para le Marco de pila
-		int despl_local=ambito_terceto.GetDesplazamiento();		
+		int despl_local=ambito_terceto.GetDesplazamiento();
 		// Escribimos la etiqueta
 		bw.write(subprograma.toLowerCase() +":\n");		// tiene q ser en minusculas!!
 		bw.write("MOVE .SP, .IX\n");					// Base del marco de pila
