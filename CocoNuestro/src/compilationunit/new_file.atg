@@ -1205,7 +1205,8 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
   | cadenaCar (. tipoDev = cadena;
   				 simbolo_resultado.SetType(cadena);
   				 String terceto;
-			   	 terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), t.val);
+  				 // asignare a la eti el valor de la cadena.
+			   	 terceto = tercetos.asignacion_cadena(simbolo_resultado.GetNombre(), t.val);
 			   	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   	 colaTercetos.add(tupla);
 			   	 tabla.InsertarEnActual(simbolo_resultado);.))
