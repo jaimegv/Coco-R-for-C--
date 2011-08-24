@@ -561,6 +561,11 @@ DecVar <Simbolo simbolo_anterior>
 								 		simboloClaseObjeto = null;
 								.)
 							] puntoComa
+	(.	if (simbolo_temp == null) {	// caso: int Var;
+			simbolo_anterior.SetEtiqueta(tercetos.darEtiqueta());
+		} else {	// caso: int Var=Expresion;
+		}
+	.)
 .
 
 
