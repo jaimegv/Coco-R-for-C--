@@ -65,6 +65,13 @@ public class Tercetos{
     return "ASIGNACION,"+op1+","+op2+",\n";
     }
     
+    public String asignacion_cadena(String op1, String op2){
+    	/*
+    	 * Asignamos a una etiqueta, op1, el valor de la cadena op2
+    	 */
+        return "ASIGNACION_CAD,"+op1+","+op2+",\n";
+    }
+    
     public String asignacion(String op1, String op2){
 
     return "ASIGNA,"+op1+","+op2+",\n";
