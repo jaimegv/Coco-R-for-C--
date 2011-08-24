@@ -118,10 +118,12 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	
 	System.out.println("PROCESAR TERCETO->"+operacion);
 	
-	if (operacion.equals("ASIGNACION")) {	// caso de asignar un entero a algo
+	if (operacion.equals("ASIGNACION")) {				// caso de asignar un entero a algo
     	EjecutarAsignacion(op1, op2, ambitoterceto);	// paso el destino(op1) y el valor(op2)
 	} else if (operacion.equals("ETIQUETA_SUBPROGRAMA")) {
-		ComienzoSubprograma(op1, ambitoterceto);	// op1: nombre de la etiqueta
+		ComienzoSubprograma(op1, ambitoterceto);		// op1: nombre de la etiqueta
+	} else if (operacion.equals("ASIGNA")) {	// "caracola"->temp
+		EjecutarAsigna(op1, op2, ambitoterceto);
 	} else {
 		System.err.println("Operaion Terceto no contemplado->"+operacion);
 	}
@@ -130,21 +132,19 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 
 //***********************************************************************************************
 /*
- *	Crear el nuevo marco de pila, añade la etiqueta al codigo ensamblador 
+ * 
  */
-private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terceto) {
+private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_terceto) {
 	try {
-		// Recuperamos el desplazamiento para le Marco de pila
-		int despl_local=ambito_terceto.GetDesplazamiento();		
-		// Escribimos la etiqueta
-		bw.write(subprograma.toLowerCase() +":\n");
-		bw.write("MOVE .SP, .IX\n");						// Base del marco de pila
-		bw.write("ADD #-" + despl_local + ", .SP\n");	// Techo del Marco de pila
-		bw.write("MOVE .A, .SP\n");
-		
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		//bw.write("DATA "+op2+"\n");
+		bw.write("WRSTR #-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
+		bw.write("etiqueta del temporal:"+simbolo_op1.GetNombre());
+		// TODO
+		// tenemos que meter cadenas como DATA en posiciones de memoria q no dañan
 	} catch (IOException e) {
-		System.err.println("Error: Comienzo Subprograma.");
-	}
+        System.err.println("Error: Ejecutar Asigna.");		
+    }
 }
 
 /*
@@ -153,15 +153,27 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
 private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_terceto)	{
 	try {
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
-		//int op2ent = Integer.parseInt(op2);
-		//bw.write("ADD .IX, " + simbolo_op1.GetDesplazamiento() + "\n");//Tenemos en A la direccion donde dejamos el resultado de la asignacion
-		//bw.write("MOVE .A, R5\n"); 
-		//bw.write("MOVE "+ op2 + ", [.A]\n");
 		bw.write("MOVE #"+op2+",#-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
-	    //bw.close();
 	} catch (IOException e) {
         System.err.println("Error: Ejecutar Asignacion.");		
     }
+}
+
+/*
+ *	Crear el nuevo marco de pila, añade la etiqueta al codigo ensamblador 
+ */
+private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terceto) {
+	try {
+		// Recuperamos el desplazamiento para le Marco de pila
+		int despl_local=ambito_terceto.GetDesplazamiento();		
+		// Escribimos la etiqueta
+		bw.write(subprograma.toLowerCase() +":\n");		// tiene q ser en minusculas!!
+		bw.write("MOVE .SP, .IX\n");					// Base del marco de pila
+		bw.write("ADD #-" + despl_local + ", .SP\n");	// Techo del Marco de pila
+		bw.write("MOVE .A, .SP\n");
+	} catch (IOException e) {
+		System.err.println("Error: Comienzo Subprograma.");
+	}
 }
  
 /*
