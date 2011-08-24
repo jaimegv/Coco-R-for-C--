@@ -823,7 +823,8 @@ InstExpresion <Simbolo simbolo>
 			   												}
 			   											else
 			   												{
-															String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+															String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));
+															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 											 			    colaTercetos.add(tupla_temp);	
 			   												}
 															
