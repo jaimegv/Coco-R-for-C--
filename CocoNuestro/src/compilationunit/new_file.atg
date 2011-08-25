@@ -50,7 +50,8 @@ COMPILER CEMASMAS1
 	
 	GenFinal codigo_final;
 	// Fichero de salida para el codigo Ensamblador
-	String fichero = new String("/tmp/CodigoObjeto");
+	String fichero = new String;
+	//String fichero = new String("/tmp/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
 
@@ -182,7 +183,7 @@ CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 			  System.out.println("El desplazamiento del ambito global es " + desplazamiento);
 			  tercetos = new Tercetos();
 			  try {
-			  	if (errors.count==0) {	// todo ok! 
+			  	if (errors.count==0) {	// todo ok!
 			  		codigo_final = new GenFinal(colaTercetos, tabla, fichero);
 			  	}
 			  } catch( Exception e ) {	// Codigo Final genera excepcion
