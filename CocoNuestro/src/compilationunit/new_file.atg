@@ -949,14 +949,17 @@ DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
 VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara arriba el resultado de la expresion
 =  (.System.out.println("Entramos en la nueva version de VExpresion");
 	int type=undef;
+	simbolo = null;
 	Simbolo simbolo_temp1 = null;
 	String terceto;
 	tupla_Tercetos tupla;.)
 	
 
-	(//VCambio_Signo <out simbolo_resultado> | VNegacion <out tipoDev> |
+	(
 	
+	VCambio_Signo <out simbolo> | //VNegacion <out tipoDev> |
 	
+	(
 	  (ValorFinalExp <out simbolo_temp1> | parent_ab VExpresion <out simbolo_temp1> parent_ce)
 	  (.simbolo = simbolo_temp1;.)
 	 
@@ -990,7 +993,7 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 															 	   		
 						 			]
 						 			
-						 			
+	)					 			
 						 			
 						 			//Hay que asignar simboloresulado a simbolo_temp1
 /*						 			(.
@@ -1006,21 +1009,21 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
  .
 
 
-/*
-VCambio_Signo <out int tipoDev, Simbolo simbolo_resultado>
+
+VCambio_Signo <out Simbolo simbolo_resultado>
  = (. System.out.println("Entramos VCambio_Signo");
- 	  int type = entera;
- 	  tipoDev = undef;
  	  boolean cambio_signo_simple = true; //Esto indicara si la operacion ha terminado o sigue con mas expresiones
- 	  Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui se almacenara VExpFinal
- 	  tabla.InsertarEnActual(simbolo_temp1);
+ 	  Simbolo simbolo_temp1 = null; //Aqui se almacenara VExpFinal
+ 	  simbolo_resultado = null;
  	  
  	  
  	  if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
  	  		SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");.)
  	op_menos (
- 			  ValorFinalExp <out tipoDev, simbolo_temp1> //Por ejemplo: t1 = 27 
+ 			  ValorFinalExp <out simbolo_temp1> //Por ejemplo: t1 = 27 
  			  (.
+ 			    if (simbolo_temp1.GetType() != entera)
+ 			    	SemErr("Error de tipos en la expresion");
  			  //Ahora vamos a hacer que t2 = -1
  			   Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
  			   String terceto;
@@ -1036,36 +1039,45 @@ VCambio_Signo <out int tipoDev, Simbolo simbolo_resultado>
   			   colaTercetos.add(tupla);
   			   tabla.InsertarEnActual(simbolo_temp3);
   			   
-  			   
-  			   
-  			   
- 			   
+  			   simbolo_resultado = simbolo_temp3;
+  			    
  			  .)
  			  
- 			   [(
- 			   	VExpSuma <out type, simbolo_temp3> 
- 			   | VExpMul <out type>)
- 			   (.cambio_signo_simple = false;.)
+ 			   [( (.Simbolo simbolo_temp4 = null;.) //En t4 estara el resultado de ExpSuma
+ 			   	VExpSuma <out simbolo_temp4, simbolo_temp3> 
+ 			   /*| VExpMul <out type>*/)
+ 			   (.simbolo_resultado = simbolo_temp4;.)
  			   
- 			   ] (. if ((tipoDev != entera) || (type != entera))
- 																							SemErr("Error de tipos en la expresion");
+ 			    (. if ((simbolo_temp3.GetType() != entera) || (simbolo_temp4.GetType() != entera))
+ 					SemErr("Error de tipos en la expresion");
  															
- 															 if (cambio_signo_simple)
- 															 	{
- 															 	 terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp3.GetNombre())); //tres = t3
-													  			 tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-													  			 colaTercetos.add(tupla);
-													  			}
+	
  															 	.) 
- 			 | parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce 
- 			 					(.if (tipoDev != entera)
-										SemErr("VCambio_Signo: Error de tipos en la expresion");
- 			 					  
- 			 					  				   		
+ 				]
+ 			 | 
+ 			 
+ 			 parent_ab VExpresion <out simbolo_temp1> parent_ce 
+ 			 				(.if (simbolo_temp1.GetType() != entera)
+									SemErr("VCambio_Signo: Error de tipos en la expresion");
+ 							   Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
+				 			   String terceto;
+				  			   terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
+				  			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+				  			   colaTercetos.add(tupla);
+				 			   tabla.InsertarEnActual(simbolo_temp2);
+				 			  //t2 = -1 hecho
+				 			  //Ahora hay que emitir t3 = t1xt2 
+				 			   simbolo_resultado = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
+				  			   terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_resultado.GetNombre())); //t3 = t1 * t2
+				  			   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+				  			   colaTercetos.add(tupla);
+				  			   tabla.InsertarEnActual(simbolo_resultado);
  			 											   		.)
  			 
  			 )
- .*/
+ .
+ 
+ 
 /*
 VNegacion <out int tipoDev>
  = (. System.out.println("Entramos VNegacion");
@@ -1095,7 +1107,9 @@ VNegacion <out int tipoDev>
       (.Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
       	tabla.InsertarEnActual(simbolo_temp1);
       	System.out.println(simbolo_resultado.GetNombre()+"CUCU");
+      	System.out.println(simbolo_temp1.GetNombre()+"CUCU");
         String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+
 
         tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
         colaTercetos.add(tupla);
