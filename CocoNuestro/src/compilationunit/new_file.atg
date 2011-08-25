@@ -557,7 +557,7 @@ DecVar <Simbolo simbolo_anterior>
 = (.simboloClaseObjeto = null;
 	int type = undef;
 	Simbolo simbolo_temp = null;.)
-[op_asig VExpresion<out type, simbolo_temp>	(. if (type != simbolo_anterior.GetType())
+[op_asig VExpresion<out simbolo_temp>	(. if (simbolo_temp.GetType() != simbolo_anterior.GetType())
 								 	SemErr("Error de tipos en la inicializacion de la variable");
 								 	else if (type == identificador)
 								 		{
@@ -774,7 +774,7 @@ InstExpresion <Simbolo simbolo>
 =	(. int type=undef;
 	   System.out.println("Entramos en InstExpresion");
 	   simboloClaseObjeto = null;
-	   Simbolo simbolo_resultado = new Simbolo(tercetos.darTemporal(), undef, var);
+	   Simbolo simbolo_resultado = null;
 	   int ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
 	   if (!(t.val.contentEquals("]")))
 	   		{
@@ -786,14 +786,14 @@ InstExpresion <Simbolo simbolo>
 				| 	//(. if .)
 					(op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo)
-													VExpresion<out type, simbolo_resultado>
+													VExpresion<out simbolo_resultado>
 													(. try
 															{
-															if ((simbolo.GetType() != type) && (simbolo.GetType() != vector))
+															if ((simbolo.GetType() != simbolo_resultado.GetType()) && (simbolo.GetType() != vector))
+														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+														   	else if ((simbolo.GetType() == vector) && (simbolo_resultado.GetType() != entera))
 														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
-														   	else if ((simbolo.GetType() == vector) && (type != entera))
-														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
-															else if (type == identificador)
+															else if (simbolo_resultado.GetType() == identificador)
 																{
 																if (simbolo.GetClase() != simboloClaseObjeto)
 																	{
@@ -834,13 +834,12 @@ InstExpresion <Simbolo simbolo>
 
 InstReturn <out int tipoDev>
 (.	tipoDev = undef;
-	int type;
 	Simbolo simbolo_temp = null; .)
 = 	   (.System.out.println("Entramos en InstReturn");
 		 simboloClaseObjeto = null;
 		 simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);.)
-(rreturn [VExpresion<out type, simbolo_temp> (.   System.out.println("Return devuelve un tipo:" + type);
-									tipoDev= type; 
+(rreturn [VExpresion<out simbolo_temp> (.   System.out.println("Return devuelve un tipo:" + simbolo_temp.GetType());
+									tipoDev= simbolo_temp.GetType(); 
 									hayreturn = true;.) ] puntoComa)
 .
 
@@ -852,7 +851,7 @@ InstIfElse <Simbolo simbolo_funcion>
 	Simbolo simbolo_temp = null;
 .) 
 =
-		iff VExpresion<out type, simbolo_temp> (.if (type != bool) {SemErr("La condicion de un if debe ser logica");}
+		iff VExpresion<out simbolo_temp> (.if (simbolo_temp.GetType() != bool) {SemErr("La condicion de un if debe ser logica");}
 								  simbolo = new Simbolo ("IF", 0, 0);.) 
 	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) 
 	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
@@ -915,7 +914,7 @@ Arg_io<out int tipoDev>
 		[(.Simbolo simbolo_lo_que_tiene_el_vector = new Simbolo(tercetos.darTemporal(),entera,var);.)
 		DarPosVector <sim, simbolo_lo_que_tiene_el_vector>]
 		| cadenaCar (. tipoDev = cadena; .)
-		| VExpresion<out tipoDev, simbolo_temp>
+		| VExpresion<out simbolo_temp> (.tipoDev = simbolo_temp.GetType();.)
 .
 
 DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
@@ -946,49 +945,28 @@ DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
 
 //******EXPRESIONES VERSIÓN DE VICTOR*************************************************************/
 
-VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el temporal donde se almacenara arriba el resultado de la expresion
+VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara arriba el resultado de la expresion
 =  (.System.out.println("Entramos en la nueva version de VExpresion");
-	tipoDev=undef;
 	int type=undef;
-	Simbolo simbolo_op1=null;
-	Simbolo simbolo_op2=null;
+	Simbolo simbolo_temp1 = null;
 	String terceto;
 	tupla_Tercetos tupla;.)
 	
-	(
-	/*(. simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); .)*/ 
-	parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce
-	/*(. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
-	   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-	   colaTercetos.add(tupla);
-	.)*/
-	 
-	|
+
+	(//VCambio_Signo <out simbolo_resultado> | VNegacion <out tipoDev> |
 	
-	 VCambio_Signo <out tipoDev, simbolo_resultado> 
-	 
-	|
-	 
-	 (. simbolo_op1 = new Simbolo(tercetos.darTemporal(),bool,var); .) 
-	 VNegacion <out tipoDev>
-	 (. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
-		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-		colaTercetos.add(tupla);	 
-	 .)
 	
-	|
-	(.Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
-	  tabla.InsertarEnActual(simbolo_temp1);.)
-	  ValorFinalExp <out tipoDev, simbolo_temp1>
+	  (ValorFinalExp <out simbolo_temp1> | parent_ab VExpresion <out simbolo_temp1> parent_ce)
+	  (.simbolo = simbolo_temp1;.)
 	 
-	 
-	 								[VExpSuma <out type, simbolo_temp1>		
-	 															(. if ((tipoDev != entera) || (type != entera))
+		 
+	 								[(.Simbolo simbolo_temp2 = null;.)
+	 								(
+	 								  VExpSuma <out simbolo_temp2, simbolo_temp1>		
+	 															(. if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
 													 					SemErr("Error de tipos en la expresion");
-						  						     			   else
-															 			tipoDev=type;
 															 			
-															 		.)
+															 		.)/*
 					 				| VExpMul <out type>		(. if ((tipoDev != entera) || (type != entera))
 															 			SemErr("Error de tipos en la expresion");
 															 	   else
@@ -1004,24 +982,30 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 						 			| VExpRelacional <out type> (. if ((tipoDev != entera) || (type != entera))
 															 			SemErr("Error de tipos en la expresion");
 															 	   else
-															 	   		tipoDev = bool;.)
+															 	   		tipoDev = bool;.)*/
+															 	   		)
+									(.simbolo = simbolo_temp2;.)
+															 	   		
+															 	   		
 						 			]
 						 			
+						 			
+						 			
 						 			//Hay que asignar simboloresulado a simbolo_temp1
-						 			(.
+/*						 			(.
 						 			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
 						 			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
 						 			colaTercetos.add(tupla);
 						 			tabla.InsertarEnActual(simbolo_resultado);
 						 			.)
-						 			
+*/						 			
+
 
 )
-
  .
 
 
-
+/*
 VCambio_Signo <out int tipoDev, Simbolo simbolo_resultado>
  = (. System.out.println("Entramos VCambio_Signo");
  	  int type = entera;
@@ -1080,8 +1064,8 @@ VCambio_Signo <out int tipoDev, Simbolo simbolo_resultado>
  			 											   		.)
  			 
  			 )
- .
-
+ .*/
+/*
 VNegacion <out int tipoDev>
  = (. System.out.println("Entramos VNegacion");
  	  int type = bool;
@@ -1094,25 +1078,29 @@ VNegacion <out int tipoDev>
  			 
  			 )
  .
- 
- VExpSuma <out int tipoDev, Simbolo simbolo_exp_anterior>
+ */
+ VExpSuma <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   = (.System.out.println("Entramos VExpSuma");
-  	  tipoDev=undef;
   	  String operacion = null;
-  	  Simbolo simbolo_resultado = new Simbolo(tercetos.darTemporal(),entera,var);
-  	  tabla.InsertarEnActual(simbolo_resultado);.)
+  	  Simbolo simbolo_resultado = null;.)
+  	  
+  	  
     (op_mas (.operacion = new String("SUMA");.)
      | op_menos (.operacion = new String("RESTA");.)
-     ) VExpresion<out tipoDev, simbolo_resultado> (.if (tipoDev != entera)
+     
+     
+     ) VExpresion<out simbolo_resultado> (.if (simbolo_resultado.GetType() != entera)
     											 		SemErr("VExpSuma: Error de tipos en la expresion");.)
       (.Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
       	tabla.InsertarEnActual(simbolo_temp1);
+      	System.out.println(simbolo_resultado.GetNombre()+"CUCU");
         String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+
         tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
         colaTercetos.add(tupla);
-        simbolo_exp_anterior = simbolo_temp1;.)
+        simbolo = simbolo_temp1;.)
     .
-    
+ /*   
  VExpMul <out int tipoDev>
   = (. System.out.println("Entramos VExpMul");
   	   int type = entera;
@@ -1153,12 +1141,12 @@ VNegacion <out int tipoDev>
    (Operador_Relacional) VExpresion <out tipoDev, simbolo_temp> (.if (tipoDev != entera)
       								 					SemErr("VEXPRel: Error de tipos en la expresion");.)
    .
-
-ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
-= (. tipoDev = undef;
-	 Simbolo simbolo = null;
+*/
+ValorFinalExp <out Simbolo simbolo_resultado>
+= (. Simbolo simbolo = null;
 	 boolean esta = false;
 	 int Pos_Vector;
+	 simbolo_resultado = null;
 	 int aux = 0;
 	 System.out.println("Entramos en ValorFinalExp"); .)
 	(ident (. if (!(tabla.EstaRecur(t.val)))
@@ -1169,17 +1157,18 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 				{
 				//System.out.println("identificador ident!!"+t.val);
 				simbolo = tabla.GetSimboloRecur(t.val);
-				tipoDev = simbolo.GetType();
 				//System.out.println("Tipo del ident!!"+tipoDev);
 				simboloClaseObjeto = simbolo.GetClase();
 				esta = true;
+				if ((la.val != "(") && (la.val != "."))
+					simbolo_resultado = simbolo;
 				}
 
 			.)
 	
 	[((parent_ab (. if  (esta)			// Esto es la llamada a una funcion
 				  		{
-				  		tipoDev = simbolo.GetTipoRetorno();
+				  		//tipoDev = simbolo.GetTipoRetorno(); //Aqui tendremos que devolver un temporal con el resultado
 				  		}
 				  		
 				  	if (simbolo.GetKind() != funcion)
@@ -1207,7 +1196,7 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 	 				 							SemErr(t.val + " es de tipo privado");
 	 				 			if (simbolo_metodoatributo.GetKind() == metodo)
 	 				 				{
-	 				 				tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+	 				 				//tipoDev = simbolo_metodoatributo.GetTipoRetorno(); //Hay que hacer que en simbolo_resultado se almacene el resultado del metodo
 	 				 				if (!la.val.contentEquals("("))
 	 				 					SemErr("Llamada invalida a metodo");
 	 				 				}
@@ -1216,14 +1205,14 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 	 				 				//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 	 				 				String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
 	 				 				System.out.println(nombreatributo);
-	 				 				tipoDev = simbolo_metodoatributo.GetType();
-	 				 				
-	 				 				simbolo_resultado.SetType(entera);
+	 				 				//tipoDev = simbolo_metodoatributo.GetType();//Lo mismo, aqui tendremos que emitir el simbolo correspondiente al atributo
+	 				 				simbolo_resultado=simbolo_metodoatributo;
+	 				 				//simbolo_resultado.SetType(entera);
   			   						String terceto;
-  			   						terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), nombreatributo);
-  			   						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-  			  					 	colaTercetos.add(tupla);
-  			   						tabla.InsertarEnActual(simbolo_resultado);
+  			   						//terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), nombreatributo);
+  			   						//tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+  			  					 	//colaTercetos.add(tupla);
+  			   						//tabla.InsertarEnActual(simbolo_resultado);
 	 				 				
 	 				 				}
 	 				 			}
@@ -1234,39 +1223,35 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
 	 		  				else
 	 		  					{
 	 		  					simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
-	 		  					tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+	 		  					//tipoDev = simbolo_metodoatributo.GetTipoRetorno(); //Aqui tendremos que devolver lo que devuelva el metodo
 	 		  					}
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
-	 							   | (DarPosVector<simbolo, simbolo_resultado>) (.tipoDev=entera;
+	 							   | (DarPosVector<simbolo, simbolo_resultado>) (.//tipoDev=entera;
 	 							   							   simbolo_resultado.SetType(entera);.))]
   
 
-  | enteros (. tipoDev = entera;
-  			   simbolo_resultado.SetType(entera);
-  			   System.out.println("Esto es una prueba");
+  | enteros (. simbolo_resultado = new Simbolo (tercetos.darTemporal(), entera, var);
   			   String terceto;
   			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
   			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
   			   colaTercetos.add(tupla);
-  			   tabla.InsertarEnActual(simbolo_resultado);.)
-  | ttrue 	(. tipoDev = bool;
-			   simbolo_resultado.SetType(bool);
+  			   tabla.InsertarEnActual(simbolo_resultado);
+  			   System.out.println(simbolo_resultado.GetNombre());.)
+  | ttrue 	(. simbolo_resultado = new Simbolo (tercetos.darTemporal(), bool, var);
   			   String terceto;  			 
 			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), 1);
 			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   colaTercetos.add(tupla);
 			   tabla.InsertarEnActual(simbolo_resultado);.)
-  | ffalse 	(. tipoDev = bool;
-  			   simbolo_resultado.SetType(bool);
+  | ffalse 	(. simbolo_resultado = new Simbolo (tercetos.darTemporal(), bool, var);
   			   String terceto;
 			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), 0);
 			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   colaTercetos.add(tupla);
 			   tabla.InsertarEnActual(simbolo_resultado);.)
-  | cadenaCar (. tipoDev = cadena;
-  				 simbolo_resultado.SetType(cadena);
+  | cadenaCar (. simbolo_resultado = new Simbolo (tercetos.darTemporal(), cadena, var);
   				 String terceto;
   				 // asignare a la eti el valor de la cadena.
 			   	 terceto = tercetos.asignacion_cadena(simbolo_resultado.GetNombre(), t.val);
@@ -1286,9 +1271,9 @@ VArgumentos <Simbolo simbolo, int pos>
 	 System.out.println("Entramos en VArgumentos");
 	 Simbolo simbolo_temp = null;
 	 	.)
-[VExpresion<out type, simbolo_temp> (. if (simbolo != null)
-							{
-							if  (pos >= simbolo.GetNParametros())
+[VExpresion<out simbolo_temp> (. if (simbolo != null)
+									{
+									if  (pos >= simbolo.GetNParametros())
 											{
 											SemErr("Numero de parametros no coincidente");
 											}

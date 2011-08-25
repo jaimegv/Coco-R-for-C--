@@ -466,8 +466,8 @@ public class Parser {
 		Simbolo simbolo_temp = null;
 		if (la.kind == 41) {
 			Get();
-			type = VExpresion(simbolo_temp);
-			if (type != simbolo_anterior.GetType())
+			simbolo_temp = VExpresion();
+			if (simbolo_temp.GetType() != simbolo_anterior.GetType())
 			SemErr("Error de tipos en la inicializacion de la variable");
 			else if (type == identificador)
 				{
@@ -925,7 +925,7 @@ public class Parser {
 		int type=undef;
 		System.out.println("Entramos en InstExpresion");
 		simboloClaseObjeto = null;
-		Simbolo simbolo_resultado = new Simbolo(tercetos.darTemporal(), undef, var);
+		Simbolo simbolo_resultado = null;
 		int ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
 		if (!(t.val.contentEquals("]")))
 				{
@@ -965,14 +965,14 @@ public class Parser {
 				break;
 			}
 			}
-			type = VExpresion(simbolo_resultado);
+			simbolo_resultado = VExpresion();
 			try
 			{
-			if ((simbolo.GetType() != type) && (simbolo.GetType() != vector))
+			if ((simbolo.GetType() != simbolo_resultado.GetType()) && (simbolo.GetType() != vector))
+			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+			  	else if ((simbolo.GetType() == vector) && (simbolo_resultado.GetType() != entera))
 			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
-			  	else if ((simbolo.GetType() == vector) && (type != entera))
-			  		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
-			else if (type == identificador)
+			else if (simbolo_resultado.GetType() == identificador)
 				{
 				if (simbolo.GetClase() != simboloClaseObjeto)
 					{
@@ -1011,74 +1011,31 @@ public class Parser {
 		} else SynErr(71);
 	}
 
-	int  VExpresion(Simbolo simbolo_resultado) {
-		int  tipoDev;
+	Simbolo  VExpresion() {
+		Simbolo  simbolo;
 		System.out.println("Entramos en la nueva version de VExpresion");
-		tipoDev=undef;
 		int type=undef;
-		Simbolo simbolo_op1=null;
-		Simbolo simbolo_op2=null;
+		Simbolo simbolo_temp1 = null;
 		String terceto;
 		tupla_Tercetos tupla;
-		if (la.kind == 31) {
+		if (StartOf(7)) {
+			simbolo_temp1 = ValorFinalExp();
+		} else if (la.kind == 31) {
 			Get();
-			tipoDev = VExpresion(simbolo_resultado);
+			simbolo_temp1 = VExpresion();
 			Expect(38);
-		} else if (la.kind == 32) {
-			tipoDev = VCambio_Signo(simbolo_resultado);
-		} else if (la.kind == 46) {
-			simbolo_op1 = new Simbolo(tercetos.darTemporal(),bool,var); 
-			tipoDev = VNegacion();
-			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
-			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			colaTercetos.add(tupla);	 
-			
-		} else if (StartOf(7)) {
-			Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
-			tabla.InsertarEnActual(simbolo_temp1);
-			tipoDev = ValorFinalExp(simbolo_temp1);
-			if (StartOf(8)) {
-				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma(simbolo_temp1);
-					if ((tipoDev != entera) || (type != entera))
-					SemErr("Error de tipos en la expresion");
-								   else
-					tipoDev=type;
-					
-					
-				} else if (la.kind == 39 || la.kind == 40) {
-					type = VExpMul();
-					if ((tipoDev != entera) || (type != entera))
-					SemErr("Error de tipos en la expresion");
-					 else
-					 		tipoDev=type;
-				} else if (la.kind == 53) {
-					type = VExpAND();
-					if ((tipoDev != bool) || (type != bool))
-					SemErr("Error de tipos en la expresion");
-					else
-					 		tipoDev=type;
-				} else if (la.kind == 54) {
-					type = VExpOR();
-					if ((tipoDev != bool) || (type != bool))
-					SemErr("Error de tipos en la expresion");
-					else
-					 		tipoDev=type;
-				} else {
-					type = VExpRelacional();
-					if ((tipoDev != entera) || (type != entera))
-					SemErr("Error de tipos en la expresion");
-					 else
-					 		tipoDev = bool;
-				}
-			}
-			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
-			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
-			colaTercetos.add(tupla);
-			tabla.InsertarEnActual(simbolo_resultado);
-			
 		} else SynErr(72);
-		return tipoDev;
+		simbolo = simbolo_temp1;
+		if (la.kind == 32 || la.kind == 34) {
+			Simbolo simbolo_temp2 = null;
+			simbolo_temp2 = VExpSuma(simbolo_temp1);
+			if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
+			SemErr("Error de tipos en la expresion");
+			
+			
+			simbolo = simbolo_temp2;
+		}
+		return simbolo;
 	}
 
 	void VArgumentos(Simbolo simbolo, int pos) {
@@ -1087,20 +1044,20 @@ public class Parser {
 		System.out.println("Entramos en VArgumentos");
 		Simbolo simbolo_temp = null;
 			
-		if (StartOf(9)) {
-			type = VExpresion(simbolo_temp);
+		if (StartOf(8)) {
+			simbolo_temp = VExpresion();
 			if (simbolo != null)
 			{
 			if  (pos >= simbolo.GetNParametros())
-							{
-							SemErr("Numero de parametros no coincidente");
-							}
-						else
-							{ 
-							simbolo_nuevo = simbolo.GetParametros(pos);
-							if (simbolo_nuevo.GetType() != type)
-								SemErr("Tipo de los parametros no coincidente");
-							}
+					{
+					SemErr("Numero de parametros no coincidente");
+					}
+				else
+					{ 
+					simbolo_nuevo = simbolo.GetParametros(pos);
+					if (simbolo_nuevo.GetType() != type)
+						SemErr("Tipo de los parametros no coincidente");
+					}
 			}
 					  
 			if (la.kind == 27) {
@@ -1113,16 +1070,15 @@ public class Parser {
 	int  InstReturn() {
 		int  tipoDev;
 		tipoDev = undef;
-		int type;
 		Simbolo simbolo_temp = null; 
 		System.out.println("Entramos en InstReturn");
 		simboloClaseObjeto = null;
 		simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);
 		Expect(18);
-		if (StartOf(9)) {
-			type = VExpresion(simbolo_temp);
-			System.out.println("Return devuelve un tipo:" + type);
-			tipoDev= type; 
+		if (StartOf(8)) {
+			simbolo_temp = VExpresion();
+			System.out.println("Return devuelve un tipo:" + simbolo_temp.GetType());
+			tipoDev= simbolo_temp.GetType(); 
 			hayreturn = true;
 		}
 		Expect(42);
@@ -1156,8 +1112,8 @@ public class Parser {
 		Simbolo simbolo_temp = null;
 		
 		Expect(23);
-		type = VExpresion(simbolo_temp);
-		if (type != bool) {SemErr("La condicion de un if debe ser logica");}
+		simbolo_temp = VExpresion();
+		if (simbolo_temp.GetType() != bool) {SemErr("La condicion de un if debe ser logica");}
 		simbolo = new Simbolo ("IF", 0, 0);
 		if (la.kind == 29) {
 			Get();
@@ -1225,111 +1181,19 @@ public class Parser {
 		} else if (la.kind == 3) {
 			Get();
 			tipoDev = cadena; 
-		} else if (StartOf(9)) {
-			tipoDev = VExpresion(simbolo_temp);
+		} else if (StartOf(8)) {
+			simbolo_temp = VExpresion();
+			tipoDev = simbolo_temp.GetType();
 		} else SynErr(75);
 		return tipoDev;
 	}
 
-	int  VCambio_Signo(Simbolo simbolo_resultado) {
-		int  tipoDev;
-		System.out.println("Entramos VCambio_Signo");
-		int type = entera;
-		tipoDev = undef;
-		boolean cambio_signo_simple = true; //Esto indicara si la operacion ha terminado o sigue con mas expresiones
-		Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui se almacenara VExpFinal
-		tabla.InsertarEnActual(simbolo_temp1);
-		
-		
-		if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
-				SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");
-		Expect(32);
-		if (StartOf(7)) {
-			tipoDev = ValorFinalExp(simbolo_temp1);
-			Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
-			String terceto;
-			 terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
-			 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			 colaTercetos.add(tupla);
-			tabla.InsertarEnActual(simbolo_temp2);
-			//t2 = -1 hecho
-			//Ahora hay que emitir t3 = t1xt2 
-			 Simbolo simbolo_temp3 = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
-			  terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_temp3.GetNombre())); //t3 = t1 * t2
-			  tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			  colaTercetos.add(tupla);
-			  tabla.InsertarEnActual(simbolo_temp3);
-			  
-			  
-			  
-			  
-			 
-			
-			if (StartOf(10)) {
-				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma(simbolo_temp3);
-				} else {
-					type = VExpMul();
-				}
-				cambio_signo_simple = false;
-			}
-			if ((tipoDev != entera) || (type != entera))
-														SemErr("Error de tipos en la expresion");
-						
-						 if (cambio_signo_simple)
-						 	{
-						 	 terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp3.GetNombre())); //tres = t3
-			  			 tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			  			 colaTercetos.add(tupla);
-			  			}
-						 	
-		} else if (la.kind == 31) {
-			Get();
-			tipoDev = VExpresion(simbolo_resultado);
-			Expect(38);
-			if (tipoDev != entera)
-			SemErr("VCambio_Signo: Error de tipos en la expresion");
-			  
-			  				   		
-									   		
-		} else SynErr(76);
-		return tipoDev;
-	}
-
-	int  VNegacion() {
-		int  tipoDev;
-		System.out.println("Entramos VNegacion");
-		int type = bool;
-		tipoDev = undef;
-		Simbolo simbolo_temp = null;
-		Expect(46);
-		if (StartOf(7)) {
-			tipoDev = ValorFinalExp(simbolo_temp);
-			if (la.kind == 53 || la.kind == 54) {
-				if (la.kind == 53) {
-					type = VExpAND();
-				} else {
-					type = VExpOR();
-				}
-			}
-			if ((tipoDev != bool) || (type != bool))
-			SemErr("Error de tipos en la expresion");
-		} else if (la.kind == 31) {
-			Get();
-			tipoDev = VExpresion(simbolo_temp);
-			Expect(38);
-			if (tipoDev != entera)
-			SemErr("VNegacion: Error de tipos en la expresion");
-		} else SynErr(77);
-		return tipoDev;
-	}
-
-	int  ValorFinalExp(Simbolo simbolo_resultado) {
-		int  tipoDev;
-		tipoDev = undef;
+	Simbolo  ValorFinalExp() {
+		Simbolo  simbolo_resultado;
 		Simbolo simbolo = null;
 		boolean esta = false;
 		int Pos_Vector;
+		simbolo_resultado = null;
 		int aux = 0;
 		System.out.println("Entramos en ValorFinalExp"); 
 		if (la.kind == 1) {
@@ -1342,10 +1206,11 @@ public class Parser {
 			{
 			//System.out.println("identificador ident!!"+t.val);
 			simbolo = tabla.GetSimboloRecur(t.val);
-			tipoDev = simbolo.GetType();
 			//System.out.println("Tipo del ident!!"+tipoDev);
 			simboloClaseObjeto = simbolo.GetClase();
 			esta = true;
+			if ((la.val != "(") && (la.val != "."))
+				simbolo_resultado = simbolo;
 			}
 			
 			if (la.kind == 28 || la.kind == 30 || la.kind == 31) {
@@ -1353,7 +1218,7 @@ public class Parser {
 					Get();
 					if  (esta)			// Esto es la llamada a una funcion
 					{
-					tipoDev = simbolo.GetTipoRetorno();
+					//tipoDev = simbolo.GetTipoRetorno(); //Aqui tendremos que devolver un temporal con el resultado
 					}
 					
 					if (simbolo.GetKind() != funcion)
@@ -1384,7 +1249,7 @@ public class Parser {
 											SemErr(t.val + " es de tipo privado");
 							if (simbolo_metodoatributo.GetKind() == metodo)
 								{
-								tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+								//tipoDev = simbolo_metodoatributo.GetTipoRetorno(); //Hay que hacer que en simbolo_resultado se almacene el resultado del metodo
 								if (!la.val.contentEquals("("))
 									SemErr("Llamada invalida a metodo");
 								}
@@ -1393,14 +1258,14 @@ public class Parser {
 								//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 								String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
 								System.out.println(nombreatributo);
-								tipoDev = simbolo_metodoatributo.GetType();
-								
-								simbolo_resultado.SetType(entera);
+								//tipoDev = simbolo_metodoatributo.GetType();//Lo mismo, aqui tendremos que emitir el simbolo correspondiente al atributo
+								simbolo_resultado=simbolo_metodoatributo;
+								//simbolo_resultado.SetType(entera);
 											String terceto;
-											terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), nombreatributo);
-											tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-									 	colaTercetos.add(tupla);
-											tabla.InsertarEnActual(simbolo_resultado);
+											//terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), nombreatributo);
+											//tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+									 	//colaTercetos.add(tupla);
+											//tabla.InsertarEnActual(simbolo_resultado);
 								
 								}
 							}
@@ -1413,7 +1278,7 @@ public class Parser {
 						else
 							{
 							simboloClaseObjeto = simbolo_metodoatributo.GetClaseDevuelta();
-							tipoDev = simbolo_metodoatributo.GetTipoRetorno();
+							//tipoDev = simbolo_metodoatributo.GetTipoRetorno(); //Aqui tendremos que devolver lo que devuelva el metodo
 							}
 						 
 						VArgumentos(simbolo_metodoatributo, aux);
@@ -1421,33 +1286,29 @@ public class Parser {
 					}
 				} else {
 					DarPosVector(simbolo, simbolo_resultado);
-					tipoDev=entera;
 					simbolo_resultado.SetType(entera);
 				}
 			}
 		} else if (la.kind == 2) {
 			Get();
-			tipoDev = entera;
-			simbolo_resultado.SetType(entera);
-			System.out.println("Esto es una prueba");
+			simbolo_resultado = new Simbolo (tercetos.darTemporal(), entera, var);
 			String terceto;
 			terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			colaTercetos.add(tupla);
 			tabla.InsertarEnActual(simbolo_resultado);
+			System.out.println(simbolo_resultado.GetNombre());
 		} else if (la.kind == 13) {
 			Get();
-			tipoDev = bool;
-			simbolo_resultado.SetType(bool);
-			  String terceto;  			 
+			simbolo_resultado = new Simbolo (tercetos.darTemporal(), bool, var);
+			String terceto;  			 
 			terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), 1);
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			colaTercetos.add(tupla);
 			tabla.InsertarEnActual(simbolo_resultado);
 		} else if (la.kind == 8) {
 			Get();
-			tipoDev = bool;
-			simbolo_resultado.SetType(bool);
+			simbolo_resultado = new Simbolo (tercetos.darTemporal(), bool, var);
 			String terceto;
 			terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), 0);
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
@@ -1455,8 +1316,7 @@ public class Parser {
 			tabla.InsertarEnActual(simbolo_resultado);
 		} else if (la.kind == 3) {
 			Get();
-			tipoDev = cadena;
-			simbolo_resultado.SetType(cadena);
+			simbolo_resultado = new Simbolo (tercetos.darTemporal(), cadena, var);
 			String terceto;
 			// asignare a la eti el valor de la cadena.
 			 terceto = tercetos.asignacion_cadena(simbolo_resultado.GetNombre(), t.val);
@@ -1467,117 +1327,55 @@ public class Parser {
 			 	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			 	 colaTercetos.add(tupla);
 			 	 tabla.InsertarEnActual(simbolo_resultado);
-		} else SynErr(78);
-		return tipoDev;
+		} else SynErr(76);
+		return simbolo_resultado;
 	}
 
-	int  VExpSuma(Simbolo simbolo_exp_anterior) {
-		int  tipoDev;
+	Simbolo  VExpSuma(Simbolo simbolo_exp_anterior) {
+		Simbolo  simbolo;
 		System.out.println("Entramos VExpSuma");
-		tipoDev=undef;
 		String operacion = null;
-		Simbolo simbolo_resultado = new Simbolo(tercetos.darTemporal(),entera,var);
-		tabla.InsertarEnActual(simbolo_resultado);
+		Simbolo simbolo_resultado = null;
 		if (la.kind == 34) {
 			Get();
 			operacion = new String("SUMA");
 		} else if (la.kind == 32) {
 			Get();
 			operacion = new String("RESTA");
-		} else SynErr(79);
-		tipoDev = VExpresion(simbolo_resultado);
-		if (tipoDev != entera)
+		} else SynErr(77);
+		simbolo_resultado = VExpresion();
+		if (simbolo_resultado.GetType() != entera)
 		SemErr("VExpSuma: Error de tipos en la expresion");
 		Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
 		tabla.InsertarEnActual(simbolo_temp1);
+		System.out.println(simbolo_resultado.GetNombre()+"CUCU");
 		 String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
-		 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+		  tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 		 colaTercetos.add(tupla);
-		 simbolo_exp_anterior = simbolo_temp1;
-		return tipoDev;
+		 simbolo = simbolo_temp1;
+		return simbolo;
 	}
 
-	int  VExpMul() {
-		int  tipoDev;
-		System.out.println("Entramos VExpMul");
-		int type = entera;
-		tipoDev = undef;
-		Simbolo simbolo_temp = null;
-		if (la.kind == 39) {
+	void Operador_Aritmetico() {
+		if (la.kind == 34) {
+			Get();
+		} else if (la.kind == 32) {
+			Get();
+		} else if (la.kind == 39) {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(80);
-		if (StartOf(7)) {
-			tipoDev = ValorFinalExp(simbolo_temp);
-			if (StartOf(10)) {
-				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma(simbolo_temp);
-				} else {
-					type = VExpMul();
-				}
-			}
-		} else if (la.kind == 31) {
+		} else SynErr(78);
+	}
+
+	void Operador_Logico() {
+		if (la.kind == 54) {
 			Get();
-			tipoDev = VExpresion(simbolo_temp);
-			Expect(38);
-		} else SynErr(81);
-		if ((tipoDev != entera) || (type != entera))
-		SemErr("ExpMul: Error de tipos en la expresion");
-		return tipoDev;
-	}
-
-	int  VExpAND() {
-		int  tipoDev;
-		System.out.println("Entramos VExpAND");
-		int type = bool;
-		tipoDev = undef;
-		Simbolo simbolo_temp = null;
-		Expect(53);
-		if (StartOf(7)) {
-			tipoDev = ValorFinalExp(simbolo_temp);
-			if (la.kind == 53 || la.kind == 54) {
-				if (la.kind == 53) {
-					type = VExpAND();
-				} else {
-					type = VExpOR();
-				}
-			}
-		} else if (la.kind == 31) {
+		} else if (la.kind == 53) {
 			Get();
-			tipoDev = VExpresion(simbolo_temp);
-			Expect(38);
-		} else SynErr(82);
-		if ((tipoDev != bool) || (type != bool))
-		{
-		System.out.println(tipoDev + type);
-			SemErr("VExpAND: Error de tipos en la expresion");
-			}
-		return tipoDev;
-	}
-
-	int  VExpOR() {
-		int  tipoDev;
-		System.out.println("Entramos VExpOR");
-		tipoDev=undef;
-		Simbolo simbolo_temp = null;
-		Expect(54);
-		tipoDev = VExpresion(simbolo_temp);
-		if (tipoDev != bool)
-		SemErr("VExpoOR: Error de tipos en la expresion");
-		return tipoDev;
-	}
-
-	int  VExpRelacional() {
-		int  tipoDev;
-		System.out.println("Entramos VExpRelacional");
-		tipoDev=undef;
-		Simbolo simbolo_temp = null;
-		Operador_Relacional();
-		tipoDev = VExpresion(simbolo_temp);
-		if (tipoDev != entera)
-		SemErr("VEXPRel: Error de tipos en la expresion");
-		return tipoDev;
+		} else if (la.kind == 46) {
+			Get();
+		} else SynErr(79);
 	}
 
 	void Operador_Relacional() {
@@ -1606,30 +1404,8 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(83); break;
+		default: SynErr(80); break;
 		}
-	}
-
-	void Operador_Aritmetico() {
-		if (la.kind == 34) {
-			Get();
-		} else if (la.kind == 32) {
-			Get();
-		} else if (la.kind == 39) {
-			Get();
-		} else if (la.kind == 40) {
-			Get();
-		} else SynErr(84);
-	}
-
-	void Operador_Logico() {
-		if (la.kind == 54) {
-			Get();
-		} else if (la.kind == 53) {
-			Get();
-		} else if (la.kind == 46) {
-			Get();
-		} else SynErr(85);
 	}
 
 
@@ -1652,9 +1428,7 @@ public class Parser {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
 } // end Parser
@@ -1755,16 +1529,11 @@ class Errors {
 			case 73: s = "invalid InstIfElse"; break;
 			case 74: s = "invalid Else"; break;
 			case 75: s = "invalid Arg_io"; break;
-			case 76: s = "invalid VCambio_Signo"; break;
-			case 77: s = "invalid VNegacion"; break;
-			case 78: s = "invalid ValorFinalExp"; break;
-			case 79: s = "invalid VExpSuma"; break;
-			case 80: s = "invalid VExpMul"; break;
-			case 81: s = "invalid VExpMul"; break;
-			case 82: s = "invalid VExpAND"; break;
-			case 83: s = "invalid Operador_Relacional"; break;
-			case 84: s = "invalid Operador_Aritmetico"; break;
-			case 85: s = "invalid Operador_Logico"; break;
+			case 76: s = "invalid ValorFinalExp"; break;
+			case 77: s = "invalid VExpSuma"; break;
+			case 78: s = "invalid Operador_Aritmetico"; break;
+			case 79: s = "invalid Operador_Logico"; break;
+			case 80: s = "invalid Operador_Relacional"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
