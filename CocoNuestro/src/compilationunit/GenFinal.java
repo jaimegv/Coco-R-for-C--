@@ -67,7 +67,6 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         bw.write ("ADD #-" + desp_total + ", .SP\n"); //sumamos desp_total de la tabla de simbolos padre al SP
         bw.write("MOVE .A, .SP\n"); //actualizamos SP
         bw.write("PUSH .IX\n");  	//guardamos el IX para saber donde empiezan los atributos de la tabla de simbolos padre
-        bw.write ("MOVE .SP, .IX\n");  //actualizamos IX
         
         //Vamos a buscar el main para que el PC
         //Si el analisis semantico ha validado el codigo, dentro del ambito global deberia estar el objeto main
@@ -157,17 +156,23 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 /*
  * Operacion SUMA
  * OpSuma(op1, op2, op3, ambitoterceto);
+ * op* y resultado son temporales.
  */
 private void OpSuma (String op1, String op2, String resultado, TablaSimbolos ambito_terceto){
 	try {
+		System.out.println("Bienvenido a OpSuma.");
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
-		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);	// siempre en ambito local-actual
+		System.out.println("Desplazamiento resultado,"+resultado+":"+simbolo_resultado.GetDesplazamiento());
 		//TODO
+		System.out.println("Nombre del op1-suma:"+simbolo_op1.GetNombre());
+		System.out.println("Nombre del op2-suma:"+simbolo_op2.GetNombre());
+		System.out.println("Nombre del op3-suma:"+simbolo_resultado.GetNombre());
 		// CASO TODO LOCAL.
 		bw.write("ADD #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
 		bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
-	} catch (IOException e) {
+	} catch (Exception e) {
         System.err.println("Error: Ejecutar OpSuma.");
     }
 }
@@ -207,7 +212,7 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 		// prueba impresion
 		//bw.write("MOVE #-" + simbolo_op1.GetDesplazamiento() + "[.IX], .IY\n");
 		//bw.write("WRSTR [.IY]\n");
-	} catch (IOException e) {
+	} catch (Exception e) {
         System.err.println("Error: Ejecutar AsignaCadena.");		
     }
 }
@@ -221,14 +226,13 @@ private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_tercet
 		// Segundo operando debe estar en el ambito actual
 		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
 		// Recuperamos el desplazamiento respecto IX de op2
-		System.out.println("Desplazamiento:"+simbolo_op2.GetDesplazamiento());
+		System.out.println("Desplazamiento,"+op2+":"+simbolo_op2.GetDesplazamiento());
 
-		// Donde esta el operando 1
+		// Donde esta el operando 10
 		// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
 		bw.write("MOVE #-" + simbolo_op2.GetDesplazamiento() + "[.IX], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
-
 		// TODO
-	} catch (IOException e) {
+	} catch (Exception e) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
 }
@@ -241,7 +245,7 @@ private void EjecutarAsignacion(String op1, String op2, TablaSimbolos ambito_ter
 	try {
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		bw.write("MOVE #"+op2+",#-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
-	} catch (IOException e) {
+	} catch (Exception e) {
         System.err.println("Error: Ejecutar Asignacion.");		
     }
 }
@@ -258,7 +262,7 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
 		bw.write("MOVE .SP, .IX\n");					// Base del marco de pila
 		bw.write("ADD #-" + despl_local + ", .SP\n");	// Techo del Marco de pila
 		bw.write("MOVE .A, .SP\n");
-	} catch (IOException e) {
+	} catch (Exception e) {
 		System.err.println("Error: Comienzo Subprograma.");
 	}
 }
@@ -282,11 +286,4 @@ private void separar(String linea)	{
     op3=linea.substring(0,linea.indexOf("\n"));
 }
     
-    
-    public void traducir(Tablas tabla)
-    	{
-    	
-    	}
-
-
 }
