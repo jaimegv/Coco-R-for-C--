@@ -54,9 +54,9 @@ public class Tercetos{
                         
     }
     
-    public String operacionUnaria(String op1, String operador){
+    public String operacionUnaria(String op1, String operador, String resultado){
 
-                return operador+","+op1+","+"1"+","+op1+"\n";
+                return operador+","+op1+","+"1"+","+resultado+"\n";
                 
     }
     

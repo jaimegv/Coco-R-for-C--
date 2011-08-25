@@ -957,7 +957,7 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 
 	(
 	
-	VCambio_Signo <out simbolo> | //VNegacion <out tipoDev> |
+	VCambio_Signo <out simbolo> | VNegacion <out simbolo> |
 	
 	(
 	  (ValorFinalExp <out simbolo_temp1> | parent_ab VExpresion <out simbolo_temp1> parent_ce)
@@ -1070,20 +1070,42 @@ VCambio_Signo <out Simbolo simbolo_resultado>
  .
  
  
-/*
-VNegacion <out int tipoDev>
+
+VNegacion <out Simbolo simbolo>
  = (. System.out.println("Entramos VNegacion");
- 	  int type = bool;
- 	  tipoDev = undef;
- 	  Simbolo simbolo_temp = null;.)
- 	op_negacion (ValorFinalExp <out tipoDev, simbolo_temp> [VExpAND <out type> | VExpOR <out type>] (. if ((tipoDev != bool) || (type != bool))
- 																							SemErr("Error de tipos en la expresion");.) 
- 			 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce (.if (tipoDev != entera)
- 			 											   		SemErr("VNegacion: Error de tipos en la expresion");.)
+ 	  Simbolo simbolo_temp = null;
+ 	  Simbolo simbolo_temp2 = null;
+ 	  simbolo = null;.)
+ 	op_negacion (ValorFinalExp <out simbolo_temp>
+ 	(.
+ 	if (simbolo_temp.GetType() != bool)
+ 		SemErr("El operador de negacion solo se puede utilizar con booleanos");
+ 	simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
+ 	tabla.InsertarEnActual(simbolo_temp2);
+ 	String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
+ 	tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+ 	colaTercetos.add(tupla);
+ 	simbolo = simbolo_temp2;
+ 	.) 
+ 	
+ 	[VExpAND <out simbolo, simbolo_temp2> | VExpOR <out simbolo, simbolo_temp2>] 
+ 	(. if ((simbolo.GetType() != bool) || (simbolo_temp2.GetType() != bool))
+			SemErr("Error de tipos en la expresion");.)
+			 
+ 			 | parent_ab VExpresion <out simbolo_temp> parent_ce 
+ 			 
+ 			 (.if (simbolo_temp.GetType() != bool)
+ 			 		SemErr("VNegacion: Error de tipos en la expresion");
+ 			 	simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
+ 				tabla.InsertarEnActual(simbolo_temp2);
+ 				String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
+ 				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+ 				colaTercetos.add(tupla);
+ 				simbolo = simbolo_temp2;.)
  			 
  			 )
  .
- */
+ 
  VExpSuma <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   = (.System.out.println("Entramos VExpSuma");
   	  String operacion = null;
