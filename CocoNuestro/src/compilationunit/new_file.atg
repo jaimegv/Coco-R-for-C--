@@ -50,7 +50,7 @@ COMPILER CEMASMAS1
 	
 	GenFinal codigo_final;
 	// Fichero de salida para el codigo Ensamblador
-	String fichero = new String;
+	String fichero = new String();
 	//String fichero = new String("/tmp/CodigoObjeto");
 // If you want your generated compiler case insensitive add the
 // keyword IGNORECASE here.
