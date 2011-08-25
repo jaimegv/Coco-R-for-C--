@@ -1060,8 +1060,12 @@ VCambio_Signo <out int tipoDev, Simbolo simbolo_resultado>
 													  			 colaTercetos.add(tupla);
 													  			}
  															 	.) 
- 			 | parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce (.if (tipoDev != entera)
- 			 											   		SemErr("VCambio_Signo: Error de tipos en la expresion");.)
+ 			 | parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce 
+ 			 					(.if (tipoDev != entera)
+										SemErr("VCambio_Signo: Error de tipos en la expresion");
+ 			 					  
+ 			 					  				   		
+ 			 											   		.)
  			 
  			 )
  .
@@ -1090,6 +1094,7 @@ VNegacion <out int tipoDev>
      ) VExpresion<out tipoDev, simbolo_resultado> (.if (tipoDev != entera)
     											 		SemErr("VExpSuma: Error de tipos en la expresion");.)
       (.Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
+      	tabla.InsertarEnActual(simbolo_temp1);
         String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
         tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
         colaTercetos.add(tupla);

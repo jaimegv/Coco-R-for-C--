@@ -1285,6 +1285,9 @@ public class Parser {
 			Expect(38);
 			if (tipoDev != entera)
 			SemErr("VCambio_Signo: Error de tipos en la expresion");
+			  
+			  				   		
+									   		
 		} else SynErr(76);
 		return tipoDev;
 	}
@@ -1453,9 +1456,13 @@ public class Parser {
 			String terceto;
 			// asignare a la eti el valor de la cadena.
 			 terceto = tercetos.asignacion_cadena(simbolo_resultado.GetNombre(), t.val);
-			 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			 colaTercetos.add(tupla);
-			 tabla.InsertarEnActual(simbolo_resultado);
+			if (t.val.equals("\"\"")) {
+			 SemErr("Error: Cadena nula. La cadena debe contener al menos un caracter.");
+			}
+			 	 System.out.println("Terceto de la cadena:"+terceto);
+			 	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			 	 colaTercetos.add(tupla);
+			 	 tabla.InsertarEnActual(simbolo_resultado);
 		} else SynErr(78);
 		return tipoDev;
 	}
@@ -1478,10 +1485,11 @@ public class Parser {
 		if (tipoDev != entera)
 		SemErr("VExpSuma: Error de tipos en la expresion");
 		Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
-		String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
-		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-		colaTercetos.add(tupla);
-		simbolo_exp_anterior = simbolo_temp1;
+		tabla.InsertarEnActual(simbolo_temp1);
+		 String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+		 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+		 colaTercetos.add(tupla);
+		 simbolo_exp_anterior = simbolo_temp1;
 		return tipoDev;
 	}
 
