@@ -143,14 +143,17 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
 	} else if (operacion.equals("ASIGNA")){				// asignamos a un temp el valor de otro tmp
 		EjecutarAsigna(op1, op2, ambitoterceto);
-	} else if (operacion.equals("SUMA")) {				// Suma
+	} else if (operacion.equals("SUMA")) {		// Suma
 		OpSuma(op1, op2, op3, ambitoterceto);
-	} else if (operacion.equals("MUL")) {				// Multiplamos
+	} else if (operacion.equals("RESTA")) {		// Restamos
+		OpBinaria(ambitoterceto);
+	} else if (operacion.equals("MUL")) {		// Multiplamos
 		OpMul(op1, op2, op3, ambitoterceto);
+	} else if (operacion.equals("DIV")) {		// Division
+		OpBinaria(ambitoterceto);
 	// } else if () {
 	// TODO operacion.equals("OR")
-	// TODO operacion.equals("RESTA")
-	// TODO operacion.equals("DIV")
+
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -160,23 +163,123 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 //***********************************************************************************************
 
 /*
+ * Operacion Binaria
+ * OpMUL(Operancion, op1, op2, resultado, ambitoterceto);
+ */
+private void OpBinaria (TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(op3);	// siempre local (temp)
+		TablaSimbolos tabla_op_lejano = null;
+		String nemonico = new String();
+
+		// Parseo la operacion a realizar
+		if (operacion.equals("SUMA")) {
+			nemonico = "ADD";
+		} else if (operacion.equals("MUL")) {
+			nemonico = "MUL";
+		} else if (operacion.equals("RESTA")) {
+			nemonico = "SUB";
+			System.out.println("op1:"+op1+" op2:"+op2);		// TODO operadores Resta pasados alreves
+		} else if (operacion.equals("DIV")) {
+			nemonico = "DIV";
+		} else {
+			System.err.println("Error OpBinaria en parser operacion.");
+		}
+
+		
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
+			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) { 	//op1 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write(nemonico+" #-"+despl_op1+"[.IY], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write(nemonico+" #-"+despl_op2+"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//NADA local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);	// Nos deja en IY la dir del marco
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Puesto q op2 tambien usara esta func. muevo el IY a otro reg
+			bw.write("MOVE .IY, .R9\n");	// DIR del MARCO de OP1 en R9!!!!
+			bw.write("ADD #-"+despl_op1+",.R9\n");	//Dejo en R9 la direccion exacta del dato
+			bw.write("MOVE .A, .R9\n");
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write(nemonico+" #-"+despl_op2+"[.IY], [.R9]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else {
+			System.err.println("Op "+nemonico+". Caso no contemplado");			
+		}
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar OpBinaria.");
+    }
+}
+/*
  * Operacion MUL
- * OpMUL(op1, op2, op3, ambitoterceto);
+ * OpMUL(op1, op2, resultado, ambitoterceto);
  */
 private void OpMul (String op1, String op2, String resultado, TablaSimbolos ambito_terceto){
 	try {
-		System.out.println("Bienvenido a OpMul.");
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
-		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);
-		System.out.println("Desplazamiento resultado,"+resultado+":"+simbolo_resultado.GetDesplazamiento());
-		//TODO
-		System.out.println("Nombre del op1-suma:"+simbolo_op1.GetNombre());
-		System.out.println("Nombre del op2-suma:"+simbolo_op2.GetNombre());
-		System.out.println("Nombre del op3-suma:"+simbolo_resultado.GetNombre());
-		// CASO TODO LOCAL.
-		bw.write("MUL #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
-		bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);	// siempre local (temp)
+		TablaSimbolos tabla_op_lejano = null;
+
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
+			bw.write("MUL #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) { 	//op1 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write("MUL #-"+despl_op1+"[.IY], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write("MUL #-"+despl_op2+"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//NADA local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);	// Nos deja en IY la dir del marco
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Puesto q op2 tambien usara esta func. muevo el IY a otro reg
+			bw.write("MOVE .IY, .R9\n");	// DIR del MARCO de OP1 en R9!!!!
+			bw.write("ADD #-"+despl_op1+",.R9\n");	//Dejo en R9 la direccion exacta del dato
+			bw.write("MOVE .A, .R9\n");
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write("MUL #-"+despl_op2+"[.IY], [.R9]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else {
+			System.err.println("OpMul. Caso no contemplado");			
+		}
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar OpMul.");
     }
@@ -184,22 +287,53 @@ private void OpMul (String op1, String op2, String resultado, TablaSimbolos ambi
 
 /*
  * Operacion SUMA
- * OpSuma(op1, op2, op3, ambitoterceto);
+ * OpSuma(op1, op2, resultado, ambitoterceto);
  */
 private void OpSuma (String op1, String op2, String resultado, TablaSimbolos ambito_terceto){
 	try {
-		System.out.println("Bienvenido a OpSuma.");
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
-		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);
-		System.out.println("Desplazamiento resultado,"+resultado+":"+simbolo_resultado.GetDesplazamiento());
-		//TODO
-		System.out.println("Nombre del op1-suma:"+simbolo_op1.GetNombre());
-		System.out.println("Nombre del op2-suma:"+simbolo_op2.GetNombre());
-		System.out.println("Nombre del op3-suma:"+simbolo_resultado.GetNombre());
-		// CASO TODO LOCAL.
-		bw.write("ADD #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
-		bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);	// siempre local (temp)
+		TablaSimbolos tabla_op_lejano = null;
+
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
+			bw.write("ADD #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) { 	//op1 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write("ADD #-"+despl_op1+"[.IY], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write("ADD #-"+despl_op2+"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//NADA local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);	// Nos deja en IY la dir del marco
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Puesto q op2 tambien usara esta func. muevo el IY a otro reg
+			bw.write("MOVE .IY, .R9\n");	// DIR del MARCO de OP1 en R9!!!!
+			bw.write("ADD #-"+despl_op1+",.R9\n");	//Dejo en R9 la direccion exacta del dato
+			bw.write("MOVE .A, .R9\n");
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
+			bw.write("ADD #-"+despl_op2+"[.IY], [.R9]\n");
+			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else {
+			System.err.println("OpSuma. Caso no contemplado");			
+		}
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar OpSuma.");
     }
@@ -211,8 +345,8 @@ private void OpSuma (String op1, String op2, String resultado, TablaSimbolos amb
  * Asignar temporal cadena
  * 1- Anadimos a una cola de cadenas otro dato que sera guardado a partir de una direccion de mem. accesible
  * por la etiqueta dada. pe: temporal20: DATA "HOLA"
- * 2- Esta etiqueta es la que luego se apila en el ambito de dicho elem. Luego guardo a partir de IX el valor
- * de dicho elemento
+ * 2- Apilamos la direccion a partir de la cual empieza la cadena.
+ * 
  */
 private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_terceto) {
 	try {
@@ -289,7 +423,7 @@ private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_tercet
 			// Pongo el valor local en el hueco ajeno
 			bw.write("MOVE #-"+ despl_op2 +"[.IY], [.R9]\n");	// RECUERDA R9!!
 		} else {
-			System.out.println("Ejecutar Asigna. Caso no contemplado");
+			System.err.println("Ejecutar Asigna. Caso no contemplado");
 		}
 
 	} catch (Exception e) {
