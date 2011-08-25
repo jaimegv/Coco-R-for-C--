@@ -1030,12 +1030,7 @@ public class Parser {
 			colaTercetos.add(tupla);
 			
 		} else if (la.kind == 32) {
-			simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); 
-			tipoDev/*, simbolo_op1*/ = VCambio_Signo();
-			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
-			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			colaTercetos.add(tupla);	 
-			
+			tipoDev = VCambio_Signo(simbolo_resultado);
 		} else if (la.kind == 46) {
 			simbolo_op1 = new Simbolo(tercetos.darTemporal(),bool,var); 
 			tipoDev = VNegacion();
@@ -1047,7 +1042,7 @@ public class Parser {
 			tipoDev = ValorFinalExp(simbolo_resultado);
 			if (StartOf(8)) {
 				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma();
+					type = VExpSuma(simbolo_resultado);
 					if ((tipoDev != entera) || (type != entera))
 					SemErr("Error de tipos en la expresion");
 								   else
@@ -1232,29 +1227,61 @@ public class Parser {
 		return tipoDev;
 	}
 
-	int  VCambio_Signo() {
+	int  VCambio_Signo(Simbolo simbolo_resultado) {
 		int  tipoDev;
 		System.out.println("Entramos VCambio_Signo");
 		int type = entera;
 		tipoDev = undef;
-		Simbolo simbolo_temp = null;
+		boolean cambio_signo_simple = true; //Esto indicara si la operacion ha terminado o sigue con mas expresiones
+		Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui se almacenara VExpFinal
+		tabla.InsertarEnActual(simbolo_temp1);
+		
+		
 		if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
 				SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");
 		Expect(32);
 		if (StartOf(7)) {
-			tipoDev = ValorFinalExp(simbolo_temp);
+			tipoDev = ValorFinalExp(simbolo_temp1);
+			Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
+			String terceto;
+			 terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
+			 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			 colaTercetos.add(tupla);
+			tabla.InsertarEnActual(simbolo_temp2);
+			//t2 = -1 hecho
+			//Ahora hay que emitir t3 = t1xt2 
+			 Simbolo simbolo_temp3 = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
+			  terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_temp3.GetNombre())); //t3 = t1 * t2
+			  tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			  colaTercetos.add(tupla);
+			  tabla.InsertarEnActual(simbolo_temp3);
+			  
+			  
+			  
+			  
+			 
+			
 			if (StartOf(10)) {
 				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma();
+					type = VExpSuma(simbolo_temp3);
 				} else {
 					type = VExpMul();
 				}
+				cambio_signo_simple = false;
 			}
 			if ((tipoDev != entera) || (type != entera))
-			SemErr("Error de tipos en la expresion");
+														SemErr("Error de tipos en la expresion");
+						
+						 if (cambio_signo_simple)
+						 	{
+						 	 terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp3.GetNombre())); //tres = t3
+			  			 tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			  			 colaTercetos.add(tupla);
+			  			}
+						 	
 		} else if (la.kind == 31) {
 			Get();
-			tipoDev = VExpresion(simbolo_temp);
+			tipoDev = VExpresion(simbolo_resultado);
 			Expect(38);
 			if (tipoDev != entera)
 			SemErr("VCambio_Signo: Error de tipos en la expresion");
@@ -1424,7 +1451,8 @@ public class Parser {
 			tipoDev = cadena;
 			simbolo_resultado.SetType(cadena);
 			String terceto;
-			 terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), t.val);
+			// asignare a la eti el valor de la cadena.
+			 terceto = tercetos.asignacion_cadena(simbolo_resultado.GetNombre(), t.val);
 			 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			 colaTercetos.add(tupla);
 			 tabla.InsertarEnActual(simbolo_resultado);
@@ -1432,19 +1460,28 @@ public class Parser {
 		return tipoDev;
 	}
 
-	int  VExpSuma() {
+	int  VExpSuma(Simbolo simbolo_exp_anterior) {
 		int  tipoDev;
 		System.out.println("Entramos VExpSuma");
 		tipoDev=undef;
-		Simbolo simbolo_temp = null;
+		String operacion = null;
+		Simbolo simbolo_resultado = new Simbolo(tercetos.darTemporal(),entera,var);
+		tabla.InsertarEnActual(simbolo_resultado);
 		if (la.kind == 34) {
 			Get();
+			operacion = new String("SUMA");
 		} else if (la.kind == 32) {
 			Get();
+			operacion = new String("RESTA");
 		} else SynErr(79);
-		tipoDev = VExpresion(simbolo_temp);
+		tipoDev = VExpresion(simbolo_resultado);
 		if (tipoDev != entera)
 		SemErr("VExpSuma: Error de tipos en la expresion");
+		Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
+		String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+		colaTercetos.add(tupla);
+		simbolo_exp_anterior = simbolo_temp1;
 		return tipoDev;
 	}
 
@@ -1463,7 +1500,7 @@ public class Parser {
 			tipoDev = ValorFinalExp(simbolo_temp);
 			if (StartOf(10)) {
 				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma();
+					type = VExpSuma(simbolo_temp);
 				} else {
 					type = VExpMul();
 				}
