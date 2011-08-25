@@ -1474,17 +1474,21 @@ public class Parser {
 			Get();
 			simbolo_temp1 = VExpresion();
 			Expect(38);
+			if ((simbolo_temp1.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+			SemErr("ExpMul: Error de tipos en la expresion");
+			 else
+			 		{
+			 		System.out.println("YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+			 		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
+			     tabla.InsertarEnActual(simbolo);
+			   String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
+			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			   colaTercetos.add(tupla);
+			   }
+			   
+			 		
+			
 		} else SynErr(80);
-		if ((simbolo_temp1.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
-		SemErr("ExpMul: Error de tipos en la expresion");
-		 else
-		 		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
-		     tabla.InsertarEnActual(simbolo);
-		   String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
-		   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-		   colaTercetos.add(tupla);
-		 		
-		
 		return simbolo;
 	}
 
