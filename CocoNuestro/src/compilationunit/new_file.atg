@@ -1115,17 +1115,34 @@ VNegacion <out int tipoDev>
         colaTercetos.add(tupla);
         simbolo = simbolo_temp1;.)
     .
- /*   
- VExpMul <out int tipoDev>
-  = (. System.out.println("Entramos VExpMul");
-  	   int type = entera;
-  	   tipoDev = undef;
-  	   Simbolo simbolo_temp = null;.)
-    (op_producto | op_division) (ValorFinalExp<out tipoDev, simbolo_temp> [VExpSuma <out type, simbolo_temp> | VExpMul <out type>]
-    					   		 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce) (. if ((tipoDev != entera) || (type != entera))
-    					   													  			SemErr("ExpMul: Error de tipos en la expresion");.)
-    .
     
+ VExpMul <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
+  = (. System.out.println("Entramos VExpMul");
+  	   Simbolo simbolo_temp1 = null;
+  	   String operador = null;.)
+  	(   
+    (op_producto (.operador = new String("MUL");.) | op_division (.operador = new String ("DIV");.) ) 
+    
+    ValorFinalExp<out simbolo_temp1> 
+    
+    (.Simbolo simbolo_temp2 = new Simbolo(tercetos.darEtiqueta(),entera,var);
+      tabla.InsertarEnActual(simbolo_temp2);
+      String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo_temp2.GetNombre()));
+      tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+      colaTercetos.add(tupla);
+      simbolo = simbolo_temp2;.)
+      
+    
+    [VExpSuma <out simbolo, simbolo_temp2> 
+    | VExpMul <out simbolo, simbolo_temp2>
+    
+    ]
+    					   		 
+    /*
+    | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce*/) /*(. if ((tipoDev != entera) || (type != entera))
+    					   													  			SemErr("ExpMul: Error de tipos en la expresion");.)*/
+    .
+    /*
  VExpAND <out int tipoDev>
   = (.System.out.println("Entramos VExpAND");
   	   int type = bool;

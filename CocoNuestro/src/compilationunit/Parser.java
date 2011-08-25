@@ -1429,6 +1429,35 @@ public class Parser {
 		return simbolo;
 	}
 
+	Simbolo  VExpMul(Simbolo simbolo_exp_anterior) {
+		Simbolo  simbolo;
+		System.out.println("Entramos VExpMul");
+		Simbolo simbolo_temp1 = null;
+		String operador = null;
+		if (la.kind == 39) {
+			Get();
+			operador = new String("MUL");
+		} else if (la.kind == 40) {
+			Get();
+			operador = new String ("DIV");
+		} else SynErr(79);
+		simbolo_temp1 = ValorFinalExp();
+		Simbolo simbolo_temp2 = new Simbolo(tercetos.darEtiqueta(),entera,var);
+		tabla.InsertarEnActual(simbolo_temp2);
+		String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo_temp2.GetNombre()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
+		simbolo = simbolo_temp2;
+		if (StartOf(10)) {
+			if (la.kind == 32 || la.kind == 34) {
+				simbolo = VExpSuma(simbolo_temp2);
+			} else {
+				simbolo = VExpMul(simbolo_temp2);
+			}
+		}
+		return simbolo;
+	}
+
 	void Operador_Aritmetico() {
 		if (la.kind == 34) {
 			Get();
@@ -1438,7 +1467,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(79);
+		} else SynErr(80);
 	}
 
 	void Operador_Logico() {
@@ -1448,7 +1477,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 46) {
 			Get();
-		} else SynErr(80);
+		} else SynErr(81);
 	}
 
 	void Operador_Relacional() {
@@ -1477,7 +1506,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(81); break;
+		default: SynErr(82); break;
 		}
 	}
 
@@ -1502,7 +1531,8 @@ public class Parser {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
 } // end Parser
@@ -1606,9 +1636,10 @@ class Errors {
 			case 76: s = "invalid VCambio_Signo"; break;
 			case 77: s = "invalid ValorFinalExp"; break;
 			case 78: s = "invalid VExpSuma"; break;
-			case 79: s = "invalid Operador_Aritmetico"; break;
-			case 80: s = "invalid Operador_Logico"; break;
-			case 81: s = "invalid Operador_Relacional"; break;
+			case 79: s = "invalid VExpMul"; break;
+			case 80: s = "invalid Operador_Aritmetico"; break;
+			case 81: s = "invalid Operador_Logico"; break;
+			case 82: s = "invalid Operador_Relacional"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
