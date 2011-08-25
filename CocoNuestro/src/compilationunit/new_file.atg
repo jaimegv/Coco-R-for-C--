@@ -974,11 +974,11 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 					 				| VExpMul <out simbolo_temp2, simbolo_temp1>
 					 											(. if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
 															 			SemErr("Error de tipos en la expresion");
-																.)/*
-						 			| VExpAND <out type>		(. if ((tipoDev != bool) || (type != bool))
+																.)
+						 			| VExpAND <out simbolo_temp2, simbolo_temp1>
+						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 															 			SemErr("Error de tipos en la expresion");
-																   else
-															 	   		tipoDev=type;.)*/
+																.)
 						 			| VExpOR  <out simbolo_temp2, simbolo_temp1>		
 						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 															 			SemErr("Error de tipos en la expresion");
@@ -994,15 +994,7 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 						 			]
 						 			
 	)					 			
-						 			
-						 			//Hay que asignar simboloresulado a simbolo_temp1
-/*						 			(.
-						 			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
-						 			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
-						 			colaTercetos.add(tupla);
-						 			tabla.InsertarEnActual(simbolo_resultado);
-						 			.)
-*/						 			
+						 							 			
 
 
 )
@@ -1152,7 +1144,6 @@ VNegacion <out int tipoDev>
     		SemErr("ExpMul: Error de tipos en la expresion");
        else
        		{
-       		System.out.println("YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
        		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
   	        tabla.InsertarEnActual(simbolo);
 	        String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
@@ -1165,22 +1156,40 @@ VNegacion <out int tipoDev>
     ).
     
     
- /*   
- VExpAND <out int tipoDev>
+    
+ VExpAND <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   = (.System.out.println("Entramos VExpAND");
-  	   int type = bool;
-  	   tipoDev = undef;
-  	   Simbolo simbolo_temp = null;.)
-    (op_and (ValorFinalExp<out tipoDev, simbolo_temp> [VExpAND <out type> | VExpOR <out type>]
-    					   		 | parent_ab VExpresion <out tipoDev, simbolo_temp> parent_ce) (. if ((tipoDev != bool) || (type != bool))
-    					   		 														{
-    					   		 														System.out.println(tipoDev + type);
-    					   													  			SemErr("VExpAND: Error de tipos en la expresion");
-    					   													  			}.)
+  	   simbolo = null;
+  	   Simbolo simbolo_temp1 = null;
+  	   Simbolo simbolo_temp2 = null;.)
+    (op_and (ValorFinalExp<out simbolo_temp1> 
+    (. simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var);
+       tabla.InsertarEnActual(simbolo_temp2);
+       String terceto = new String (tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(),"AND",simbolo_temp2.GetNombre()));
+       tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+       colaTercetos.add(tupla);
+       simbolo = simbolo_temp2;.)
+   
+    
+    [(VExpAND <out simbolo, simbolo_temp2> 
+    | 
+    VExpOR <out simbolo, simbolo_temp2>)]
+    					   		 | 
+    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce) 
+    					   		 					(. if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
+	 														{
+												  			SemErr("VExpAND: Error de tipos en la expresion");
+												  			}
+												  		else
+												  			{
+												  			simbolo = simbolo_temp1;
+												  			}.)
     					   													  			
     					   	)
     .
-   */
+
+
+
  VExpOR <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   = (.System.out.println("Entramos VExpOR");
   	  Simbolo simbolo_temp = null;
@@ -1189,14 +1198,13 @@ VNegacion <out int tipoDev>
     (op_or) VExpresion<out simbolo_temp> 
     (.if ((simbolo_temp.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool)) 
     		SemErr("VExpoOR: Error de tipos en la expresion");
-      else
-      		{
-      		simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
-      		tabla.InsertarEnActual(simbolo);
-      		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
-      		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-      		colaTercetos.add(tupla);
-      		}		
+
+		simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
+		tabla.InsertarEnActual(simbolo);
+		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
+		
     	.)
     .
     /*

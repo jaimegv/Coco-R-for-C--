@@ -1044,6 +1044,11 @@ public class Parser {
 					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
 					SemErr("Error de tipos en la expresion");
 					
+				} else if (la.kind == 53) {
+					simbolo_temp2 = VExpAND(simbolo_temp1);
+					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
+					SemErr("Error de tipos en la expresion");
+					
 				} else {
 					simbolo_temp2 = VExpOR(simbolo_temp1);
 					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
@@ -1483,7 +1488,6 @@ public class Parser {
 			SemErr("ExpMul: Error de tipos en la expresion");
 			 else
 			 		{
-			 		System.out.println("YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 			 		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
 			     tabla.InsertarEnActual(simbolo);
 			   String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
@@ -1497,6 +1501,44 @@ public class Parser {
 		return simbolo;
 	}
 
+	Simbolo  VExpAND(Simbolo simbolo_exp_anterior) {
+		Simbolo  simbolo;
+		System.out.println("Entramos VExpAND");
+		simbolo = null;
+		Simbolo simbolo_temp1 = null;
+		Simbolo simbolo_temp2 = null;
+		Expect(53);
+		if (StartOf(8)) {
+			simbolo_temp1 = ValorFinalExp();
+			simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var);
+			tabla.InsertarEnActual(simbolo_temp2);
+			String terceto = new String (tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(),"AND",simbolo_temp2.GetNombre()));
+			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			colaTercetos.add(tupla);
+			simbolo = simbolo_temp2;
+			if (la.kind == 53 || la.kind == 54) {
+				if (la.kind == 53) {
+					simbolo = VExpAND(simbolo_temp2);
+				} else {
+					simbolo = VExpOR(simbolo_temp2);
+				}
+			}
+		} else if (la.kind == 31) {
+			Get();
+			simbolo_temp1 = VExpresion();
+			Expect(38);
+		} else SynErr(81);
+		if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
+		{
+			SemErr("VExpAND: Error de tipos en la expresion");
+			}
+		else
+			{
+			simbolo = simbolo_temp1;
+			}
+		return simbolo;
+	}
+
 	Simbolo  VExpOR(Simbolo simbolo_exp_anterior) {
 		Simbolo  simbolo;
 		System.out.println("Entramos VExpOR");
@@ -1506,15 +1548,13 @@ public class Parser {
 		simbolo_temp = VExpresion();
 		if ((simbolo_temp.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool)) 
 		SemErr("VExpoOR: Error de tipos en la expresion");
-		else
-				{
-				simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
-				tabla.InsertarEnActual(simbolo);
-				String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
-				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-				colaTercetos.add(tupla);
-				}		
+		simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
+		tabla.InsertarEnActual(simbolo);
+		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
 		
+		  	
 		return simbolo;
 	}
 
@@ -1527,7 +1567,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(81);
+		} else SynErr(82);
 	}
 
 	void Operador_Logico() {
@@ -1537,7 +1577,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 46) {
 			Get();
-		} else SynErr(82);
+		} else SynErr(83);
 	}
 
 	void Operador_Relacional() {
@@ -1566,7 +1606,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(83); break;
+		default: SynErr(84); break;
 		}
 	}
 
@@ -1591,7 +1631,7 @@ public class Parser {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
@@ -1699,9 +1739,10 @@ class Errors {
 			case 78: s = "invalid VExpSuma"; break;
 			case 79: s = "invalid VExpMul"; break;
 			case 80: s = "invalid VExpMul"; break;
-			case 81: s = "invalid Operador_Aritmetico"; break;
-			case 82: s = "invalid Operador_Logico"; break;
-			case 83: s = "invalid Operador_Relacional"; break;
+			case 81: s = "invalid VExpAND"; break;
+			case 82: s = "invalid Operador_Aritmetico"; break;
+			case 83: s = "invalid Operador_Logico"; break;
+			case 84: s = "invalid Operador_Relacional"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
