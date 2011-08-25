@@ -1021,14 +1021,9 @@ public class Parser {
 		String terceto;
 		tupla_Tercetos tupla;
 		if (la.kind == 31) {
-			simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); 
 			Get();
 			tipoDev = VExpresion(simbolo_resultado);
 			Expect(38);
-			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
-			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			colaTercetos.add(tupla);
-			
 		} else if (la.kind == 32) {
 			tipoDev = VCambio_Signo(simbolo_resultado);
 		} else if (la.kind == 46) {
@@ -1039,14 +1034,18 @@ public class Parser {
 			colaTercetos.add(tupla);	 
 			
 		} else if (StartOf(7)) {
-			tipoDev = ValorFinalExp(simbolo_resultado);
+			Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),bool,var);
+			tabla.InsertarEnActual(simbolo_temp1);
+			tipoDev = ValorFinalExp(simbolo_temp1);
 			if (StartOf(8)) {
 				if (la.kind == 32 || la.kind == 34) {
-					type = VExpSuma(simbolo_resultado);
+					type = VExpSuma(simbolo_temp1);
 					if ((tipoDev != entera) || (type != entera))
 					SemErr("Error de tipos en la expresion");
 								   else
 					tipoDev=type;
+					
+					
 				} else if (la.kind == 39 || la.kind == 40) {
 					type = VExpMul();
 					if ((tipoDev != entera) || (type != entera))
@@ -1073,6 +1072,10 @@ public class Parser {
 					 		tipoDev = bool;
 				}
 			}
+			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
+			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+			colaTercetos.add(tupla);
+			
 		} else SynErr(72);
 		return tipoDev;
 	}

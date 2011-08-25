@@ -956,12 +956,12 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 	tupla_Tercetos tupla;.)
 	
 	(
-	(. simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); .) 
+	/*(. simbolo_op1 = new Simbolo(tercetos.darTemporal(),entera,var); .)*/ 
 	parent_ab VExpresion <out tipoDev, simbolo_resultado> parent_ce
-	(. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
+	/*(. terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(), simbolo_op1.GetNombre()));
 	   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 	   colaTercetos.add(tupla);
-	.)
+	.)*/
 	 
 	|
 	
@@ -977,15 +977,18 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 	 .)
 	
 	|
-
-	 ValorFinalExp <out tipoDev, simbolo_resultado> 
+	(.Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),bool,var);
+	  tabla.InsertarEnActual(simbolo_temp1);.)
+	 ValorFinalExp <out tipoDev, simbolo_temp1>
 	 
 	 
-	 								[VExpSuma <out type, simbolo_resultado>		
+	 								[VExpSuma <out type, simbolo_temp1>		
 	 															(. if ((tipoDev != entera) || (type != entera))
 													 					SemErr("Error de tipos en la expresion");
 						  						     			   else
-															 			tipoDev=type;.)
+															 			tipoDev=type;
+															 			
+															 		.)
 					 				| VExpMul <out type>		(. if ((tipoDev != entera) || (type != entera))
 															 			SemErr("Error de tipos en la expresion");
 															 	   else
@@ -1003,6 +1006,14 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 															 	   else
 															 	   		tipoDev = bool;.)
 						 			]
+						 			
+						 			//Hay que asignar simboloresulado a simbolo_temp1
+						 			(.
+						 			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
+						 			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+						 			colaTercetos.add(tupla);
+						 			.)
+						 			
 
 )
 
