@@ -1122,7 +1122,9 @@ VNegacion <out Simbolo simbolo>
       	tabla.InsertarEnActual(simbolo_temp1);
       	System.out.println(simbolo_resultado.GetNombre()+"CUCU");
       	System.out.println(simbolo_temp1.GetNombre()+"CUCU");
-        String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+      	//LUIS
+        //String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+        String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(),operacion,simbolo_temp1.GetNombre()));
 
 
         tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
@@ -1144,7 +1146,9 @@ VNegacion <out Simbolo simbolo>
       Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var);
       tabla.InsertarEnActual(simbolo_temp2);
       System.out.println("hola holita!!");
-      String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo_temp2.GetNombre()));
+//	LUIs
+//      String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo_temp2.GetNombre()));
+	  String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp1.GetNombre(), operador, simbolo_temp2.GetNombre()));
       tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
             
       colaTercetos.add(tupla);
