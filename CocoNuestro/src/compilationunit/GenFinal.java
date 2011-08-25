@@ -143,10 +143,14 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
 	} else if (operacion.equals("ASIGNA")){				// asignamos a un temp el valor de otro tmp
 		EjecutarAsigna(op1, op2, ambitoterceto);
-	} else if (operacion.equals("SUMA")) {
+	} else if (operacion.equals("SUMA")) {				// Suma
 		OpSuma(op1, op2, op3, ambitoterceto);
 	} else if (operacion.equals("MUL")) {				// Multiplamos
 		OpMul(op1, op2, op3, ambitoterceto);
+	// } else if () {
+	// TODO operacion.equals("OR")
+	// TODO operacion.equals("RESTA")
+	// TODO operacion.equals("DIV")
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -259,26 +263,16 @@ private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_tercet
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	//op1 No local
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op1 = ambito_terceto.Ambito_Padre().GetSimbolo(op1).GetDesplazamiento();
-			bw.write("MOVE .IX, .IY\n");	//Sabemos que al menos esta en el padre
-			TablaSimbolos ambito_op1=ambito_terceto;	// Variable para moverme por tablas
-			// op1 NO LOCAL. op2 SI LOCAL
-			while (!ambito_op1.Esta(op1)) {
-				bw.write("MOVE #2[.IY],.IY\n");
-				ambito_op1 = ambito_terceto.Ambito_Padre();	// esta en el padre?
-			}
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			BuscaMarcoDir(op1, ambito_terceto);
 			// Pongo el valor local en el hueco ajeno
 			bw.write("MOVE #-"+ simbolo_op2.GetDesplazamiento() +"[.IX], #-"+ despl_op1+"[.IY]\n");
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { //op2 No local
 			// TODO NO ESTA COMPROBADA ESTA RAMA			
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op2 = ambito_terceto.Ambito_Padre().GetSimbolo(op2).GetDesplazamiento();
-			bw.write("MOVE .IX, .IY\n");	//Sabemos que al menos esta en el padre
-			TablaSimbolos ambito_op2 = ambito_terceto;	// Variable para moverme por tablas
-			// op1 SI LOCAL. op2 NO LOCAL
-			while (!ambito_op2.Esta(op2)) {
-				bw.write("MOVE #2[.IY],.IY\n");
-				ambito_op2 = ambito_terceto.Ambito_Padre();	// esta en el padre?
-			}
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			BuscaMarcoDir(op2, ambito_terceto);
 			// Pongo el valor ajeno en el hueco local
 			bw.write("MOVE #-"+ despl_op2 +"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
 		} else {
@@ -288,6 +282,25 @@ private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_tercet
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
+}
+
+/*
+ * Busca la direccion de un elemento-simbolo(String) que no este en el ambito dado
+ * como parametro. Ademas va escribiendo en la salida del fichero el codigo necesario
+ * para dejar en IY el valor del MARCO DE PILA del ambito donde esta declarado
+ */
+private void BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto) {
+	try {
+		bw.write("MOVE .IX, .IY\n");	// Nos moveremos sobre este registro
+		TablaSimbolos ambito_simbolo = ambito_terceto;	// Variable para moverme por tablas
+		// op1 SI LOCAL. op2 NO LOCAL
+		while (!ambito_simbolo.Esta(Nombre)) {
+			bw.write("MOVE #2[.IY],.IY\n");
+			ambito_simbolo = ambito_terceto.Ambito_Padre();	// esta en el padre?
+		}	
+	} catch (Exception e) {
+		System.err.println("Error: Buscar Direccion simbolo error.");
+	}
 }
 
 /*
