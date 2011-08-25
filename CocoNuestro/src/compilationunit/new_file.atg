@@ -1253,6 +1253,10 @@ ValorFinalExp <out int tipoDev, Simbolo simbolo_resultado>
   				 String terceto;
   				 // asignare a la eti el valor de la cadena.
 			   	 terceto = tercetos.asignacion_cadena(simbolo_resultado.GetNombre(), t.val);
+				 if (t.val.equals("\"\"")) {
+					 SemErr("Error: Cadena nula. La cadena debe contener al menos un caracter.");
+				 }
+			   	 System.out.println("Terceto de la cadena:"+terceto);
 			   	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			   	 colaTercetos.add(tupla);
 			   	 tabla.InsertarEnActual(simbolo_resultado);.))

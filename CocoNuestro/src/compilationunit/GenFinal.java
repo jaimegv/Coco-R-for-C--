@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.StringTokenizer;
 
 public class GenFinal {
     BufferedWriter bw;
@@ -160,19 +161,33 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		// 1- Anadimos a la lista de DATA esta etiqueta con su valor
 		lista_data.add(simbolo_op1.GetNombre()+": DATA "+ op2 + "\n");
+		// Elimino las comillas que envuelven al string
+		op2=op2.substring(1, op2.length()-1);
 		// 2- Guardo la etiqueta en el marco de pila actual
 		bw.write("MOVE #"+ count_char +",#-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
-		count_char= count_char + op2.getBytes().length - 2;	// Resto 2 por las dobles comillas
-		System.out.println("Longitud en bytes:"+op2.length());
-		System.out.println("ahora con utf-8:"+op2.getBytes("UTF-8").length);
-		//bw.write("DATA "+op2+"\n");
+		// Cuento el numero de elem del string para mover el desplazamiento
+	    // Texto que vamos a buscar
+	    String sTextoBuscado = "\\n";	// solo ocupa un espacio pero son 2 char
+	    // Contador de ocurrencias 
+	    int contador = 0;	// Numero de veces que aparece la cadena
+	    while (op2.indexOf(sTextoBuscado) > -1) {
+	      op2 = op2.substring(op2.indexOf(sTextoBuscado)+sTextoBuscado.length(),op2.length());
+	      contador++;
+	    }
+		// Ajustamos le desplazamiento teniendo en cuenta todo
+	    if ((op2.length()==0) && (contador!=0)) {		// caso "\n"
+			count_char= count_char + contador + 1;
+	    } else {
+			count_char= count_char + op2.length() + contador + 1;	
+	    }
 		// prueba impresion
-		bw.write("MOVE #-" + simbolo_op1.GetDesplazamiento() + "[.IX], .IY\n");
-		bw.write("WRSTR [.IY]\n");
+		//bw.write("MOVE #-" + simbolo_op1.GetDesplazamiento() + "[.IX], .IY\n");
+		//bw.write("WRSTR [.IY]\n");
 	} catch (IOException e) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
 }
+
 /*
  * 
  */
