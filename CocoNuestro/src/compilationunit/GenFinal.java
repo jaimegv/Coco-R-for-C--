@@ -142,6 +142,8 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		ComienzoSubprograma(op1, ambitoterceto);		// op1: nombre de la etiqueta
 	} else if (operacion.equals("ASIGNACION_CADENA")) {	// ETI: data "HOLA"
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
+	} else if (operacion.equals("ASIGNA")){
+		EjecutarAsigna(op1, op2, ambitoterceto);
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -189,16 +191,21 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 }
 
 /*
- * 
+ * Asginamos el valor de op2 a op1 
  */
 private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_terceto) {
 	try {
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
-		//bw.write("DATA "+op2+"\n");
-		bw.write("WRSTR #-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
-		bw.write("etiqueta del temporal:"+simbolo_op1.GetNombre());
+		// Segundo operando debe estar en el ambito actual
+		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
+		// Recuperamos el desplazamiento respecto IX de op2
+		System.out.println("Desplazamiento:"+simbolo_op2.GetDesplazamiento());
+
+		// Donde esta el operando 1
+		// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
+		bw.write("MOVE #-" + simbolo_op2.GetDesplazamiento() + "[.IX], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+
 		// TODO
-		// tenemos que meter cadenas como DATA en posiciones de memoria q no dañan
 	} catch (IOException e) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
