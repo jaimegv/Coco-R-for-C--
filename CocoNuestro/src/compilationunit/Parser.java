@@ -1034,7 +1034,7 @@ public class Parser {
 			colaTercetos.add(tupla);	 
 			
 		} else if (StartOf(7)) {
-			Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),bool,var);
+			Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
 			tabla.InsertarEnActual(simbolo_temp1);
 			tipoDev = ValorFinalExp(simbolo_temp1);
 			if (StartOf(8)) {
