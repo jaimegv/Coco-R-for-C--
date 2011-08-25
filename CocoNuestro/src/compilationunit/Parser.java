@@ -1039,9 +1039,14 @@ public class Parser {
 					SemErr("Error de tipos en la expresion");
 					
 					
-				} else {
+				} else if (la.kind == 39 || la.kind == 40) {
 					simbolo_temp2 = VExpMul(simbolo_temp1);
 					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
+					SemErr("Error de tipos en la expresion");
+					
+				} else {
+					simbolo_temp2 = VExpOR(simbolo_temp1);
+					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 					SemErr("Error de tipos en la expresion");
 					
 				}
@@ -1234,7 +1239,7 @@ public class Parser {
 			  simbolo_resultado = simbolo_temp3;
 			   
 			
-			if (StartOf(9)) {
+			if (StartOf(11)) {
 				Simbolo simbolo_temp4 = null;
 				if (la.kind == 32 || la.kind == 34) {
 					simbolo_temp4 = VExpSuma(simbolo_temp3);
@@ -1463,7 +1468,7 @@ public class Parser {
 			      
 			colaTercetos.add(tupla);
 			simbolo = simbolo_temp2;
-			if (StartOf(9)) {
+			if (StartOf(11)) {
 				if (la.kind == 32 || la.kind == 34) {
 					simbolo = VExpSuma(simbolo_temp2);
 				} else {
@@ -1489,6 +1494,27 @@ public class Parser {
 			 		
 			
 		} else SynErr(80);
+		return simbolo;
+	}
+
+	Simbolo  VExpOR(Simbolo simbolo_exp_anterior) {
+		Simbolo  simbolo;
+		System.out.println("Entramos VExpOR");
+		Simbolo simbolo_temp = null;
+		simbolo = null;
+		Expect(54);
+		simbolo_temp = VExpresion();
+		if ((simbolo_temp.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool)) 
+		SemErr("VExpoOR: Error de tipos en la expresion");
+		else
+				{
+				simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
+				tabla.InsertarEnActual(simbolo);
+				String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
+				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+				colaTercetos.add(tupla);
+				}		
+		
 		return simbolo;
 	}
 
@@ -1565,8 +1591,9 @@ public class Parser {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x},
+		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	};
 } // end Parser

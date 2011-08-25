@@ -978,11 +978,11 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 						 			| VExpAND <out type>		(. if ((tipoDev != bool) || (type != bool))
 															 			SemErr("Error de tipos en la expresion");
 																   else
-															 	   		tipoDev=type;.)
-						 			| VExpOR  <out type>		(. if ((tipoDev != bool) || (type != bool))
+															 	   		tipoDev=type;.)*/
+						 			| VExpOR  <out simbolo_temp2, simbolo_temp1>		
+						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 															 			SemErr("Error de tipos en la expresion");
-																   else
-															 	   		tipoDev=type;.)
+															 	.)/*
 						 			| VExpRelacional <out type> (. if ((tipoDev != entera) || (type != entera))
 															 			SemErr("Error de tipos en la expresion");
 															 	   else
@@ -1165,7 +1165,7 @@ VNegacion <out int tipoDev>
     ).
     
     
-    /*
+ /*   
  VExpAND <out int tipoDev>
   = (.System.out.println("Entramos VExpAND");
   	   int type = bool;
@@ -1180,15 +1180,26 @@ VNegacion <out int tipoDev>
     					   													  			
     					   	)
     .
-    
- VExpOR <out int tipoDev>
+   */
+ VExpOR <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   = (.System.out.println("Entramos VExpOR");
-  	  tipoDev=undef;
-  	  Simbolo simbolo_temp = null;.)
-    (op_or) VExpresion<out tipoDev, simbolo_temp> (.if (tipoDev != bool)
-      								 		SemErr("VExpoOR: Error de tipos en la expresion");.)
+  	  Simbolo simbolo_temp = null;
+  	  simbolo = null;.)
+  	  
+    (op_or) VExpresion<out simbolo_temp> 
+    (.if ((simbolo_temp.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool)) 
+    		SemErr("VExpoOR: Error de tipos en la expresion");
+      else
+      		{
+      		simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
+      		tabla.InsertarEnActual(simbolo);
+      		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
+      		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+      		colaTercetos.add(tupla);
+      		}		
+    	.)
     .
-    
+    /*
  VExpRelacional <out int tipoDev>
  = (.System.out.println("Entramos VExpRelacional");
  	 tipoDev=undef;
