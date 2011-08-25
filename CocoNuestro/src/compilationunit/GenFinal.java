@@ -142,8 +142,10 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		ComienzoSubprograma(op1, ambitoterceto);		// op1: nombre de la etiqueta
 	} else if (operacion.equals("ASIGNACION_CADENA")) {	// ETI: data "HOLA"
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
-	} else if (operacion.equals("ASIGNA")){
+	} else if (operacion.equals("ASIGNA")){				// asignamos a un temp el valor de otro tmp
 		EjecutarAsigna(op1, op2, ambitoterceto);
+	} else if (operacion.equals("SUMA")) {
+		OpSuma(op1, op2, op3, ambitoterceto);
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -151,6 +153,26 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * Operacion SUMA
+ * OpSuma(op1, op2, op3, ambitoterceto);
+ */
+private void OpSuma (String op1, String op2, String resultado, TablaSimbolos ambito_terceto){
+	try {
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);
+		//TODO
+		// CASO TODO LOCAL.
+		bw.write("ADD #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+		bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+	} catch (IOException e) {
+        System.err.println("Error: Ejecutar OpSuma.");
+    }
+}
+
+
 
 /* Asignar temporal cadena
  * 1- Anadimos a una cola de cadenas otro dato que sera guardado a partir de una direccion de mem. accesible
@@ -186,7 +208,7 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 		//bw.write("MOVE #-" + simbolo_op1.GetDesplazamiento() + "[.IX], .IY\n");
 		//bw.write("WRSTR [.IY]\n");
 	} catch (IOException e) {
-        System.err.println("Error: Ejecutar Asigna.");		
+        System.err.println("Error: Ejecutar AsignaCadena.");		
     }
 }
 
