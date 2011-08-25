@@ -145,6 +145,8 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		EjecutarAsigna(op1, op2, ambitoterceto);
 	} else if (operacion.equals("SUMA")) {
 		OpSuma(op1, op2, op3, ambitoterceto);
+	} else if (operacion.equals("MUL")) {				// Multiplamos
+		OpMul(op1, op2, op3, ambitoterceto);
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -154,16 +156,38 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 //***********************************************************************************************
 
 /*
+ * Operacion MUL
+ * OpMUL(op1, op2, op3, ambitoterceto);
+ */
+private void OpMul (String op1, String op2, String resultado, TablaSimbolos ambito_terceto){
+	try {
+		System.out.println("Bienvenido a OpMul.");
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);
+		System.out.println("Desplazamiento resultado,"+resultado+":"+simbolo_resultado.GetDesplazamiento());
+		//TODO
+		System.out.println("Nombre del op1-suma:"+simbolo_op1.GetNombre());
+		System.out.println("Nombre del op2-suma:"+simbolo_op2.GetNombre());
+		System.out.println("Nombre del op3-suma:"+simbolo_resultado.GetNombre());
+		// CASO TODO LOCAL.
+		bw.write("MUL #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+		bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar OpMul.");
+    }
+}
+
+/*
  * Operacion SUMA
  * OpSuma(op1, op2, op3, ambitoterceto);
- * op* y resultado son temporales.
  */
 private void OpSuma (String op1, String op2, String resultado, TablaSimbolos ambito_terceto){
 	try {
 		System.out.println("Bienvenido a OpSuma.");
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
-		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);	// siempre en ambito local-actual
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(resultado);
 		System.out.println("Desplazamiento resultado,"+resultado+":"+simbolo_resultado.GetDesplazamiento());
 		//TODO
 		System.out.println("Nombre del op1-suma:"+simbolo_op1.GetNombre());
@@ -179,7 +203,8 @@ private void OpSuma (String op1, String op2, String resultado, TablaSimbolos amb
 
 
 
-/* Asignar temporal cadena
+/* 
+ * Asignar temporal cadena
  * 1- Anadimos a una cola de cadenas otro dato que sera guardado a partir de una direccion de mem. accesible
  * por la etiqueta dada. pe: temporal20: DATA "HOLA"
  * 2- Esta etiqueta es la que luego se apila en el ambito de dicho elem. Luego guardo a partir de IX el valor
@@ -218,7 +243,8 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 }
 
 /*
- * Asginamos el valor de op2 a op1 
+ * Asignamos el valor de op2 a op1 
+ * op1 y op2 pueden ser o no variables locales
  */
 private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_terceto) {
 	try {
@@ -226,12 +252,39 @@ private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_tercet
 		// Segundo operando debe estar en el ambito actual
 		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
 		// Recuperamos el desplazamiento respecto IX de op2
-		System.out.println("Desplazamiento,"+op2+":"+simbolo_op2.GetDesplazamiento());
 
-		// Donde esta el operando 10
-		// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
-		bw.write("MOVE #-" + simbolo_op2.GetDesplazamiento() + "[.IX], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
-		// TODO
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	// todo local!
+			// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
+			bw.write("MOVE #-" + simbolo_op2.GetDesplazamiento() + "[.IX], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	//op1 No local
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = ambito_terceto.Ambito_Padre().GetSimbolo(op1).GetDesplazamiento();
+			bw.write("MOVE .IX, .IY\n");	//Sabemos que al menos esta en el padre
+			TablaSimbolos ambito_op1=ambito_terceto;	// Variable para moverme por tablas
+			// op1 NO LOCAL. op2 SI LOCAL
+			while (!ambito_op1.Esta(op1)) {
+				bw.write("MOVE #2[.IY],.IY\n");
+				ambito_op1 = ambito_terceto.Ambito_Padre();	// esta en el padre?
+			}
+			// Pongo el valor local en el hueco ajeno
+			bw.write("MOVE #-"+ simbolo_op2.GetDesplazamiento() +"[.IX], #-"+ despl_op1+"[.IY]\n");
+		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { //op2 No local
+			// TODO NO ESTA COMPROBADA ESTA RAMA			
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = ambito_terceto.Ambito_Padre().GetSimbolo(op2).GetDesplazamiento();
+			bw.write("MOVE .IX, .IY\n");	//Sabemos que al menos esta en el padre
+			TablaSimbolos ambito_op2 = ambito_terceto;	// Variable para moverme por tablas
+			// op1 SI LOCAL. op2 NO LOCAL
+			while (!ambito_op2.Esta(op2)) {
+				bw.write("MOVE #2[.IY],.IY\n");
+				ambito_op2 = ambito_terceto.Ambito_Padre();	// esta en el padre?
+			}
+			// Pongo el valor ajeno en el hueco local
+			bw.write("MOVE #-"+ despl_op2 +"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+		} else {
+			System.out.println("Ejecutar Asigna. Caso no contemplado");
+		}
+
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
@@ -284,6 +337,17 @@ private void separar(String linea)	{
     linea=linea.substring(u+1);
 
     op3=linea.substring(0,linea.indexOf("\n"));
+}
+
+private void daInformacion (String operando, TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolito = ambito_terceto.GetSimbolo(operando);
+		System.out.println("-> Dando informacion acerca del operando: "+operando);
+		System.out.println("Nombre: "+simbolito.GetNombre());
+		System.out.println("Etiqueta: "+simbolito.GetEtiqueta());
+	} catch (Exception e) {
+		System.err.println("Fallor en impresion de informacion de un operando.");
+	}
 }
     
 }
