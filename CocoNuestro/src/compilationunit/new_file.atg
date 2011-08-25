@@ -979,7 +979,7 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 	|
 	(.Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),bool,var);
 	  tabla.InsertarEnActual(simbolo_temp1);.)
-	 ValorFinalExp <out tipoDev, simbolo_temp1>
+	  ValorFinalExp <out tipoDev, simbolo_temp1>
 	 
 	 
 	 								[VExpSuma <out type, simbolo_temp1>		
@@ -1012,6 +1012,7 @@ VExpresion <out int tipoDev, Simbolo simbolo_resultado> //Simbolo será el tempo
 						 			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
 						 			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
 						 			colaTercetos.add(tupla);
+						 			tabla.InsertarEnActual(simbolo_resultado);
 						 			.)
 						 			
 

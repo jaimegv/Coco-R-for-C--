@@ -1075,6 +1075,7 @@ public class Parser {
 			terceto = new String(tercetos.asignacion(simbolo_resultado.GetNombre(),simbolo_temp1.GetNombre()));
 			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
 			colaTercetos.add(tupla);
+			tabla.InsertarEnActual(simbolo_resultado);
 			
 		} else SynErr(72);
 		return tipoDev;
