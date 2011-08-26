@@ -220,13 +220,41 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 		// Tenemos tres simbolos a dos posibilidades cada uno de estar o no en el ambito local -> 2 * 2 * 2 = 8 posibilidades
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2) && ambito_terceto.Esta(op3)) {	// todo local!
 			bw.write("MOVE #-"+simbolo_indice.GetDesplazamiento()+"[.IX],.R9\n");	// R9=valor del indice
-			bw.write("ADD #-"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IX, .A\n");
 			bw.write("MOVE .A, .IY\n");	// R8 = Desplzamiento total hasta elemento del vector
 			bw.write("MOVE #-"+simbolo_valor.GetDesplazamiento()+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
 		} else if ((!ambito_terceto.Esta(op1)) && ambito_terceto.Esta(op2) && ambito_terceto.Esta(op3))	{	//solo op1 No local
+			bw.write("MOVE #-"+simbolo_indice.GetDesplazamiento()+"[.IX],.R9\n");	// R9=valor del indice
+			// Busco el desplazamiento del vector
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			bw.write("ADD #"+despl_op1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("SUB .IY, .A\n");	// BuscaMarcoDir ha dejado en IY la direccion del marco del vector
+			bw.write("MOVE .A, .IY\n");	// R8 = Desplzamiento total hasta elemento del vector
+			bw.write("MOVE #-"+simbolo_valor.GetDesplazamiento()+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
 		} else if (ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && ambito_terceto.Esta(op3))	{	//solo op2 No local
+			bw.write("MOVE #-"+simbolo_indice.GetDesplazamiento()+"[.IX],.R9\n");	// R9=valor del indice
+			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("SUB .IX, .A\n");
+			bw.write("MOVE .A, .R8\n");	// R8 = Desplzamiento total hasta elemento del vector
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			bw.write("MOVE #-"+despl_op2+"[.IY], [.R8]\n");	// Muevo el valor del elemento al vector
 		} else if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2) && (!ambito_terceto.Esta(op3)))	{	//solo op3 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_indice = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
+			bw.write("MOVE #-"+despl_indice+"[.IY],.R9\n");	// R9=valor del indice
+			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("SUB .IX, .A\n");
+			bw.write("MOVE .A, .IY\n");	// R8 = Desplzamiento total hasta elemento del vector
+			bw.write("MOVE #-"+simbolo_valor.GetDesplazamiento()+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
 		} else if ((!ambito_terceto.Esta(op1)) && (!ambito_terceto.Esta(op2)) && ambito_terceto.Esta(op3))	{	//op1 y op2 No local
 		} else if ((!ambito_terceto.Esta(op1)) && ambito_terceto.Esta(op2) && (!ambito_terceto.Esta(op3)))	{	//op1 y op3 No local
 		} else if (ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && (!ambito_terceto.Esta(op3)))	{	//op2 y op3 No local
@@ -254,7 +282,6 @@ private void GetEntero (TablaSimbolos ambito_terceto) {
 		if (ambito_terceto.Esta(op1)) {			// todo local!
 			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento() + "[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
-			// TODO
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
