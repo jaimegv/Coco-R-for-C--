@@ -500,7 +500,8 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 = (. Simbolo simbolo_anterior = null;
 	 boolean estaba_declarado = false;.)
 	{Instruccion <simbolo_funcion>
-		| ((Ttipo<out type> | voidd) (. if (type == identificador)
+		| ((Ttipo<out type> | voidd (.type = vacio;.)) 
+									(. if (type == identificador)
 											 {
 											 if (!(tabla.EstaRecur(t.val)))
 											 	{
@@ -510,6 +511,7 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 											 	{
 											 	simbolo_anterior = tabla.GetSimboloRecur(t.val);
 											 	estaba_declarado = true;
+											 	System.out.println("trolorololo");
 											 	}
 											 }
 										else if (la.val.contentEquals("["))
@@ -554,7 +556,7 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 			 							   		}	
 			 							   	.) 
 			(Subprograma <simbolo>
-		 | (Vector<simbolo> puntoComa | DecVar<simbolo> ))))}
+		 | (Vector<simbolo> puntoComa | DecVar<simbolo> )))) (.estaba_declarado = false;.)}
 .
 
 
@@ -750,7 +752,7 @@ parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funci
 															(. tabla.CerrarAmbito();
 															   if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
 															   		{
-															   		System.out.println(hayreturn);
+															   		System.out.println(simbolo_funcion.GetTipoRetorno());
 															   		SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
 															   		}
 															   else
@@ -910,6 +912,7 @@ InstIfElse <Simbolo simbolo_funcion>
 								  		   colaTercetos.add(tupla);
 								  		   
 								  		 .)
+								  		 
 								  		    
 	(llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();
 																		   terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
