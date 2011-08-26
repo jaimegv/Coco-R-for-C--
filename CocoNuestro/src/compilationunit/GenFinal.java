@@ -20,7 +20,7 @@ public class GenFinal {
     LinkedList<String> lista_data = new LinkedList();
     int lista_ini=12000;	// comienzo en memoria de la lista_data
     int count_char=lista_ini;	// Numero de characters emitidos en lista data
-    int true_false = lista_ini - 200;	// En esta direccion se guarda cadena "true" y "false" y valor 1 y 0
+    int true_false = lista_ini - 200;	// En esta direccion se guarda cadena "true" y "false" y valor 1 y 0 y mas constantes
 	String nemonico = new String();		
     
 
@@ -106,6 +106,16 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         bw.write("RET; final de main\n");
 
         /*
+         * Almacenamos constantes, sí o sí
+         */
+        bw.write("ORG "+true_false+"\n");
+        bw.write("cad_cierto: DATA \"true\"\n");
+        bw.write("cad_falso: DATA \"false\"\n");
+        bw.write("v_cierto: DATA 1\n");
+        bw.write("v_falso: DATA 0\n");
+        bw.write("salto_lin: DATA \"\\n\"\n");
+
+        /*
          * Tenemos en "lista_data" las posibles cadenas que se guardan a partir de una dir de memoria 
          */
         if (!lista_data.isEmpty()) {
@@ -115,15 +125,6 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         		bw.write(iterador.next());
         	}
         } // else No hay ninguna cadena en el codigo
-        
-        /*
-         * Almacenamos true y false, sí o sí
-         */
-        bw.write("ORG "+true_false+"\n");
-        bw.write("cad_cierto: DATA \"true\"\n");
-        bw.write("cad_falso: DATA \"false\"\n");
-        bw.write("v_cierto: DATA 1\n");
-        bw.write("v_falso: DATA 0\n");
 
         // Importante! sino no se guarda nada en el fichero!
         bw.close();
@@ -176,8 +177,19 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("PUT_BOOLEANO")) {	// PRINT Boolean
 		nemonico="WRSTR";
 		PutBool(ambitoterceto);
-		nemonico.substring(0, 2).equals("hola");
+	} else if (operacion.equals("PUT_CADENA")) {	// PRINT CADENA
+		nemonico="WRSTR";
+		PutCadena(ambitoterceto);
+	} else if (operacion.equals("PUT_ENTERO")) {	// PRINT ENTERO
+		nemonico="WRINT";
+		PutEntero(ambitoterceto);
+	} else if (operacion.equals("PUT_SALTO_LINEA")) {// PRINT SALTO_LINEA
+		// No es una instruccion al uso. Solo en cada cout se emite esto
+		try { bw.write("WRSTR /salto_lin\n"); }	// etiqueta ya guardada! 
+		catch (IOException e) 
+			{ System.err.println("Error: SaltoLinea"); }
 	// } else if () {PUT_BOOLEANO
+	// TODO cin
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -185,6 +197,62 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * PutEntero
+ * Imprime por pantalla un valor entero
+ */
+private void PutEntero (TablaSimbolos ambito_terceto) {
+	try {
+		// recuperamos el simbolo a imprimir
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		TablaSimbolos tabla_op_lejano = null;	// En caso de ser variable local.
+
+		if (ambito_terceto.Esta(op1)) {			// todo local!
+			bw.write(nemonico + "#-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			bw.write(nemonico + "#-"+despl_op1+"[.IY]\n");		
+		} else {
+			System.err.println("Op "+nemonico+". Caso no contemplado");			
+		}
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar PutEntero.");
+	}
+}
+
+/*
+ * PutCadena
+ * Imprime por pantalla el valor de una cadena que previamente se almaceno en un espacio de memoria
+ * y del q se sabe la direccion de comienzo, almacenada en el ambito (local-padre...)
+ * Se usa .R9
+ */
+private void PutCadena (TablaSimbolos ambito_terceto) {
+	try {
+		// recuperamos el simbolo a imprimir
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		TablaSimbolos tabla_op_lejano = null;	// En caso de ser variable local.
+
+		if (ambito_terceto.Esta(op1)) {			// todo local!
+			bw.write("MOVE #-"+simbolo_op1.GetDesplazamiento()+"[.IX],.R9\n");
+			bw.write(nemonico + " [.R9]\n");	// imprime a partir de la etiqueta
+		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			bw.write("MOVE #-"+despl_op1+"[.IY],.R9\n");
+			bw.write(nemonico + " [.R9]\n");	// imprime a partir de la etiqueta
+		} else {
+			System.err.println("Op "+nemonico+". Caso no contemplado");			
+		}
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar PutCadena.");
+	}
+}
 
 /*
  * PutBool
@@ -198,9 +266,20 @@ private void PutBool (TablaSimbolos ambito_terceto) {
 
 		if (ambito_terceto.Esta(op1)) {			// todo local!
 			bw.write("CMP #-"+simbolo_op1.GetDesplazamiento()+"[.IX], /v_cierto\n");
-			bw.write("BZ #2\n");	// Es cierto? Sí -> salto!
+			bw.write("BZ $3\n");	// Es cierto? Sí -> salto!
 			bw.write(nemonico + " /cad_falso\n");	// imprime-> "false"
-			bw.write("BR #2\n");
+			bw.write("BR $2\n");
+			bw.write(nemonico + " /cad_cierto\n");	// imprime-> "cierto"
+		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Imprimimos lacadena q representa a dicho valor
+			bw.write("CMP #-" + despl_op1 + "[.IY], /v_cierto\n");
+			bw.write("BZ $4\n");	// Es cierto? Sí -> salto!
+			bw.write(nemonico + " /cad_falso\n");	// imprime-> "false"
+			bw.write("BR $2\n");
 			bw.write(nemonico + " /cad_cierto\n");	// imprime-> "cierto"
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
@@ -311,7 +390,7 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 		lista_data.add(simbolo_op1.GetNombre()+": DATA "+ op2 + "\n");
 		// Elimino las comillas que envuelven al string
 		op2=op2.substring(1, op2.length()-1);
-		// 2- Guardo la etiqueta en el marco de pila actual
+		// 2- Guardo la direccion a la cadena en el marco de pila actual
 		bw.write("MOVE #"+ count_char +",#-" + simbolo_op1.GetDesplazamiento() + "[.IX]\n");
 		// Cuento el numero de elem del string para mover el desplazamiento
 	    // Texto que vamos a buscar
