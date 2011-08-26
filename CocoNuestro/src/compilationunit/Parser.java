@@ -106,8 +106,8 @@ public class Parser {
 	// algo distinto de void
 	public boolean hayreturn = false;
 	
-	//Otra chapucilla
-	int indice_vector = -1;
+	
+	Simbolo indice_vector = null; //Aqui almacenaremos el indice de un vector
 	
 	//Otra chapuza mas
 	Simbolo simboloObjetoGlob = null;
@@ -775,8 +775,11 @@ public class Parser {
 						SemErr("No existe el tipo especificado");
 				
 				if (la.kind == 30) {
-					Simbolo simbolo_lo_que_tiene_el_vector = new Simbolo("Estesimbolonovale", entera, var);
-					DarPosVector(simbolo_anterior, simbolo_lo_que_tiene_el_vector);
+					Get();
+					indice_vector = VExpresion();
+					Expect(37);
+					if (indice_vector.GetType()!= entera)
+					SemErr("La posicion de un vector debe ser una expresion de tipo entero");
 				}
 				if (la.kind == 28) {
 					Llamada(simbolo_anterior);
@@ -845,30 +848,55 @@ public class Parser {
 		} else SynErr(69);
 	}
 
-	void DarPosVector(Simbolo sim, Simbolo simbolo_resultado) {
-		int tipoDev; 
-		System.out.println("Estamos en DarPosVector");
-		Expect(30);
-		try
-		{ 
-		if (!(sim.Es_Vector()))
-				SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+	Simbolo  VExpresion() {
+		Simbolo  simbolo;
+		System.out.println("Entramos en la nueva version de VExpresion");
+		int type=undef;
+		simbolo = null;
+		Simbolo simbolo_temp1 = null;
+		String terceto;
+		tupla_Tercetos tupla;
+		if (la.kind == 32) {
+			simbolo = VCambio_Signo();
+		} else if (la.kind == 46) {
+			simbolo = VNegacion();
+		} else if (StartOf(6)) {
+			if (StartOf(7)) {
+				simbolo_temp1 = ValorFinalExp();
+			} else {
+				Get();
+				simbolo_temp1 = VExpresion();
+				Expect(38);
 			}
-		catch (NullPointerException e)
-			{
-			System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
-		}
-		
-		simbolo_resultado.SetType(entera);
-		tabla.InsertarEnActual(simbolo_resultado);
-		
-		Expect(2);
-		if (Integer.parseInt(t.val) >= sim.Actualiza_Tamano())
-		SemErr("Posicion fuera de rango");
-		 indice_vector = Integer.parseInt(t.val);
-		 tercetos.elemento_vector(sim.GetNombre(), Integer.parseInt(t.val), simbolo_resultado.GetNombre());
-		
-		Expect(37);
+			simbolo = simbolo_temp1;
+			if (StartOf(8)) {
+				Simbolo simbolo_temp2 = null;
+				if (la.kind == 32 || la.kind == 34) {
+					simbolo_temp2 = VExpSuma(simbolo_temp1);
+					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
+					SemErr("Error de tipos en la expresion");
+					
+					
+				} else if (la.kind == 39 || la.kind == 40) {
+					simbolo_temp2 = VExpMul(simbolo_temp1);
+					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
+					SemErr("Error de tipos en la expresion");
+					
+				} else if (la.kind == 31 || la.kind == 53) {
+					simbolo_temp2 = VExpAND(simbolo_temp1);
+					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
+					SemErr("Error de tipos en la expresion");
+					
+				} else {
+					simbolo_temp2 = VExpOR(simbolo_temp1);
+					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
+					SemErr("Error de tipos en la expresion");
+					
+				}
+				simbolo = simbolo_temp2;
+			}
+		} else SynErr(70);
+		return simbolo;
 	}
 
 	void Llamada(Simbolo simbolo_objeto) {
@@ -919,7 +947,7 @@ public class Parser {
 		} else if (StartOf(5)) {
 			InstExpresion(simbolo_metodoargumento);
 			simboloObjetoGlob = null;
-		} else SynErr(70);
+		} else SynErr(71);
 	}
 
 	void InstExpresion(Simbolo simbolo) {
@@ -927,7 +955,7 @@ public class Parser {
 		System.out.println("Entramos en InstExpresion");
 		simboloClaseObjeto = null;
 		Simbolo simbolo_resultado = null;
-		int ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
+		Simbolo ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
 		if (!(t.val.contentEquals("]")))
 				{
 		    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
@@ -939,7 +967,7 @@ public class Parser {
 			VArgumentos(simbolo, 0);
 			Expect(38);
 			Expect(42);
-		} else if (StartOf(6)) {
+		} else if (StartOf(9)) {
 			switch (la.kind) {
 			case 41: {
 				Get();
@@ -991,7 +1019,7 @@ public class Parser {
 			
 			if (simbolo.GetType() == vector)
 			{
-			String terceto = new String(tercetos.a_elemento_vector(simbolo.GetNombre(), ind_vector, simbolo_resultado.GetNombre()));
+			String terceto = new String(tercetos.meteEnArray(simbolo.GetNombre(), simbolo_resultado.GetNombre(), ind_vector.GetNombre()));
 			tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 			    colaTercetos.add(tupla_temp);
 						}
@@ -1043,58 +1071,7 @@ public class Parser {
 				
 			
 			Expect(42);
-		} else SynErr(71);
-	}
-
-	Simbolo  VExpresion() {
-		Simbolo  simbolo;
-		System.out.println("Entramos en la nueva version de VExpresion");
-		int type=undef;
-		simbolo = null;
-		Simbolo simbolo_temp1 = null;
-		String terceto;
-		tupla_Tercetos tupla;
-		if (la.kind == 32) {
-			simbolo = VCambio_Signo();
-		} else if (la.kind == 46) {
-			simbolo = VNegacion();
-		} else if (StartOf(7)) {
-			if (StartOf(8)) {
-				simbolo_temp1 = ValorFinalExp();
-			} else {
-				Get();
-				simbolo_temp1 = VExpresion();
-				Expect(38);
-			}
-			simbolo = simbolo_temp1;
-			if (StartOf(9)) {
-				Simbolo simbolo_temp2 = null;
-				if (la.kind == 32 || la.kind == 34) {
-					simbolo_temp2 = VExpSuma(simbolo_temp1);
-					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
-					SemErr("Error de tipos en la expresion");
-					
-					
-				} else if (la.kind == 39 || la.kind == 40) {
-					simbolo_temp2 = VExpMul(simbolo_temp1);
-					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
-					SemErr("Error de tipos en la expresion");
-					
-				} else if (la.kind == 31 || la.kind == 53) {
-					simbolo_temp2 = VExpAND(simbolo_temp1);
-					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
-					SemErr("Error de tipos en la expresion");
-					
-				} else {
-					simbolo_temp2 = VExpOR(simbolo_temp1);
-					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
-					SemErr("Error de tipos en la expresion");
-					
-				}
-				simbolo = simbolo_temp2;
-			}
 		} else SynErr(72);
-		return simbolo;
 	}
 
 	void VArgumentos(Simbolo simbolo, int pos) {
@@ -1330,7 +1307,7 @@ public class Parser {
 								{
 								//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 								String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
-								System.out.println(nombreatributo);
+								//System.out.println(nomdar_posbreatributo);
 								//tipoDev = simbolo_metodoatributo.GetType();//Lo mismo, aqui tendremos que emitir el simbolo correspondiente al atributo
 								simbolo_resultado=simbolo_metodoatributo;
 								//simbolo_resultado.SetType(entera);
@@ -1358,8 +1335,7 @@ public class Parser {
 						Expect(38);
 					}
 				} else {
-					DarPosVector(simbolo, simbolo_resultado);
-					simbolo_resultado.SetType(entera);
+					simbolo_resultado = DarPosVector(simbolo);
 				}
 			}
 		} else if (la.kind == 2) {
@@ -1404,6 +1380,37 @@ public class Parser {
 		return simbolo_resultado;
 	}
 
+	Simbolo  DarPosVector(Simbolo sim) {
+		Simbolo  simbolo_dentro_vector;
+		int tipoDev; 
+		System.out.println("Estamos en DarPosVector");
+		simbolo_dentro_vector = null;
+		Simbolo simbolo_ind_vector = null;
+		
+		Expect(30);
+		try
+		{ 
+		if (!(sim.Es_Vector()))
+				SemErr(sim.GetNombre() + " definido en la linea " + sim.GetLine() + " columna " + sim.GetColumn() + " no es un vector");
+			}
+		catch (NullPointerException e)
+			{
+			System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
+		}
+		
+		simbolo_ind_vector = VExpresion();
+		if (simbolo_ind_vector.GetType() != entera)
+			SemErr("El indice de un vector debe ser una expresion entera");
+		 								  simbolo_dentro_vector = new Simbolo(tercetos.darTemporal(), entera, var);
+		tabla.InsertarEnActual(simbolo_dentro_vector);
+		String terceto = new String(tercetos.sacaDeArray(sim.GetNombre(), simbolo_dentro_vector.GetNombre(), simbolo_ind_vector.GetNombre()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
+		
+		Expect(37);
+		return simbolo_dentro_vector;
+	}
+
 	Simbolo  VCambio_Signo() {
 		Simbolo  simbolo_resultado;
 		System.out.println("Entramos VCambio_Signo");
@@ -1415,7 +1422,7 @@ public class Parser {
 		if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
 				SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");
 		Expect(32);
-		if (StartOf(8)) {
+		if (StartOf(7)) {
 			simbolo_temp1 = ValorFinalExp();
 			if (simbolo_temp1.GetType() != entera)
 			SemErr("Error de tipos en la expresion");
@@ -1481,7 +1488,7 @@ public class Parser {
 		Simbolo simbolo_temp2 = null;
 		simbolo = null;
 		Expect(46);
-		if (StartOf(8)) {
+		if (StartOf(7)) {
 			simbolo_temp = ValorFinalExp();
 			if (simbolo_temp.GetType() != bool)
 			SemErr("El operador de negacion solo se puede utilizar con booleanos");
@@ -1558,7 +1565,7 @@ public class Parser {
 			Get();
 			operador = new String ("DIV");
 		} else SynErr(79);
-		if (StartOf(8)) {
+		if (StartOf(7)) {
 			simbolo_temp1 = ValorFinalExp();
 			Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var);
 			tabla.InsertarEnActual(simbolo_temp2);
@@ -1725,10 +1732,10 @@ public class Parser {
 		{x,T,x,x, T,T,T,x, x,T,x,x, x,x,T,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
@@ -1825,9 +1832,9 @@ class Errors {
 			case 67: s = "invalid Cuerpo"; break;
 			case 68: s = "invalid Cuerpo"; break;
 			case 69: s = "invalid Instruccion"; break;
-			case 70: s = "invalid Llamada"; break;
-			case 71: s = "invalid InstExpresion"; break;
-			case 72: s = "invalid VExpresion"; break;
+			case 70: s = "invalid VExpresion"; break;
+			case 71: s = "invalid Llamada"; break;
+			case 72: s = "invalid InstExpresion"; break;
 			case 73: s = "invalid InstIfElse"; break;
 			case 74: s = "invalid Else"; break;
 			case 75: s = "invalid ValorFinalExp"; break;

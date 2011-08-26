@@ -106,16 +106,16 @@ public class Tercetos{
         return "AARRAYIND,"+op1+","+nombre+","+indice+"\n";
     }
     
-    public String meteEnArray(String op1,String nombre,int num){
-
-        return "EN_ARRAY,"+op1+","+nombre+","+num+"\n";
-    }
     
-    public String meteEnArray(String op1,String nombre,String num){
+    public String meteEnArray(String array,String nombre,String num){
 
-        return "EN_ARRAY,"+op1+","+nombre+","+num+"\n";
+        return "METE_EN_ARRAY,"+array+","+nombre+","+num+"\n";
     }
 
+    public String sacaDeArray(String array,String nombre,String num){
+
+        return "SACA_DE_ARRAY,"+array+","+nombre+","+num+"\n";
+    }
     // mete en el terceto la llamada a una funcion
 
 //    public String funcion_en_terceto (String nombre, int num_par, String parametros [], String etiqueta){

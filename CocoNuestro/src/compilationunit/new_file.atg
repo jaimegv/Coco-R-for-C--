@@ -36,8 +36,8 @@ COMPILER CEMASMAS1
 	// algo distinto de void
 	public boolean hayreturn = false;
 	
-	//Otra chapucilla
-	int indice_vector = -1;
+	
+	Simbolo indice_vector = null; //Aqui almacenaremos el indice de un vector
 	
 	//Otra chapuza mas
 	Simbolo simboloObjetoGlob = null;
@@ -515,10 +515,11 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 										else if (la.val.contentEquals("["))
 												SemErr("No existe el tipo especificado");
 									 .)
-									 [(.Simbolo simbolo_lo_que_tiene_el_vector = new Simbolo("Estesimbolonovale", entera, var);.)
-									 DarPosVector<simbolo_anterior, simbolo_lo_que_tiene_el_vector>]
-											 	)
-									 
+									 [ 
+									 corchete_ab VExpresion<out indice_vector> corchete_ce
+									 (.if (indice_vector.GetType()!= entera)
+									 		SemErr("La posicion de un vector debe ser una expresion de tipo entero");.)
+									 ])
 									 
 									 
 									 (Llamada<simbolo_anterior> 
@@ -776,7 +777,7 @@ InstExpresion <Simbolo simbolo>
 	   System.out.println("Entramos en InstExpresion");
 	   simboloClaseObjeto = null;
 	   Simbolo simbolo_resultado = null;
-	   int ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
+	   Simbolo ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
 	   if (!(t.val.contentEquals("]")))
 	   		{
 	  	    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
@@ -813,7 +814,7 @@ InstExpresion <Simbolo simbolo>
 														(.
 														if (simbolo.GetType() == vector)
 															{
-															String terceto = new String(tercetos.a_elemento_vector(simbolo.GetNombre(), ind_vector, simbolo_resultado.GetNombre()));
+															String terceto = new String(tercetos.meteEnArray(simbolo.GetNombre(), simbolo_resultado.GetNombre(), ind_vector.GetNombre()));
 															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 											 			    colaTercetos.add(tupla_temp);
 			   												}
@@ -982,8 +983,11 @@ Arg_io<out Simbolo simbolo>
 
 
 
-DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
-		= (.System.out.println("Estamos en DarPosVector");.)
+DarPosVector <out Simbolo simbolo_dentro_vector, Simbolo sim> (.int tipoDev; .)
+		= (.System.out.println("Estamos en DarPosVector");
+			simbolo_dentro_vector = null;
+			Simbolo simbolo_ind_vector = null;
+			.)
 			corchete_ab (.try
 							{ 
 							if (!(sim.Es_Vector()))
@@ -994,15 +998,16 @@ DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
 			 				System.out.println("Se le ha pasado un simbolo nulo a DarPosVector");
 							}
 			 			.)
-			 			(.
-			 			simbolo_resultado.SetType(entera);
-			 			tabla.InsertarEnActual(simbolo_resultado);
-			 			.)
- 						enteros (. 
- 								 if (Integer.parseInt(t.val) >= sim.Actualiza_Tamano())
- 								 	SemErr("Posicion fuera de rango");
-							   	 indice_vector = Integer.parseInt(t.val);
-							   	 tercetos.elemento_vector(sim.GetNombre(), Integer.parseInt(t.val), simbolo_resultado.GetNombre());
+ 						VExpresion<out simbolo_ind_vector> 
+ 								(. 
+ 								  if (simbolo_ind_vector.GetType() != entera)
+ 								  		SemErr("El indice de un vector debe ser una expresion entera");
+ 								  
+ 								  simbolo_dentro_vector = new Simbolo(tercetos.darTemporal(), entera, var);
+ 								  tabla.InsertarEnActual(simbolo_dentro_vector);
+ 								  String terceto = new String(tercetos.sacaDeArray(sim.GetNombre(), simbolo_dentro_vector.GetNombre(), simbolo_ind_vector.GetNombre()));
+ 								  tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+ 								  colaTercetos.add(tupla);
 								.)	 
  		corchete_ce
 .
@@ -1369,7 +1374,7 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 				 				{
 	 				 				//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
 	 				 				String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
-	 				 				System.out.println(nombreatributo);
+	 				 				//System.out.println(nomdar_posbreatributo);
 	 				 				//tipoDev = simbolo_metodoatributo.GetType();//Lo mismo, aqui tendremos que emitir el simbolo correspondiente al atributo
 	 				 				simbolo_resultado=simbolo_metodoatributo;
 	 				 				//simbolo_resultado.SetType(entera);
@@ -1393,8 +1398,7 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 		  			  .)
 	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
-	 							   | (DarPosVector<simbolo, simbolo_resultado>) (.//tipoDev=entera;
-	 							   							   simbolo_resultado.SetType(entera);.))]
+	 							   |(DarPosVector<out simbolo_resultado, simbolo>))]
   
 
   | enteros (. simbolo_resultado = new Simbolo (tercetos.darTemporal(), entera, var);
