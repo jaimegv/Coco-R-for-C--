@@ -966,6 +966,7 @@ public class Parser {
 				break;
 			}
 			}
+			String operador = new String (t.val);
 			simbolo_resultado = VExpresion();
 			try
 			{
@@ -1002,11 +1003,44 @@ public class Parser {
 						}
 					else
 						{
-			String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));
-			tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-			    colaTercetos.add(tupla_temp);	
+						if (operador.contentEquals("="))
+							{
+				String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));
+				tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			    	colaTercetos.add(tupla_temp);	
+							}
+						else 
+							{
+							if ((simbolo_resultado.GetType() != entera) || (simbolo.GetType() != entera))
+								SemErr("El operador de asignacion con operacion solo se puede usar con numeros enteros");
+							else if (operador.contentEquals("+="))
+								{
+								String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "SUMA", simbolo.GetNombre()));
+								tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			    		colaTercetos.add(tupla_temp);
+								}
+							else if (operador.contentEquals("-="))
+								{
+								String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "RESTA", simbolo.GetNombre()));
+								tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			    		colaTercetos.add(tupla_temp);
+								}
+							else if (operador.contentEquals("*="))
+								{
+								String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "MUL", simbolo.GetNombre()));
+								tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			    		colaTercetos.add(tupla_temp);
+								}
+							else if (operador.contentEquals("/="))
+								{
+								String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "DIV", simbolo.GetNombre()));
+								tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			    		colaTercetos.add(tupla_temp);
+								}
+							}
+						
 						}
-			
+				
 			
 			Expect(42);
 		} else SynErr(71);

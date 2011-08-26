@@ -787,6 +787,7 @@ InstExpresion <Simbolo simbolo>
 				| 	//(. if .)
 					(op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo)
+													(. String operador = new String (t.val);.)
 													VExpresion<out simbolo_resultado>
 													(. try
 															{
@@ -824,10 +825,44 @@ InstExpresion <Simbolo simbolo>
 			   												}
 			   											else
 			   												{
-															String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));
-															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-											 			    colaTercetos.add(tupla_temp);	
+			   												if (operador.contentEquals("="))
+			   													{
+																String terceto = new String(tercetos.asignacion(simbolo.GetNombre(), simbolo_resultado.GetNombre()));
+																tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    	colaTercetos.add(tupla_temp);	
+			   													}
+			   												else 
+			   													{
+			   													if ((simbolo_resultado.GetType() != entera) || (simbolo.GetType() != entera))
+			   														SemErr("El operador de asignacion con operacion solo se puede usar con numeros enteros");
+			   													else if (operador.contentEquals("+="))
+			   														{
+			   														String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "SUMA", simbolo.GetNombre()));
+			   														tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    		colaTercetos.add(tupla_temp);
+			   														}
+			   													else if (operador.contentEquals("-="))
+			   														{
+			   														String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "RESTA", simbolo.GetNombre()));
+			   														tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    		colaTercetos.add(tupla_temp);
+			   														}
+			   													else if (operador.contentEquals("*="))
+			   														{
+			   														String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "MUL", simbolo.GetNombre()));
+			   														tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    		colaTercetos.add(tupla_temp);
+			   														}
+			   													else if (operador.contentEquals("/="))
+			   														{
+			   														String terceto = new String(tercetos.operacionBinaria(simbolo.GetNombre(), simbolo_resultado.GetNombre(), "DIV", simbolo.GetNombre()));
+			   														tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+											 			    		colaTercetos.add(tupla_temp);
+			   														}
+			   													}
+			   												
 			   												}
+
 															
 														.)
 														puntoComa)
