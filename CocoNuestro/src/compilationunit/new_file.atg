@@ -892,33 +892,51 @@ InstIfElse <Simbolo simbolo_funcion>
 (. int type, type1;
 	Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 	Simbolo simbolo_temp = null;
+	String etiqueta_else = null;
+	String etiqueta_final = null;
+	String terceto = null;
+	tupla_Tercetos tupla = null;
 .) 
-=
-		iff VExpresion<out simbolo_temp> (.if (simbolo_temp.GetType() != bool) {SemErr("La condicion de un if debe ser logica");}
-								  simbolo = new Simbolo ("IF", 0, 0);.) 
-	((llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) 
+= (. etiqueta_else = new String(tercetos.darEtiqueta());
+	 etiqueta_final = new String(tercetos.darEtiqueta()); .)
+		iff VExpresion<out simbolo_temp> (.if (simbolo_temp.GetType() != bool) 
+												{
+												SemErr("La condicion de un if debe ser logica");
+												}
+								  		   simbolo = new Simbolo (tercetos.darTemporal(), 0, 0);
+								  		   
+								  		   terceto = new String (tercetos.saltoCondicional(simbolo_temp.GetNombre(), etiqueta_else));
+								  		   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+								  		   colaTercetos.add(tupla);
+								  		   
+								  		 .)
+								  		    
+	(llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();
+																		   terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
+								  		   								   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+								  		   								   colaTercetos.add(tupla);	
+																		.) llave_ce) 
 	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
-	| Instruccion<simbolo_funcion> | ident (.
-									 if (!(tabla.EstaRecur(t.val)))
-									 	{
-									 	SemErr(t.val + " no ha sido declarado previamente");
-									 	}
-									 else
-									 	{
-									 	simbolo = tabla.GetSimboloRecur(t.val);
-										}
-						.)
-						InstExpresion <simbolo>
-	) 
+	 	
+	(.
+	terceto = new String(tercetos.InsertarEtiqueta(etiqueta_else));
+	tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	colaTercetos.add(tupla);
+	.)
 		 [Else <simbolo_funcion>]
+		 
+	(.
+	terceto = new String(tercetos.InsertarEtiqueta(etiqueta_final));
+	tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	colaTercetos.add(tupla);
+	.)
 .
 
 Else<Simbolo simbolo_funcion>	(. int type;
-	Simbolo sim = new Simbolo("ELSE", 0, 0);	// borrarcuando corrigas
+	Simbolo sim = new Simbolo(tercetos.darTemporal(), 0, 0);	// borrarcuando corrigas
 .) 
 =
-	elsse ((llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) 
-			| Instruccion<simbolo_funcion>) .
+	elsse (llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) .
 
 /***************************************************/
 
