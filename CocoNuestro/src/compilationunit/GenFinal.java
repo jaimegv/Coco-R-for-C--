@@ -18,9 +18,10 @@ public class GenFinal {
     int num_param_actual = 0;
     int c_etiqueta;
     LinkedList<String> lista_data = new LinkedList();
-    int lista_ini=3000;	// comienzo en memoria de la lista_data 
+    int lista_ini=12000;	// comienzo en memoria de la lista_data
     int count_char=lista_ini;	// Numero de characters emitidos en lista data
-	String nemonico = new String();
+    int true_false = lista_ini - 200;	// En esta direccion se guarda cadena "true" y "false" y valor 1 y 0
+	String nemonico = new String();		
     
 
 
@@ -114,6 +115,15 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         		bw.write(iterador.next());
         	}
         } // else No hay ninguna cadena en el codigo
+        
+        /*
+         * Almacenamos true y false, sí o sí
+         */
+        bw.write("ORG "+true_false+"\n");
+        bw.write("cad_cierto: DATA \"true\"\n");
+        bw.write("cad_falso: DATA \"false\"\n");
+        bw.write("v_cierto: DATA 1\n");
+        bw.write("v_falso: DATA 0\n");
 
         // Importante! sino no se guarda nada en el fichero!
         bw.close();
@@ -158,15 +168,16 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		nemonico = "OR";
 		OpBinaria(ambitoterceto);
 	} else if (operacion.equals("AND")) {		// AND lógico
-		// TODO Error prioridades.
 		nemonico = "AND";
 		OpBinaria(ambitoterceto);
 	} else if (operacion.equals("NEG_LOG")) {	// NOT lógico
-		// TODO comprobrar
-		// Recuerda en opUnaria op2 siempre es 1
 		nemonico = "XOR";
-		OpUnaria(ambitoterceto);
-	// } else if () {
+		OpUnaria(ambitoterceto);	// opUnaria op2=1
+	} else if (operacion.equals("PUT_BOOLEANO")) {	// PRINT Boolean
+		nemonico="WRSTR";
+		PutBool(ambitoterceto);
+		nemonico.substring(0, 2).equals("hola");
+	// } else if () {PUT_BOOLEANO
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -174,6 +185,30 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * PutBool
+ * Imprime por pantalla la secuencia de String: true o false. Dependiendo del valor op1
+ */
+private void PutBool (TablaSimbolos ambito_terceto) {
+	try {
+		// recuperamos el simbolo a imprimir
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		TablaSimbolos tabla_op_lejano = null;	// En caso de ser variable local.
+
+		if (ambito_terceto.Esta(op1)) {			// todo local!
+			bw.write("CMP #-"+simbolo_op1.GetDesplazamiento()+"[.IX], /v_cierto\n");
+			bw.write("BZ #2\n");	// Es cierto? Sí -> salto!
+			bw.write(nemonico + " /cad_falso\n");	// imprime-> "false"
+			bw.write("BR #2\n");
+			bw.write(nemonico + " /cad_cierto\n");	// imprime-> "cierto"
+		} else {
+			System.err.println("Op "+nemonico+". Caso no contemplado");			
+		}
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar PutBool.");
+	}
+}
 
 /*
  * OpUnaria
@@ -202,7 +237,6 @@ private void OpUnaria (TablaSimbolos ambito_terceto) {
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
 		}
-		
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar OpUnaria.");
 	}
