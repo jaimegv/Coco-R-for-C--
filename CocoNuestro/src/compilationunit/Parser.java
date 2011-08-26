@@ -778,8 +778,12 @@ public class Parser {
 					Get();
 					indice_vector = VExpresion();
 					Expect(37);
+					if (indice_vector != null)
+					{
 					if (indice_vector.GetType()!= entera)
-					SemErr("La posicion de un vector debe ser una expresion de tipo entero");
+						SemErr("La posicion de un vector debe ser una expresion de tipo entero");
+					}
+					
 				}
 				if (la.kind == 28) {
 					Llamada(simbolo_anterior);
@@ -1019,9 +1023,12 @@ public class Parser {
 			
 			if (simbolo.GetType() == vector)
 			{
-			String terceto = new String(tercetos.meteEnArray(simbolo.GetNombre(), simbolo_resultado.GetNombre(), ind_vector.GetNombre()));
-			tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-			    colaTercetos.add(tupla_temp);
+			if (ind_vector != null)
+				{
+				String terceto = new String(tercetos.meteEnArray(simbolo.GetNombre(), simbolo_resultado.GetNombre(), ind_vector.GetNombre()));
+				tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				    colaTercetos.add(tupla_temp);
+				    }
 						}
 					else if (simboloObjetoGlob != null) //En este caso sera en el que estemos ante un atributo de un objeto
 						{
