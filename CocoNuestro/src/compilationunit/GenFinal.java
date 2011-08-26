@@ -139,6 +139,7 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	// Obtenemos los dos valores de la tupla
 	String terceto_actual= tupla_actual.GetTerceto();	// Almacenara el String emitido por el GCI
 	TablaSimbolos ambitoterceto = tupla_actual.GetAmbitoActual();
+
 	
 	// Separamos los operando del terceto. operador, op1, op2...
 	this.separar(terceto_actual);
@@ -665,9 +666,11 @@ private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto
 		bw.write("MOVE .IX, .IY\n");	// Nos moveremos sobre este registro
 		TablaSimbolos ambito_simbolo = ambito_terceto;	// Variable para moverme por tablas
 		// op1 SI LOCAL. op2 NO LOCAL
+		
 		while (!ambito_simbolo.Esta(Nombre)) {
+			System.out.println("Simbolo con nombre:"+Nombre);
 			bw.write("MOVE #2[.IY],.IY\n");
-			ambito_simbolo = ambito_terceto.Ambito_Padre();	// esta en el padre?
+			ambito_simbolo = ambito_simbolo.Ambito_Padre();	// esta en el padre?
 		}
 		return ambito_simbolo;
 	} catch (Exception e) {
@@ -702,7 +705,7 @@ private void daInformacion (String operando, TablaSimbolos ambito_terceto) {
 		System.out.println("Nombre: "+simbolito.GetNombre());
 		System.out.println("Etiqueta: "+simbolito.GetEtiqueta());
 	} catch (Exception e) {
-		System.err.println("Fallor en impresion de informacion de un operando.");
+		System.err.println("Fallo en impresion de informacion de un operando.");
 	}
 }
     
