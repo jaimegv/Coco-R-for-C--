@@ -151,6 +151,10 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
 	} else if (operacion.equals("ASIGNA")){				// asignamos a un temp el valor de otro tmp
 		EjecutarAsigna(op1, op2, ambitoterceto);
+	} else if (operacion.equals("METE_EN_ARRAY")) {		// Asignar valor en posicion del vector
+		// TODO
+		// METE_EN_ARRAY,caracola,temporal2,temporal1
+		AsignaValorVector(ambitoterceto);				// pe: v[2]=23
 	} else if (operacion.equals("SUMA")) {		// Suma
 		nemonico = "ADD";
 		OpBinaria(ambitoterceto);
@@ -198,6 +202,45 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 
 //***********************************************************************************************
 
+
+/*
+ * AsignaValorVector
+ * Asignamos un valor a una posicion-indice del vector
+ * uso de .R9 y .R8
+ */
+private void AsignaValorVector (TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_vector = ambito_terceto.GetSimbolo(op1);	// Simbolo del Vector
+		Simbolo simbolo_valor = ambito_terceto.GetSimbolo(op2);	// Simbolo del valor a meter en el vector
+		Simbolo simbolo_indice= ambito_terceto.GetSimbolo(op3);	// Simbolo del indice del vector
+		TablaSimbolos tabla_op_lejano = null;
+		
+		// TODO : Comprobrar que el indice no es mayor-menor al tamaño del vector
+
+		// Tenemos tres simbolos a dos posibilidades cada uno de estar o no en el ambito local -> 2 * 2 * 2 = 8 posibilidades
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2) && ambito_terceto.Esta(op3)) {	// todo local!
+			bw.write("MOVE #-"+simbolo_indice.GetDesplazamiento()+"[.IX],.R9\n");	// R9=valor del indice
+			bw.write("ADD #-"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("SUB .IX, .A\n");
+			bw.write("MOVE .A, .IY\n");	// R8 = Desplzamiento total hasta elemento del vector
+			bw.write("MOVE #-"+simbolo_valor.GetDesplazamiento()+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
+		} else if ((!ambito_terceto.Esta(op1)) && ambito_terceto.Esta(op2) && ambito_terceto.Esta(op3))	{	//solo op1 No local
+		} else if (ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && ambito_terceto.Esta(op3))	{	//solo op2 No local
+		} else if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2) && (!ambito_terceto.Esta(op3)))	{	//solo op3 No local
+		} else if ((!ambito_terceto.Esta(op1)) && (!ambito_terceto.Esta(op2)) && ambito_terceto.Esta(op3))	{	//op1 y op2 No local
+		} else if ((!ambito_terceto.Esta(op1)) && ambito_terceto.Esta(op2) && (!ambito_terceto.Esta(op3)))	{	//op1 y op3 No local
+		} else if (ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && (!ambito_terceto.Esta(op3)))	{	//op2 y op3 No local
+		} else if (!ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && (!ambito_terceto.Esta(op3))) {	// NADA LOCAL!
+		} else {
+			System.err.println("Ejecutar Asigna. Caso no contemplado");
+		}
+		
+		
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar AsignaValorVector.");
+	}
+}
+
 /*
  * GetEntero
  * Captura por consola una ristra de caracteres que luego convertira a entero y colocara en op1
@@ -209,9 +252,14 @@ private void GetEntero (TablaSimbolos ambito_terceto) {
 		TablaSimbolos tabla_op_lejano = null;	// En caso de ser variable local.
 
 		if (ambito_terceto.Esta(op1)) {			// todo local!
-			bw.write("ININT #-"+simbolo_op1.GetDesplazamiento() + "[.IX]\n");
+			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento() + "[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
 			// TODO
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			bw.write(nemonico + "#-"+despl_op1+"[.IY]\n");	
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
 		}
