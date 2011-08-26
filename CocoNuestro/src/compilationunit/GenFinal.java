@@ -84,15 +84,13 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
          * Bucle para imprimir toda la cola de tercetos!
          */
         System.out.println("-----------------------------------");
-        System.out.println("Elementos de la lista "+colaTercetos);
-        System.out.println("Tamano de la lista:"+colaTercetos.size());
+        //System.out.println("Tamano de la lista:"+colaTercetos.size());
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
         tupla_Tercetos tupla_temp;
         while (it.hasNext()) {
             //this.separar(it.next().GetTerceto());
         	tupla_actual = it.next();
             System.out.println("Terceto: "+tupla_actual.GetTerceto());
-            System.out.println("Desplazamiento de la tabla para temp:"+tupla_actual.GetAmbitoActual().GetDesplazamiento());
             //System.out.println("Ambito_actual: "+it.next().GetAmbitoActual());
             ProcesarTerceto(tupla_actual, tabla);
         }
@@ -174,6 +172,9 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("NEG_LOG")) {	// NOT lógico
 		nemonico = "XOR";
 		OpUnaria(ambitoterceto);	// opUnaria op2=1
+	} else if (operacion.equals("READ")) {		// CIN
+		nemonico = "ININT";
+		GetEntero(ambitoterceto);
 	} else if (operacion.equals("PUT_BOOLEANO")) {	// PRINT Boolean
 		nemonico="WRSTR";
 		PutBool(ambitoterceto);
@@ -189,7 +190,6 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		catch (IOException e) 
 			{ System.err.println("Error: SaltoLinea"); }
 	// } else if () {PUT_BOOLEANO
-	// TODO cin
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
@@ -197,6 +197,28 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * GetEntero
+ * Captura por consola una ristra de caracteres que luego convertira a entero y colocara en op1
+ */
+private void GetEntero (TablaSimbolos ambito_terceto) {
+	try {
+		// recuperamos el simbolo a imprimir
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		TablaSimbolos tabla_op_lejano = null;	// En caso de ser variable local.
+
+		if (ambito_terceto.Esta(op1)) {			// todo local!
+			bw.write("ININT #-"+simbolo_op1.GetDesplazamiento() + "[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
+			// TODO
+		} else {
+			System.err.println("Op "+nemonico+". Caso no contemplado");			
+		}
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar PutEntero.");
+	}
+}
 
 /*
  * PutEntero
