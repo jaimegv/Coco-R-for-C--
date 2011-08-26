@@ -1050,8 +1050,6 @@ public class Parser {
 					simbolo_temp2 = VExpAND(simbolo_temp1);
 					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 					SemErr("Error de tipos en la expresion");
-					else
-						System.out.println(simbolo_temp2.GetNombre() + "EOEOEOEOEOEOEOEOOEOEOEOOEOEOEOEEO");
 					
 				} else {
 					simbolo_temp2 = VExpOR(simbolo_temp1);
@@ -1158,7 +1156,16 @@ public class Parser {
 		Simbolo simbolo = null; 
 		Expect(20);
 		Expect(22);
-		simbolo = Arg_io();
+		simbolo = ValorFinalExp();
+		String verificacion_temporal = new String(simbolo.GetNombre().substring(0,8));
+		if (verificacion_temporal.contentEquals("temporal"))
+			SemErr("El argumento de la expresion CIN debe ser una variable declarada previamente");
+		else
+			{
+			String terceto = new String(tercetos.readExpresion(simbolo.GetNombre()));
+			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			colaTercetos.add(tupla);
+			}
 		Expect(42);
 	}
 
@@ -1217,119 +1224,6 @@ public class Parser {
 		Simbolo  simbolo;
 		simbolo = null; 
 		simbolo = VExpresion();
-		return simbolo;
-	}
-
-	Simbolo  VCambio_Signo() {
-		Simbolo  simbolo_resultado;
-		System.out.println("Entramos VCambio_Signo");
-		boolean cambio_signo_simple = true; //Esto indicara si la operacion ha terminado o sigue con mas expresiones
-		Simbolo simbolo_temp1 = null; //Aqui se almacenara VExpFinal
-		simbolo_resultado = null;
-		
-		
-		if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
-				SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");
-		Expect(32);
-		if (StartOf(8)) {
-			simbolo_temp1 = ValorFinalExp();
-			if (simbolo_temp1.GetType() != entera)
-			SemErr("Error de tipos en la expresion");
-			//Ahora vamos a hacer que t2 = -1
-			 Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
-			 String terceto;
-			  terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
-			  tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			  colaTercetos.add(tupla);
-			 tabla.InsertarEnActual(simbolo_temp2);
-			//t2 = -1 hecho
-			//Ahora hay que emitir t3 = t1xt2 
-			 Simbolo simbolo_temp3 = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
-			  terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_temp3.GetNombre())); //t3 = t1 * t2
-			  tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			  colaTercetos.add(tupla);
-			  tabla.InsertarEnActual(simbolo_temp3);
-			  
-			  simbolo_resultado = simbolo_temp3;
-			   
-			
-			if (StartOf(11)) {
-				Simbolo simbolo_temp4 = null;
-				if (la.kind == 32 || la.kind == 34) {
-					simbolo_temp4 = VExpSuma(simbolo_temp3);
-				} else {
-					simbolo_temp4 = VExpMul(simbolo_temp3);
-				}
-				simbolo_resultado = simbolo_temp4;
-				if ((simbolo_temp3.GetType() != entera) || (simbolo_temp4.GetType() != entera))
-				SemErr("Error de tipos en la expresion");
-														
-																 	
-			}
-		} else if (la.kind == 31) {
-			Get();
-			simbolo_temp1 = VExpresion();
-			Expect(38);
-			if (simbolo_temp1.GetType() != entera)
-			SemErr("VCambio_Signo: Error de tipos en la expresion");
-			  Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
-			  String terceto;
-			   terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
-			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			   colaTercetos.add(tupla);
-			  tabla.InsertarEnActual(simbolo_temp2);
-			 //t2 = -1 hecho
-			 //Ahora hay que emitir t3 = t1xt2 
-			  simbolo_resultado = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
-			   terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_resultado.GetNombre())); //t3 = t1 * t2
-			   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-			   colaTercetos.add(tupla);
-			   tabla.InsertarEnActual(simbolo_resultado);
-										   		
-		} else SynErr(75);
-		return simbolo_resultado;
-	}
-
-	Simbolo  VNegacion() {
-		Simbolo  simbolo;
-		System.out.println("Entramos VNegacion");
-		Simbolo simbolo_temp = null;
-		Simbolo simbolo_temp2 = null;
-		simbolo = null;
-		Expect(46);
-		if (StartOf(8)) {
-			simbolo_temp = ValorFinalExp();
-			if (simbolo_temp.GetType() != bool)
-			SemErr("El operador de negacion solo se puede utilizar con booleanos");
-			simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
-			tabla.InsertarEnActual(simbolo_temp2);
-			String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
-			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-			colaTercetos.add(tupla);
-			simbolo = simbolo_temp2;
-			
-			if (la.kind == 31 || la.kind == 53 || la.kind == 54) {
-				if (la.kind == 31 || la.kind == 53) {
-					simbolo = VExpAND(simbolo_temp2);
-				} else {
-					simbolo = VExpOR(simbolo_temp2);
-				}
-			}
-			if ((simbolo.GetType() != bool) || (simbolo_temp2.GetType() != bool))
-			SemErr("Error de tipos en la expresion");
-		} else if (la.kind == 31) {
-			Get();
-			simbolo_temp = VExpresion();
-			Expect(38);
-			if (simbolo_temp.GetType() != bool)
-			SemErr("VNegacion: Error de tipos en la expresion");
-			simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
-			tabla.InsertarEnActual(simbolo_temp2);
-			String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
-			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-			colaTercetos.add(tupla);
-			simbolo = simbolo_temp2;
-		} else SynErr(76);
 		return simbolo;
 	}
 
@@ -1472,8 +1366,121 @@ public class Parser {
 			 	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			 	 colaTercetos.add(tupla);
 			 	 tabla.InsertarEnActual(simbolo_resultado);
-		} else SynErr(77);
+		} else SynErr(75);
 		return simbolo_resultado;
+	}
+
+	Simbolo  VCambio_Signo() {
+		Simbolo  simbolo_resultado;
+		System.out.println("Entramos VCambio_Signo");
+		boolean cambio_signo_simple = true; //Esto indicara si la operacion ha terminado o sigue con mas expresiones
+		Simbolo simbolo_temp1 = null; //Aqui se almacenara VExpFinal
+		simbolo_resultado = null;
+		
+		
+		if (t.val.contentEquals("+") || t.val.contentEquals("-") || t.val.contentEquals("/") ||t.val.contentEquals("*"))
+				SemErr("No esta permitido poner dos operandos seguidos. Sugerencia: defina mediante parentesis las expresiones");
+		Expect(32);
+		if (StartOf(8)) {
+			simbolo_temp1 = ValorFinalExp();
+			if (simbolo_temp1.GetType() != entera)
+			SemErr("Error de tipos en la expresion");
+			//Ahora vamos a hacer que t2 = -1
+			 Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
+			 String terceto;
+			  terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
+			  tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			  colaTercetos.add(tupla);
+			 tabla.InsertarEnActual(simbolo_temp2);
+			//t2 = -1 hecho
+			//Ahora hay que emitir t3 = t1xt2 
+			 Simbolo simbolo_temp3 = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
+			  terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_temp3.GetNombre())); //t3 = t1 * t2
+			  tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			  colaTercetos.add(tupla);
+			  tabla.InsertarEnActual(simbolo_temp3);
+			  
+			  simbolo_resultado = simbolo_temp3;
+			   
+			
+			if (StartOf(11)) {
+				Simbolo simbolo_temp4 = null;
+				if (la.kind == 32 || la.kind == 34) {
+					simbolo_temp4 = VExpSuma(simbolo_temp3);
+				} else {
+					simbolo_temp4 = VExpMul(simbolo_temp3);
+				}
+				simbolo_resultado = simbolo_temp4;
+				if ((simbolo_temp3.GetType() != entera) || (simbolo_temp4.GetType() != entera))
+				SemErr("Error de tipos en la expresion");
+														
+																 	
+			}
+		} else if (la.kind == 31) {
+			Get();
+			simbolo_temp1 = VExpresion();
+			Expect(38);
+			if (simbolo_temp1.GetType() != entera)
+			SemErr("VCambio_Signo: Error de tipos en la expresion");
+			  Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var); //Aqui almacenaremos t2
+			  String terceto;
+			   terceto =new String (tercetos.asignacion_valor(simbolo_temp2.GetNombre(), -1));
+			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			   colaTercetos.add(tupla);
+			  tabla.InsertarEnActual(simbolo_temp2);
+			 //t2 = -1 hecho
+			 //Ahora hay que emitir t3 = t1xt2 
+			  simbolo_resultado = new Simbolo(tercetos.darTemporal(),entera,var); //TEMP3 t1xt2
+			   terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(),simbolo_temp2.GetNombre(),"MUL",simbolo_resultado.GetNombre())); //t3 = t1 * t2
+			   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+			   colaTercetos.add(tupla);
+			   tabla.InsertarEnActual(simbolo_resultado);
+										   		
+		} else SynErr(76);
+		return simbolo_resultado;
+	}
+
+	Simbolo  VNegacion() {
+		Simbolo  simbolo;
+		System.out.println("Entramos VNegacion");
+		Simbolo simbolo_temp = null;
+		Simbolo simbolo_temp2 = null;
+		simbolo = null;
+		Expect(46);
+		if (StartOf(8)) {
+			simbolo_temp = ValorFinalExp();
+			if (simbolo_temp.GetType() != bool)
+			SemErr("El operador de negacion solo se puede utilizar con booleanos");
+			simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
+			tabla.InsertarEnActual(simbolo_temp2);
+			String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
+			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			colaTercetos.add(tupla);
+			simbolo = simbolo_temp2;
+			
+			if (la.kind == 31 || la.kind == 53 || la.kind == 54) {
+				if (la.kind == 31 || la.kind == 53) {
+					simbolo = VExpAND(simbolo_temp2);
+				} else {
+					simbolo = VExpOR(simbolo_temp2);
+				}
+			}
+			if ((simbolo.GetType() != bool) || (simbolo_temp2.GetType() != bool))
+			SemErr("Error de tipos en la expresion");
+		} else if (la.kind == 31) {
+			Get();
+			simbolo_temp = VExpresion();
+			Expect(38);
+			if (simbolo_temp.GetType() != bool)
+			SemErr("VNegacion: Error de tipos en la expresion");
+			simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
+			tabla.InsertarEnActual(simbolo_temp2);
+			String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
+			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			colaTercetos.add(tupla);
+			simbolo = simbolo_temp2;
+		} else SynErr(77);
+		return simbolo;
 	}
 
 	Simbolo  VExpSuma(Simbolo simbolo_exp_anterior) {
@@ -1789,9 +1796,9 @@ class Errors {
 			case 72: s = "invalid VExpresion"; break;
 			case 73: s = "invalid InstIfElse"; break;
 			case 74: s = "invalid Else"; break;
-			case 75: s = "invalid VCambio_Signo"; break;
-			case 76: s = "invalid VNegacion"; break;
-			case 77: s = "invalid ValorFinalExp"; break;
+			case 75: s = "invalid ValorFinalExp"; break;
+			case 76: s = "invalid VCambio_Signo"; break;
+			case 77: s = "invalid VNegacion"; break;
 			case 78: s = "invalid VExpSuma"; break;
 			case 79: s = "invalid VExpMul"; break;
 			case 80: s = "invalid VExpMul"; break;

@@ -927,7 +927,17 @@ InstCout
 InstCin
 (. Simbolo simbolo = null; .)
 =
-	cin mayor_mayor Arg_io <out simbolo>
+	cin mayor_mayor ValorFinalExp <out simbolo>
+					(.//Tenemos que verificar que el simbolo devuelto no es un temporal, sino una variable
+					String verificacion_temporal = new String(simbolo.GetNombre().substring(0,8));
+					if (verificacion_temporal.contentEquals("temporal"))
+						SemErr("El argumento de la expresion CIN debe ser una variable declarada previamente");
+					else
+						{
+						String terceto = new String(tercetos.readExpresion(simbolo.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+						colaTercetos.add(tupla);
+						}.)
 							 puntoComa
 .
 
@@ -997,8 +1007,6 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 						 			| VExpAND <out simbolo_temp2, simbolo_temp1>
 						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 															 			SemErr("Error de tipos en la expresion");
-															 		else
-															 			System.out.println(simbolo_temp2.GetNombre() + "EOEOEOEOEOEOEOEOOEOEOEOOEOEOEOEEO");
 																.)
 						 			| VExpOR  <out simbolo_temp2, simbolo_temp1>		
 						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
