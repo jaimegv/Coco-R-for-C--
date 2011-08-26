@@ -5,7 +5,7 @@ public class Tercetos{
     //BufferedWriter bw;
     String union;
     String etiqueta ="etiqueta";
-    String temporal ="$temporal";
+    String temporal ="temporal";
     int c_etiqueta;
     int c_temporal;
     
@@ -69,7 +69,7 @@ public class Tercetos{
     	/*
     	 * Asignamos a una etiqueta, op1, el valor de la cadena op2
     	 */
-        return "ASIGNACION_CAD,"+op1+","+op2+",\n";
+        return "ASIGNACION_CADENA,"+op1+","+op2+",\n";
     }
     
     public String asignacion(String op1, String op2){
