@@ -968,19 +968,102 @@ InstCout
 .
 
 InstCin
-(. Simbolo simbolo = null; .)
+(. Simbolo simbolo = null;
+   Simbolo simbolo_ind_vector = null; .)
 =
-	cin mayor_mayor ValorFinalExp <out simbolo>
-					(.//Tenemos que verificar que el simbolo devuelto no es un temporal, sino una variable
-					String verificacion_temporal = new String(simbolo.GetNombre().substring(0,8));
-					if (verificacion_temporal.contentEquals("temporal"))
-						SemErr("El argumento de la expresion CIN debe ser una variable declarada previamente");
-					else
+	cin mayor_mayor ident (.if (!tabla.EstaRecur(t.val))
+								SemErr("La instruccion cin debe recibir un identificador declarado previamente");
+							 else
+							 	{
+							 	 simbolo = tabla.GetSimboloRecur(t.val);
+							 	 if (simbolo.GetType() == entera)
+							 	 	{
+							 	 	String terceto = new String(tercetos.readExpresion(simbolo.GetNombre()));
+									tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+									colaTercetos.add(tupla);
+							 	 	}
+							 	 else if ((simbolo.GetType() != vector) && (simbolo.GetType() != identificador))
+							 	 	SemErr("La instruccion CIN debe recibir un identificador de tipo entero");
+							 	 else if (la.val.contentEquals(";") && (simbolo.GetType() != entera))
+							 	 	SemErr("La instruccion CIN debe recibir un identificador de tipo entero");
+								}
+							 	.)
+			
+	
+	
+
+					[
+					(. if (simbolo != null)
+							{
+							if (simbolo.GetType() != vector)
+								SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + " y columna " + simbolo.GetColumn() + " no fue declarado como un vector");
+							}
+					.)
+					corchete_ab VExpresion<out simbolo_ind_vector> corchete_ce
+					(.
+					if (simbolo_ind_vector != null)
 						{
-						String terceto = new String(tercetos.readExpresion(simbolo.GetNombre()));
-						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-						colaTercetos.add(tupla);
-						}.)
+						if (simbolo_ind_vector.GetType() != entera)
+							SemErr("El indice de un vector debe ser una expresion entera");
+						else
+							{
+							Simbolo simbolo_temp = new Simbolo(tercetos.darEtiqueta(), entera,var);
+							tabla.InsertarEnActual(simbolo_temp);
+							String terceto = new String(tercetos.readExpresion(simbolo_temp.GetNombre()));
+							tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+							colaTercetos.add(tupla);
+							//En teoria ya tenemos en simbolo_temp lo que se ha leido por pantalla
+							//Ahora vamos meter ese temporal dentro del array
+							terceto = new String(tercetos.meteEnArray(simbolo.GetNombre(), simbolo_temp.GetNombre(), simbolo_ind_vector.GetNombre()));
+							tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			 			    colaTercetos.add(tupla);
+		 			    	}
+	 			    	}
+					.)
+					
+					
+					| 
+					punto ident
+					(. 	
+					Simbolo simboloatributo = null;
+					if (simbolo != null)
+						{
+						if (simbolo.GetType() != identificador)
+							{
+							SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + "y columna " + simbolo.GetColumn() + " no fue declarado como una clase");
+							}
+						else
+							{
+							if (!simbolo.GetClase().GetAmbitoAsociado().Esta(t.val))
+								SemErr("No se declaro ningun atributo con ese nombre");
+							else
+								{
+								simboloatributo = simbolo.GetClase().GetAmbitoAsociado().GetSimbolo(t.val);
+								if (simboloatributo.GetKind() != var)
+									{
+									SemErr("El identificador " + simboloatributo.GetNombre() + " no fue declarado como atributo dentro de la clase " + simbolo.GetClase().GetNombre());
+									}
+								else
+									{
+									if ((tabla.GetAmbitoActual().Ambito_Padre() != simbolo.GetClase().GetAmbitoAsociado()) && (simboloatributo.GetVisibilidad() == privado))
+										SemErr(simboloatributo.GetNombre() + " es de tipo privado");
+									else
+										{
+										if (simboloatributo.GetType() != entera)
+											SemErr("El atributo " + simboloatributo.GetNombre() + " de la clase " + simbolo.GetClase().GetNombre() + " no es de tipo entero");
+										}
+									}
+								}
+							}
+						}
+						
+
+					
+					.)
+					
+					] 
+	
+	
 							 puntoComa
 .
 
