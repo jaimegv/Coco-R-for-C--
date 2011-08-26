@@ -151,9 +151,9 @@ public class Tercetos{
         return "PUT_CADENA,"+op1+",,\n";
     }
     
-    public String putExpresion(String op1){
+    public String putEntero(String op1){
      
-        return "PUT_EXPRESION,"+op1+",,\n";
+        return "PUT_ENTERO,"+op1+",,\n";
     }
     
     public String putSaltoLinea(){

@@ -885,38 +885,54 @@ Else<Simbolo simbolo_funcion>	(. int type;
 
 
 InstCout
-(. int type=undef; .)
+(. Simbolo simbolo = null;.)
 =
-	cout {menor_menor Arg_io<out type>} puntoComa (.if (type==undef) {
-														SemErr("InstCout: Error tipos.");
-													}.)
+	cout {menor_menor Arg_io<out simbolo>(.if (simbolo.GetType()==undef) 
+											{
+											SemErr("InstCout: Error tipos.");
+											}
+										else if ((simbolo.GetType() == identificador) || (simbolo.GetType() == vector))
+											SemErr("La instruccion cout solo puede recibir como argumentos los tipos basicos");
+									    else
+									    	{
+									    	if (simbolo.GetType() == entera)
+									    		{
+										    	String terceto = new String(tercetos.putEntero(simbolo.GetNombre()));
+										    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+										    	colaTercetos.add(tupla);
+									    		}
+									    	else if (simbolo.GetType() == bool)
+									    		{
+									    		String terceto = new String(tercetos.putBooleano(simbolo.GetNombre()));
+										    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+										    	colaTercetos.add(tupla);
+									    		}
+									    	else if (simbolo.GetType() == cadena)
+									    		{
+												String terceto = new String(tercetos.putCadena(simbolo.GetNombre()));
+										    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+										    	colaTercetos.add(tupla);
+									    		}
+									    	}
+									   
+									   
+									   .)
+		} 
+													
+	puntoComa 
 .
 
 InstCin
-(. int type; .)
+(. Simbolo simbolo = null; .)
 =
-	cin mayor_mayor Arg_io <out type> puntoComa
+	cin mayor_mayor Arg_io <out simbolo> puntoComa
 .
 
-Arg_io<out int tipoDev>
-(. tipoDev=undef;
-   Simbolo sim = new Simbolo("Temp",0,0);
-   Simbolo simbolo_temp = null; .)
-=	ident (. if (!(tabla.EstaRecur(t.val)))
-			 	SemErr(t.val + " no esta definido");
-			 else if (sim.GetKind() == clase)
-			 	SemErr(t.val + " es una clase");
-			 else
-			 	{
-			 	sim = null;
-			 	sim = tabla.GetSimboloRecur(t.val);
-			 	tipoDev = sim.GetType();
-			 	} .) 
-		[(.Simbolo simbolo_lo_que_tiene_el_vector = new Simbolo(tercetos.darTemporal(),entera,var);.)
-		DarPosVector <sim, simbolo_lo_que_tiene_el_vector>]
-		| cadenaCar (. tipoDev = cadena; .)
-		| VExpresion<out simbolo_temp> (.tipoDev = simbolo_temp.GetType();.)
-.
+Arg_io<out Simbolo simbolo>
+(. simbolo = null; .)
+=	VExpresion<out simbolo> .
+
+
 
 DarPosVector <Simbolo sim, Simbolo simbolo_resultado> (.int tipoDev; .)
 		= (.System.out.println("Estamos en DarPosVector");.)
@@ -978,6 +994,8 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 						 			| VExpAND <out simbolo_temp2, simbolo_temp1>
 						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 															 			SemErr("Error de tipos en la expresion");
+															 		else
+															 			System.out.println(simbolo_temp2.GetNombre() + "EOEOEOEOEOEOEOEOOEOEOEOOEOEOEOEEO");
 																.)
 						 			| VExpOR  <out simbolo_temp2, simbolo_temp1>		
 						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
@@ -1188,8 +1206,8 @@ VNegacion <out Simbolo simbolo>
   	   simbolo = null;
   	   Simbolo simbolo_temp1 = null;
   	   Simbolo simbolo_temp2 = null;.)
-    (op_and (ValorFinalExp<out simbolo_temp1> 
-    (. simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var);
+    (op_and (ValorFinalExp<out simbolo_temp1> //simbolo_temp1 --> valor recogido por VExpFinal
+    (. simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var); //En simbolo_temp2 estara el resultado
        tabla.InsertarEnActual(simbolo_temp2);
        String terceto = new String (tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(),"AND",simbolo_temp2.GetNombre()));
        tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
@@ -1199,9 +1217,9 @@ VNegacion <out Simbolo simbolo>
     
     [(VExpAND <out simbolo, simbolo_temp2> 
     | 
-    VExpOR <out simbolo, simbolo_temp2>)]
-    					   		 | 
-    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce) 
+    VExpOR <out simbolo, simbolo_temp2>)])
+    					   		 |
+    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce
     					   		 					(. if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
 	 														{
 												  			SemErr("VExpAND: Error de tipos en la expresion");
@@ -1212,6 +1230,7 @@ VNegacion <out Simbolo simbolo>
 												  			}.)
     					   													  			
     					   	)
+    					   	 
     .
 
 
