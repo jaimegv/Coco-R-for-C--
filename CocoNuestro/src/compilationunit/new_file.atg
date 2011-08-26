@@ -809,13 +809,9 @@ InstExpresion <Simbolo simbolo>
 																else
 																	simboloClaseObjeto = null;
 																}
-															}
-														catch (NullPointerException e)
-															{
-															}
+
 														
-														.) 
-														(.
+														
 														if (simbolo.GetType() == vector)
 															{
 															if (ind_vector != null)
@@ -870,7 +866,10 @@ InstExpresion <Simbolo simbolo>
 			   													}
 			   												
 			   												}
-
+														}
+													catch (NullPointerException e)
+														{
+														}
 															
 														.)
 														puntoComa)
@@ -1141,11 +1140,14 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 						 			| VExpOR  <out simbolo_temp2, simbolo_temp1>		
 						 										(. if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 															 			SemErr("Error de tipos en la expresion");
-															 	.)/*
-						 			| VExpRelacional <out type> (. if ((tipoDev != entera) || (type != entera))
-															 			SemErr("Error de tipos en la expresion");
-															 	   else
-															 	   		tipoDev = bool;.)*/
+															 	.)
+						 			| VExpRelacional <out simbolo_temp2, simbolo_temp1> 
+						 										(.if ((simbolo_temp1 != null) && (simbolo_temp2 != null))
+						 												{
+						 												if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != bool))
+															 				SemErr("Error de tipos en la expresion");
+															 			}
+															 	 .)
 															 	   		)
 									(.simbolo = simbolo_temp2;.)
 															 	   		
@@ -1393,15 +1395,27 @@ VNegacion <out Simbolo simbolo>
 		
     	.)
     .
-    /*
- VExpRelacional <out int tipoDev>
+    
+ VExpRelacional <out Simbolo simbolo_resultado, Simbolo simbolo_exp_anterior>
  = (.System.out.println("Entramos VExpRelacional");
- 	 tipoDev=undef;
- 	 Simbolo simbolo_temp = null;.)
-   (Operador_Relacional) VExpresion <out tipoDev, simbolo_temp> (.if (tipoDev != entera)
-      								 					SemErr("VEXPRel: Error de tipos en la expresion");.)
+ 	 simbolo_resultado = null;
+ 	 Simbolo simbolo_temp = null;
+ 	 String operador = null;.)
+   (Operador_Relacional) (.operador = new String (t.val);.)
+    VExpresion <out simbolo_temp> 
+   							(.if (simbolo_temp != null)
+	   							  if ((simbolo_temp.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+	      						  		SemErr("VEXPRel: Error de tipos en la expresion");
+	      						  else
+	      						  		{
+	      						  		simbolo_resultado = new Simbolo(tercetos.darTemporal(),bool,var);
+	      						  		tabla.InsertarEnActual(simbolo_resultado);
+	      						  		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), operador, simbolo_resultado.GetNombre()));
+	      						  		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	      						  		colaTercetos.add(tupla);
+	      						  		}.)
    .
-*/
+
 ValorFinalExp <out Simbolo simbolo_resultado>
 = (. Simbolo simbolo = null;
 	 boolean esta = false;
