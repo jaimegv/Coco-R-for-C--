@@ -891,41 +891,44 @@ InstCout
 											{
 											SemErr("InstCout: Error tipos.");
 											}
-										else if ((simbolo.GetType() == identificador) || (simbolo.GetType() == vector))
+										   else if ((simbolo.GetType() == identificador) || (simbolo.GetType() == vector))
 											SemErr("La instruccion cout solo puede recibir como argumentos los tipos basicos");
-									    else
-									    	{
-									    	if (simbolo.GetType() == entera)
-									    		{
-										    	String terceto = new String(tercetos.putEntero(simbolo.GetNombre()));
-										    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
-										    	colaTercetos.add(tupla);
+									       else
+										    	{
+										    	if (simbolo.GetType() == entera)
+										    		{
+											    	String terceto = new String(tercetos.putEntero(simbolo.GetNombre()));
+											    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+											    	colaTercetos.add(tupla);
+										    		}
+										    	else if (simbolo.GetType() == bool)
+										    		{
+										    		String terceto = new String(tercetos.putBooleano(simbolo.GetNombre()));
+											    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+											    	colaTercetos.add(tupla);
+										    		}
+										    	else if (simbolo.GetType() == cadena)
+										    		{
+													String terceto = new String(tercetos.putCadena(simbolo.GetNombre()));
+											    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+											    	colaTercetos.add(tupla);
+										    		}
 									    		}
-									    	else if (simbolo.GetType() == bool)
-									    		{
-									    		String terceto = new String(tercetos.putBooleano(simbolo.GetNombre()));
-										    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
-										    	colaTercetos.add(tupla);
-									    		}
-									    	else if (simbolo.GetType() == cadena)
-									    		{
-												String terceto = new String(tercetos.putCadena(simbolo.GetNombre()));
-										    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
-										    	colaTercetos.add(tupla);
-									    		}
-									    	}
-									   
-									   
 									   .)
 		} 
-													
-	puntoComa 
+			
+	puntoComa (.
+				String terceto = new String(tercetos.putSaltoLinea());
+		    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+		    	colaTercetos.add(tupla);	
+			  .) 
 .
 
 InstCin
 (. Simbolo simbolo = null; .)
 =
-	cin mayor_mayor Arg_io <out simbolo> puntoComa
+	cin mayor_mayor Arg_io <out simbolo>
+							 puntoComa
 .
 
 Arg_io<out Simbolo simbolo>

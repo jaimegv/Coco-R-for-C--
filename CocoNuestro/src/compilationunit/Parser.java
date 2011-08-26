@@ -1122,9 +1122,9 @@ public class Parser {
 			{
 			SemErr("InstCout: Error tipos.");
 			}
-			else if ((simbolo.GetType() == identificador) || (simbolo.GetType() == vector))
-				SemErr("La instruccion cout solo puede recibir como argumentos los tipos basicos");
-			   else
+			  else if ((simbolo.GetType() == identificador) || (simbolo.GetType() == vector))
+			SemErr("La instruccion cout solo puede recibir como argumentos los tipos basicos");
+			     else
 			   	{
 			   	if (simbolo.GetType() == entera)
 			   		{
@@ -1144,12 +1144,14 @@ public class Parser {
 			    	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
 			    	colaTercetos.add(tupla);
 			   		}
-			   	}
-			  
-			  
-			  
+			  		}
+			 
 		}
 		Expect(42);
+		String terceto = new String(tercetos.putSaltoLinea());
+		 	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+		 	colaTercetos.add(tupla);	
+		
 	}
 
 	void InstCin() {
