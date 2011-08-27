@@ -581,6 +581,15 @@ DecVar <Simbolo simbolo_anterior>
 							 		simboloClaseObjeto = null;
 							 		//Empieza la generacion de codigo intermedio
 							 		String terceto = new String(tercetos.asignacion(simbolo_anterior.GetNombre(), simbolo_temp.GetNombre()));
+							 		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+							 		if (tabla.GetAmbitoActual() == tabla.GetAmbitoGlobal()) //Si estamos en el ambito global entonces tenemos que meter el terceto en la cola global
+							 			{										 			
+							 			colaGlobal.add(tupla);
+							 			}
+							 		else
+							 			{
+							 			colaTercetos.add(tupla);
+							 			}
 							 		
 							 		}
 							 		
