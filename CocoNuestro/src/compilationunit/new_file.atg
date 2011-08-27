@@ -17,7 +17,7 @@ import java.util.*;
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 
-	static public boolean modo_depuracion = false;
+	static public boolean modo_depuracion = true;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -769,12 +769,14 @@ Subprograma <Simbolo simbolo_funcion> = (.  simbolo_funcion.SetKind (funcion);
 											simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno.
 											simbolo_funcion.SetType(undef);
 											simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
+											tabla.NuevoAmbito(simbolo_funcion);
+											
 											//Vamos a emitir el tercetos que nos asigna aqui una etiqueta
 											String terceto = new String(tercetos.EtiquetaSubprograma(simbolo_funcion.GetEtiqueta()));
 											tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 											colaTercetos.add(tupla);
 											//*****************************
-											tabla.NuevoAmbito(simbolo_funcion);
+											
 											
 											if (simbolo_funcion.GetTipoRetorno() == identificador)
 												{
@@ -1635,17 +1637,21 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 	 salidadep("Entramos en VArgumentos");
 	 Simbolo simbolo_temp = null;
 	 boolean haysiguienteargumento = false;
+	 boolean hayargumento = false;
 	 if (pos == 0)
 	 	{
 	 	 colaArgumentos = new Vector ();
 	 	}
 	.)
-	(.if  (pos >= simbolo_funcion.GetNParametros())
+	(.if  ((pos >= simbolo_funcion.GetNParametros()) && (simbolo_funcion.GetNParametros() != 0))
 			{
 			SemErr("Numero de parametros no coincidente");
 			}
 	.)
-[VExpresion<out simbolo_temp> (. if (simbolo_funcion != null)
+[(.hayargumento = true;.)
+ (.if (pos >= simbolo_funcion.GetNParametros())
+ 		SemErr("Numero de parametros no coincidente"); .)
+VExpresion<out simbolo_temp> (. if (simbolo_funcion != null)
 									{
 									if  (pos >= simbolo_funcion.GetNParametros())
 											{
@@ -1699,11 +1705,29 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 				colaTercetos.add(tupla);
 				}
-			else
+			else if ((simbolo_funcion.GetNParametros() == 0) && !haysiguienteargumento && !hayargumento && (pos==0))
 				{
-				if ((!(pos == (simbolo_funcion.GetNParametros() - 1)) && !haysiguienteargumento))
-					SemErr("Numero de parametros no coincidente");
+				//Primero emitimos el terceto correspondiente a apilar el valor devuelto
+				String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+				colaTercetos.add(tupla);
+				//Ahora tenemos que saltar a la etiqueta
+				String terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
 				}
+			else if ((simbolo_funcion.GetNParametros() == 0) && (haysiguienteargumento || hayargumento))
+			
+				{
+				SemErr("Numero de parametros no coincidente");
+				}
+			
+			if ((pos==0) && (simbolo_funcion.GetNParametros() > 0) && !hayargumento)
+				{
+				SemErr("Numero de parametros no coincidente");
+				}
+					
+
 		
 		.)
 .
