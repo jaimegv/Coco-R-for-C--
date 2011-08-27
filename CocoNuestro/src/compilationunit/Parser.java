@@ -116,7 +116,7 @@ public class Parser {
 	Tercetos tercetos = new Tercetos();
 	String terceto_actual;
 	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
-    LinkedList<tupla_Tercetos> colaGlobal = new LinkedList<tupla_Tercetos> ();
+    //LinkedList<tupla_Tercetos> colaGlobal = new LinkedList<tupla_Tercetos> ();
 	
 	GenFinal codigo_final;
 	// Fichero de salida para el codigo Ensamblador
@@ -195,7 +195,7 @@ public class Parser {
 		tercetos = new Tercetos();
 		try {
 			if (errors.count==0) {	// todo ok!
-				codigo_final = new GenFinal(colaTercetos, colaGlobal, tabla, fichero);
+				codigo_final = new GenFinal(colaTercetos, tabla, fichero);
 			}
 		} catch( Exception e ) {	// Codigo Final genera excepcion
 			System.err.println("GeneraciÃ³n de CÃ³digo Final desbocado.");
@@ -486,7 +486,7 @@ public class Parser {
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			if (tabla.GetAmbitoActual() == tabla.GetAmbitoGlobal()) //Si estamos en el ambito global entonces tenemos que meter el terceto en la cola global
 				{										 			
-				colaGlobal.add(tupla);
+				SemErr("No esta permitido inicializar variables en el ambito global");
 				}
 			else
 				{
