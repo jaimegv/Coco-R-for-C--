@@ -1222,7 +1222,7 @@ public class Parser {
 		}
 		else
 			{
-			if ((!(pos == (simbolo_funcion.GetNParametros() - 1)) && !haysiguienteargumento)
+			if ((!(pos == (simbolo_funcion.GetNParametros() - 1)) && !haysiguienteargumento))
 				SemErr("Numero de parametros no coincidente");
 			}
 				
