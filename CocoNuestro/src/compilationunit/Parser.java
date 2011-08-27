@@ -851,15 +851,11 @@ public class Parser {
 					  		tabla.InsertarEnActual(simbolo);
 					  		}	
 					  	
-					if (la.kind == 31) {
-						Subprograma(simbolo);
-					} else if (la.kind == 30 || la.kind == 41 || la.kind == 42) {
-						if (la.kind == 30) {
-							Vector(simbolo);
-							Expect(42);
-						} else {
-							DecVar(simbolo);
-						}
+					if (la.kind == 30) {
+						Vector(simbolo);
+						Expect(42);
+					} else if (la.kind == 41 || la.kind == 42) {
+						DecVar(simbolo);
 					} else SynErr(67);
 				} else SynErr(68);
 				estaba_declarado = false;

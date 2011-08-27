@@ -559,8 +559,7 @@ Cuerpo <Simbolo simbolo_funcion> 	(. int type = undef; .)
 			 							   		tabla.InsertarEnActual(simbolo);
 			 							   		}	
 			 							   	.) 
-			(Subprograma <simbolo>
-		 | (Vector<simbolo> puntoComa | DecVar<simbolo> )))) (.estaba_declarado = false;.)}
+			( (Vector<simbolo> puntoComa | DecVar<simbolo> )))) (.estaba_declarado = false;.)}
 .
 
 
