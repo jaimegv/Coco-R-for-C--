@@ -141,6 +141,8 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	if (operacion.equals("ASIGNACION")) {				// caso de asignar un entero a algo
     	EjecutarAsignacion(op1, op2, ambitoterceto);	// paso el destino(op1) y el valor(op2)
 	} else if (operacion.equals("ETIQUETA_SUBPROGRAMA")) {
+		// Se envia el ambito de dicho subprograma
+		// TODO esta siendo corrigiendo por VICTOR
 		ComienzoSubprograma(op1, ambitoterceto);		// op1: nombre de la etiqueta
 	} else if (operacion.equals("ASIGNACION_CADENA")) {	// ETI: data "HOLA"
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
@@ -150,6 +152,14 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		// TODO
 		// METE_EN_ARRAY,caracola,temporal2,temporal1
 		AsignaValorVector(ambitoterceto);				// pe: v[2]=23
+	} else if (operacion.equals("CALL")) {
+		// TODO no comprobada
+		LlamadaProg(ambitoterceto);
+	} else if (operacion.equals("RET")) {		// Retornar de una funcion
+		// TODO	no comprobada
+		RetornoProg(ambitoterceto);
+	} else if (operacion.equals("DIR_RETORNO")) {	// Push DirRetorno	
+		PushDirRetorno(ambitoterceto);
 	} else if (operacion.equals("SUMA")) {		// Suma
 		nemonico = "ADD";
 		OpBinaria(ambitoterceto);
@@ -173,7 +183,7 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		OpUnaria(ambitoterceto);	// opUnaria op2=1
 	} else if ((operacion.equals("==")) ||
 					(operacion.equals("!="))) {		// OpRel.
-		// TODO
+		// TODO Solo hemos hecho estos operadores Relacionales!
 		nemonico ="CMP";	// nemonico para todos los relacionales¿?
 		OpRelacional(ambitoterceto);
 	} else if (operacion.equals("READ")) {		// CIN
@@ -197,10 +207,64 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else {
 		System.err.println("Operacion Terceto no contemplado->"+tupla_actual.GetTerceto());
 	}
-
 }
 
 //***********************************************************************************************
+
+/*
+ * PushDirRetorno
+ * Apilamos la direccion donde dejaremos el valor de retorno. Esta direccion sera la 
+ * direccion ABSOLUTA.
+ * Nota: En caso NO devolver nada, void, la funcion se apilara con una direccion IX
+ */
+private void PushDirRetorno (TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		// Resto a IX el desplazamiento para llegar al temporal
+		bw.write("SUB .IX,#"+simbolo_return.GetDesplazamiento()+"\n");
+		// Apilo dicha direccion en la cima
+		bw.write("PUSH .A\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar PushDirRetorno.");
+	}
+}
+
+/*
+ * LlamadaProg
+ * Realizamos la llamada a una funcion. Hay q tener mucho cuidado con lo que apilamos. Luego hay 
+ * q desapilar lo mismo
+ */
+private void LlamadaProg (TablaSimbolos ambito_terceto) {
+	try {
+		// Apilamos todo lo necesario para la vuelta
+		bw.write("PUSH .SR\n");
+		bw.write("PUSH .IX\n");
+		// Salto a etiqueta
+		bw.write("CALL /"+op1+"; SALTO A PROGRAMA\n");
+		// Desapilamos lo mismo que apilamos
+		bw.write("POP .IX\n");
+		bw.write("POP .SR\n");
+		// Hay otro valor en la pila. PushDirRetorno lo metio!
+		bw.write("POP .R0\n"); // siempre se apila
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar Llamada a Programa.");
+	}
+}
+
+/*
+ * RetornoProg
+ * Volveremos a la funcion llamante, dejando igual q cuando nos lo dieron
+ */
+private void RetornoProg (TablaSimbolos ambito_terceto) {
+	try {
+		// Dejamos el .SP igual que cuando nos lo dieron
+		bw.write("MOVE .IX, .SP\n");
+		// Ahora debe estar en la cima de la pila la direccion de retorno
+		bw.write("RET\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar RetornoPrograma.");
+	}
+}
 
 /*
  * OpRelacional
