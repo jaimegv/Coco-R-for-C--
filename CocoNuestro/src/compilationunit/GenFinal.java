@@ -24,8 +24,8 @@ public class GenFinal {
 	String nemonico = new String();		
     
 
-
-public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fichero) {
+// TODO consumir ColaGlobal
+public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, LinkedList<tupla_Tercetos> colaGlobal, Tablas tabla, String fichero) {
     
     int desp_total;  //variable para el desplazamiento total de las tablas de simbolos
     archiEscri= new File(fichero);
@@ -40,8 +40,7 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
     
     System.out.println("Comienza la fase de generacion de codigo objeto");
     //preparamos el fichero que contendra el codigo objeto
-    try
-    	{
+    try	{
         bw= new BufferedWriter(new FileWriter(fichero));
     	}
     catch (IOException e) 
