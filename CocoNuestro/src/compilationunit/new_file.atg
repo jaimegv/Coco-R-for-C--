@@ -935,7 +935,7 @@ InstReturn <out int tipoDev>
 	Simbolo simbolo_temp = null; .)
 = 	   (.salidadep("Entramos en InstReturn");
 		 simboloClaseObjeto = null;
-		 simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);.)
+		 simbolo_temp = new Simbolo(tercetos.darTemporal(), undef, var);.)
 (rreturn [VExpresion<out simbolo_temp> (.   salidadep("Return devuelve un tipo:" + simbolo_temp.GetType());
 									tipoDev= simbolo_temp.GetType(); 
 									hayreturn = true;.) ] puntoComa)

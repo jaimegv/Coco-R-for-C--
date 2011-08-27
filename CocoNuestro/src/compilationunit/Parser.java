@@ -1234,7 +1234,7 @@ public class Parser {
 		Simbolo simbolo_temp = null; 
 		salidadep("Entramos en InstReturn");
 		simboloClaseObjeto = null;
-		simbolo_temp = new Simbolo(tercetos.darEtiqueta(), undef, var);
+		simbolo_temp = new Simbolo(tercetos.darTemporal(), undef, var);
 		Expect(18);
 		if (StartOf(10)) {
 			simbolo_temp = VExpresion();
