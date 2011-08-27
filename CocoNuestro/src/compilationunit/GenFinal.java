@@ -223,7 +223,7 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
-				bw.write("XOR .A, #0\n");
+				bw.write("XOR .A, #1\n");
 			}//  else if (operacion.equals("==")) { // nada en este caso }
 			// Muevo la operacion relacional
 			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
@@ -238,7 +238,7 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
-				bw.write("XOR .A, #0\n");
+				bw.write("XOR .A, #1\n");
 			}//  else if (operacion.equals("==")) { // nada en este caso }
 			// Muevo la operacion relacional
 			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
@@ -253,7 +253,7 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
-				bw.write("XOR .A, #0\n");
+				bw.write("XOR .A, #1\n");
 			}//  else if (operacion.equals("==")) { // nada en este caso }
 			// Muevo la operacion relacional
 			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
@@ -264,17 +264,19 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 			// Ya q op2 usara el registro IY muevo este a R9
-			bw.write("MOVE .IY, .R9\n");
+			//bw.write("MOVE .IY, .R9\n");
+			bw.write("SUB .IY, #"+despl_op1+"\n");
+			bw.write("MOVE .A, .R9\n");
 			// Busco el operando 2.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			bw.write(nemonico+" #-"+despl_op1+"[.R9], #-"+despl_op2+"[.IY]\n");
+			bw.write(nemonico+" [.R9], #-"+despl_op2+"[.IY]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
-				bw.write("XOR .A, #0\n");
+				bw.write("XOR .A, #1\n");
 			}//  else if (operacion.equals("==")) { // nada en este caso }
 			// Muevo la operacion relacional
 			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
@@ -347,7 +349,6 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 			bw.write("MOVE .IY, .R8\n");	// contenido que deja la función a R7
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			bw.write("ADD #"+despl_op1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .R8, .A\n");	// BuscaMarcoDir ha dejado en IY la direccion del marco del vector
 			bw.write("MOVE .A, .R8\n");	// R8 = Desplzamiento total hasta elemento del vector
 			// A BUSCAR OP2
@@ -508,7 +509,7 @@ private void PutBool (TablaSimbolos ambito_terceto) {
 
 		if (ambito_terceto.Esta(op1)) {			// todo local!
 			bw.write("CMP #-"+simbolo_op1.GetDesplazamiento()+"[.IX], /v_cierto\n");
-			bw.write("BZ $3\n");	// Es cierto? Sí -> salto!
+			bw.write("BZ $4\n");	// Es cierto? Sí -> salto!
 			bw.write(nemonico + " /cad_falso\n");	// imprime-> "false"
 			bw.write("BR $2\n");
 			bw.write(nemonico + " /cad_cierto\n");	// imprime-> "cierto"
