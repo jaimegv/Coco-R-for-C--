@@ -116,7 +116,7 @@ public class Parser {
 	Tercetos tercetos = new Tercetos();
 	String terceto_actual;
 	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
-    LinkedList<tupla_Tercetos> colaMain = new LinkedList<tupla_Tercetos> ();
+    LinkedList<tupla_Tercetos> colaGlobal = new LinkedList<tupla_Tercetos> ();
 	
 	GenFinal codigo_final;
 	// Fichero de salida para el codigo Ensamblador
@@ -195,7 +195,7 @@ public class Parser {
 		tercetos = new Tercetos();
 		try {
 			if (errors.count==0) {	// todo ok!
-				codigo_final = new GenFinal(colaTercetos, tabla, fichero);
+				codigo_final = new GenFinal(colaTercetos, colaGlobal, tabla, fichero);
 			}
 		} catch( Exception e ) {	// Codigo Final genera excepcion
 			System.err.println("GeneraciÃ³n de CÃ³digo Final desbocado.");
@@ -483,6 +483,7 @@ public class Parser {
 			simboloClaseObjeto = null;
 			//Empieza la generacion de codigo intermedio
 			String terceto = new String(tercetos.asignacion(simbolo_anterior.GetNombre(), simbolo_temp.GetNombre()));
+			
 			}
 			
 			
