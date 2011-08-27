@@ -427,12 +427,16 @@ public class Parser {
 	}
 
 	void Subprograma(Simbolo simbolo_funcion) {
-		tabla.NuevoAmbito(simbolo_funcion);
 		simbolo_funcion.SetKind (funcion);
 		simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el sÃ­mbolo que nos pasan, en type se ha metido el tipo de retorno.
 		simbolo_funcion.SetType(undef);
 		simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
-		// Una vez generada la eti aÃ±ado a la cola de tercetos
+		//Vamos a emitir el tercetos que nos asigna aqui una etiqueta
+		String terceto = new String(tercetos.InsertarEtiqueta(simbolo_funcion.GetEtiqueta()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
+		//*****************************
+		tabla.NuevoAmbito(simbolo_funcion);
 		
 		if (simbolo_funcion.GetTipoRetorno() == identificador)
 			{
@@ -445,14 +449,20 @@ public class Parser {
 		Expect(38);
 		Expect(29);
 		Cuerpo(simbolo_funcion);
+		terceto = new String (tercetos.retorno_subprograma());
+		tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
 		tabla.CerrarAmbito();
+		
 		if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
 				{
 				salidadep(simbolo_funcion.GetTipoRetorno());
 				SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
 				}
 		else
-				hayreturn = false; 
+				{
+				hayreturn = false;
+				} 
 		Expect(36);
 	}
 
@@ -979,7 +989,15 @@ public class Parser {
 			 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
 				}
 			
-			VArgumentos(simbolo_metodoargumento, 0);
+			Simbolo simbolo_valor_devuelto = null;
+			if (simbolo_metodoargumento != null)
+				{
+				simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo_metodoargumento.GetTipoRetorno(), var);
+				simbolo_valor_devuelto.SetClase(simbolo_metodoargumento.GetClaseDevuelta());
+				tabla.InsertarEnActual(simbolo_valor_devuelto);
+				}
+			
+			VArgumentos(simbolo_metodoargumento, 0, simbolo_valor_devuelto, null);
 			Expect(38);
 			Expect(42);
 		} else if (StartOf(5)) {
@@ -1001,8 +1019,21 @@ public class Parser {
 		}
 		 		 
 		if (la.kind == 31) {
+			Simbolo simbolo_valor_devuelto = null;
+			if (simbolo != null)
+				{
+				if (simbolo.GetKind() != funcion)
+					SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + " no corresponde a una funcion");
+				else
+					{
+					simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
+					simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
+					tabla.InsertarEnActual(simbolo_valor_devuelto);
+					}
+				}
+				
 			Get();
-			VArgumentos(simbolo, 0);
+			VArgumentos(simbolo, 0, simbolo_valor_devuelto, null);
 			Expect(38);
 			Expect(42);
 		} else if (StartOf(9)) {
@@ -1114,33 +1145,71 @@ public class Parser {
 		} else SynErr(72);
 	}
 
-	void VArgumentos(Simbolo simbolo, int pos) {
-		int type=undef;
+	void VArgumentos(Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos) {
 		Simbolo simbolo_nuevo = null; 
 		salidadep("Entramos en VArgumentos");
 		Simbolo simbolo_temp = null;
-			
+		if (pos == 0)
+			{
+			 colaArgumentos = new Vector ();
+			}
+		
 		if (StartOf(10)) {
 			simbolo_temp = VExpresion();
-			if (simbolo != null)
+			if (simbolo_funcion != null)
 			{
-			if  (pos >= simbolo.GetNParametros())
+			if  (pos >= simbolo_funcion.GetNParametros())
 					{
 					SemErr("Numero de parametros no coincidente");
 					}
 				else
 					{ 
-					simbolo_nuevo = simbolo.GetParametros(pos);
-					if (simbolo_nuevo.GetType() != type)
+					simbolo_nuevo = simbolo_funcion.GetParametros(pos);
+					if (simbolo_nuevo.GetType() != simbolo_temp.GetType())
 						SemErr("Tipo de los parametros no coincidente");
+					else if (simbolo_nuevo.GetClase() != simbolo_temp.GetClase())
+						SemErr("Clase de los parametros no coincidente");
+					else
+						{
+						String terceto_argumento = new String(tercetos.ApilarParam(simbolo_temp.GetNombre()));
+						tupla_Tercetos tupla_argumento = new tupla_Tercetos (tabla.GetAmbitoActual(),terceto_argumento);
+						colaArgumentos.addElement(tupla_argumento);
+						}
 					}
 			}
 					  
 			if (la.kind == 27) {
 				Get();
-				VArgumentos(simbolo, pos + 1);
+				VArgumentos(simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos);
 			}
 		}
+		if ((pos == simbolo_funcion.GetNParametros() - 1) || (simbolo_funcion.GetNParametros() == 0))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
+		{
+		//Primero emitimos el terceto correspondiente a apilar el valor devuelto
+		String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+		colaTercetos.add(tupla);
+		//Ahora emitimos el terceto de aviso de apilar parametros
+		String terceto = new String(tercetos.Init_parametros());
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+		colaTercetos.add(tupla);
+		//Ahora emitimos los tercetos de apilamiento de parametros
+		    		for(int i=0; i< colaArgumentos.size(); i++)
+		    			{
+		      	tupla = (tupla_Tercetos)colaArgumentos.elementAt(i);
+		      	colaTercetos.add(tupla);
+			}
+		//Ahora emitimos el terceto de terminar de apilar parametros
+		terceto = new String(tercetos.Fin_parametros());
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+		colaTercetos.add(tupla);
+		
+		//Ahora tenemos que saltar a la etiqueta
+		terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+		colaTercetos.add(tupla);
+		}
+			
 	}
 
 	int  InstReturn() {
@@ -1166,7 +1235,7 @@ public class Parser {
 		Expect(19);
 		while (la.kind == 21) {
 			Get();
-			simbolo = Arg_io();
+			simbolo = VExpresion();
 			if (simbolo.GetType()==undef) 
 			{
 			SemErr("InstCout: Error tipos.");
@@ -1356,13 +1425,6 @@ public class Parser {
 		Expect(36);
 	}
 
-	Simbolo  Arg_io() {
-		Simbolo  simbolo;
-		simbolo = null; 
-		simbolo = VExpresion();
-		return simbolo;
-	}
-
 	Simbolo  DarPosVector(Simbolo sim) {
 		Simbolo  simbolo_dentro_vector;
 		int tipoDev; 
@@ -1527,7 +1589,6 @@ public class Parser {
 			simbolo = tabla.GetSimboloRecur(t.val);
 			//System.out.println("Tipo del ident!!"+tipoDev);
 			simboloClaseObjeto = simbolo.GetClase();
-			esta = true;
 			if ((la.val != "(") && (la.val != "."))
 				simbolo_resultado = simbolo;
 			}
@@ -1535,15 +1596,21 @@ public class Parser {
 			if (la.kind == 28 || la.kind == 30 || la.kind == 31) {
 				if (la.kind == 31) {
 					Get();
-					if  (esta)			// Esto es la llamada a una funcion
-					{
-					//tipoDev = simbolo.GetTipoRetorno(); //Aqui tendremos que devolver un temporal con el resultado
-					}
-					
-					if (simbolo.GetKind() != funcion)
-					SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
-					
-					VArgumentos(simbolo, aux);
+					Simbolo simbolo_valor_devuelto = null;
+					tabla.InsertarEnActual(simbolo_valor_devuelto);
+					if  (simbolo != null)			// Esto es la llamada a una funcion
+					 		{
+					  	if (simbolo.GetKind() != funcion)
+						 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
+						else
+							{
+							simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
+							simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
+							}
+							
+					 	}
+					  
+					VArgumentos(simbolo, aux, simbolo_valor_devuelto, null);
 					Expect(38);
 				} else if (la.kind == 28) {
 					Get();
@@ -1600,7 +1667,15 @@ public class Parser {
 							//tipoDev = simbolo_metodoatributo.GetTipoRetorno(); //Aqui tendremos que devolver lo que devuelva el metodo
 							}
 						 
-						VArgumentos(simbolo_metodoatributo, aux);
+						Simbolo simbolo_valor_devuelto = null;
+						if (simbolo_metodoatributo != null)
+								{
+								simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(), simbolo_metodoatributo.GetTipoRetorno(),var);
+								simbolo_valor_devuelto.SetClase(simbolo_metodoatributo.GetClaseDevuelta());
+								tabla.InsertarEnActual(simbolo_valor_devuelto);
+								}
+						
+						VArgumentos(simbolo_metodoatributo, 0, simbolo_valor_devuelto, null);
 						Expect(38);
 					}
 				} else {

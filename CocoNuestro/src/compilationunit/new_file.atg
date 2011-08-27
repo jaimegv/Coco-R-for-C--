@@ -731,7 +731,7 @@ punto ident (. if (simbolo_objeto != null)
 				 			}
 				 		} 
 				 	}.) 
-
+//*************************COMIENZO DE LA LLAMADA**************************************************/
 ((parent_ab (.if (simbolo_metodoargumento != null)
 					{
 					if (simbolo_metodoargumento.GetKind() != metodo) //Si hay un paréntesis tiene que ser un método, y debe ser público.
@@ -742,7 +742,15 @@ punto ident (. if (simbolo_objeto != null)
 					 	SemErr(simbolo_metodoargumento.GetNombre() + " no es un metodo publico.");
 			 		}
 			 	.)
- VArgumentos<simbolo_metodoargumento, 0> parent_ce puntoComa)
+	(. Simbolo simbolo_valor_devuelto = null;
+	 if (simbolo_metodoargumento != null)
+	 	{
+	 	simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo_metodoargumento.GetTipoRetorno(), var);
+	 	simbolo_valor_devuelto.SetClase(simbolo_metodoargumento.GetClaseDevuelta());
+	 	tabla.InsertarEnActual(simbolo_valor_devuelto);
+	 	}
+	.)
+ VArgumentos<simbolo_metodoargumento, 0, simbolo_valor_devuelto, null> parent_ce puntoComa)
  | InstExpresion<simbolo_metodoargumento> (.simboloObjetoGlob = null;.))
 .
 
@@ -756,26 +764,36 @@ punto ident (. if (simbolo_objeto != null)
 
 
 
-Subprograma <Simbolo simbolo_funcion> = (.  tabla.NuevoAmbito(simbolo_funcion);
-											simbolo_funcion.SetKind (funcion);
+Subprograma <Simbolo simbolo_funcion> = (.  simbolo_funcion.SetKind (funcion);
 											simbolo_funcion.SetTipoRetorno(simbolo_funcion.GetType()); //Cuando se ha creado el símbolo que nos pasan, en type se ha metido el tipo de retorno.
 											simbolo_funcion.SetType(undef);
 											simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
-											// Una vez generada la eti añado a la cola de tercetos
+											//Vamos a emitir el tercetos que nos asigna aqui una etiqueta
+											String terceto = new String(tercetos.InsertarEtiqueta(simbolo_funcion.GetEtiqueta()));
+											tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+											colaTercetos.add(tupla);
+											//*****************************
+											tabla.NuevoAmbito(simbolo_funcion);
 											
 											if (simbolo_funcion.GetTipoRetorno() == identificador)
 												{
 												simbolo_funcion.SetClaseDevuelta(simbolo_funcion.GetClase()); //Cuando se ha creado el simbolo que nos pasan, en Clase se ha metido el símbolo de la clase que vamos a devolver.
 												}  .) 
-parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab Cuerpo<simbolo_funcion> 
-															(. tabla.CerrarAmbito();
+parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab	Cuerpo<simbolo_funcion> 
+															(. terceto = new String (tercetos.retorno_subprograma());
+															   tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+															   colaTercetos.add(tupla);
+															   tabla.CerrarAmbito();
+															   
 															   if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
 															   		{
 															   		salidadep(simbolo_funcion.GetTipoRetorno());
 															   		SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
 															   		}
 															   else
-															   		hayreturn = false; .)
+															   		{
+															   		hayreturn = false;
+															   		} .)
  llave_ce.
 
 
@@ -809,7 +827,22 @@ InstExpresion <Simbolo simbolo>
 	   			SemErr("Operacion no permitida: La parte izquierda de la asignacion es un vector");
 			}
 	   		 .)
-				 (parent_ab VArgumentos <simbolo, 0> parent_ce puntoComa //Llamada a una función
+	   		 //**************************LLAMADA A UNA FUNCION*************************************
+				 ((.Simbolo simbolo_valor_devuelto = null;
+				 	if (simbolo != null)
+				 		{
+				 		if (simbolo.GetKind() != funcion)
+				 			SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + " no corresponde a una funcion");
+				 		else
+				 			{
+				 			simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
+				 			simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
+				 			tabla.InsertarEnActual(simbolo_valor_devuelto);
+				 			}
+				 		}
+				 		.) //En este caso el valor devuelto por la funcion nos importara un pito
+				 parent_ab VArgumentos <simbolo, 0, simbolo_valor_devuelto, null> parent_ce puntoComa //Llamada a una función
+			//*************************************************************************************
 				| 	//(. if .)
 					(op_asig | op_asig_mas | op_asig_menos |
 					op_asig_producto | op_asig_division | op_asig_modulo)
@@ -969,7 +1002,7 @@ Else<Simbolo simbolo_funcion>	(. int type;
 InstCout
 (. Simbolo simbolo = null;.)
 =
-	cout {menor_menor Arg_io<out simbolo>(.if (simbolo.GetType()==undef) 
+	cout {menor_menor VExpresion<out simbolo>(.if (simbolo.GetType()==undef) 
 											{
 											SemErr("InstCout: Error tipos.");
 											}
@@ -1105,10 +1138,6 @@ InstCin
 	
 							 puntoComa
 .
-
-Arg_io<out Simbolo simbolo>
-(. simbolo = null; .)
-=	VExpresion<out simbolo> .
 
 
 
@@ -1472,22 +1501,34 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 				simbolo = tabla.GetSimboloRecur(t.val);
 				//System.out.println("Tipo del ident!!"+tipoDev);
 				simboloClaseObjeto = simbolo.GetClase();
-				esta = true;
 				if ((la.val != "(") && (la.val != "."))
 					simbolo_resultado = simbolo;
 				}
 
 			.)
-	
-	[((parent_ab (. if  (esta)			// Esto es la llamada a una funcion
+	//**********************Es lo que devuelve un subprograma***********************+
+	[((parent_ab (. Simbolo simbolo_valor_devuelto = null;
+					tabla.InsertarEnActual(simbolo_valor_devuelto);
+					if  (simbolo != null)			// Esto es la llamada a una funcion
 				  		{
-				  		//tipoDev = simbolo.GetTipoRetorno(); //Aqui tendremos que devolver un temporal con el resultado
-				  		}
-				  		
-				  	if (simbolo.GetKind() != funcion)
-					 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
+					  	if (simbolo.GetKind() != funcion)
+						 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
+						else
+							{
+							simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
+							simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
+							}
+							
+					 	}
 				   .)
-	 VArgumentos<simbolo, aux> parent_ce)
+	 VArgumentos<simbolo, aux, simbolo_valor_devuelto, null> parent_ce)
+	 
+	 
+	 
+	 
+	 
+	 
+	 //***********************************************************************************
 	 //Este es el caso de que sea un método o atributo de una clase 
 	 | (punto ident (.Simbolo simbolo_metodoatributo = null;
 	 				  Simbolo simbolo_clase = simbolo.GetClase();
@@ -1539,7 +1580,16 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 		  					//tipoDev = simbolo_metodoatributo.GetTipoRetorno(); //Aqui tendremos que devolver lo que devuelva el metodo
 	 		  					}
 	 		  			  .)
-	 		   VArgumentos <simbolo_metodoatributo, aux> parent_ce])
+	 		  			  (.
+	 		  			  Simbolo simbolo_valor_devuelto = null;
+	 		  			  if (simbolo_metodoatributo != null)
+	 		  			  		{
+	 		  			  		simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(), simbolo_metodoatributo.GetTipoRetorno(),var);
+	 		  			  		simbolo_valor_devuelto.SetClase(simbolo_metodoatributo.GetClaseDevuelta());
+	 		  			  		tabla.InsertarEnActual(simbolo_valor_devuelto);
+	 		  			  		}
+	 		  			  .)
+	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
 	 							   |(DarPosVector<out simbolo_resultado, simbolo>))]
   
@@ -1577,27 +1627,68 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 
 .
 
-VArgumentos <Simbolo simbolo, int pos>
-= (. int type=undef;
-	 Simbolo simbolo_nuevo = null; 
+VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos>
+= (. Simbolo simbolo_nuevo = null; 
 	 salidadep("Entramos en VArgumentos");
 	 Simbolo simbolo_temp = null;
-	 	.)
-[VExpresion<out simbolo_temp> (. if (simbolo != null)
+	 if (pos == 0)
+	 	{
+	 	 colaArgumentos = new Vector ();
+	 	}
+	.)
+[VExpresion<out simbolo_temp> (. if (simbolo_funcion != null)
 									{
-									if  (pos >= simbolo.GetNParametros())
+									if  (pos >= simbolo_funcion.GetNParametros())
 											{
 											SemErr("Numero de parametros no coincidente");
 											}
 										else
 											{ 
-											simbolo_nuevo = simbolo.GetParametros(pos);
-											if (simbolo_nuevo.GetType() != type)
+											simbolo_nuevo = simbolo_funcion.GetParametros(pos);
+											if (simbolo_nuevo.GetType() != simbolo_temp.GetType())
 												SemErr("Tipo de los parametros no coincidente");
+											else if (simbolo_nuevo.GetClase() != simbolo_temp.GetClase())
+												SemErr("Clase de los parametros no coincidente");
+											else
+												{
+												String terceto_argumento = new String(tercetos.ApilarParam(simbolo_temp.GetNombre()));
+												tupla_Tercetos tupla_argumento = new tupla_Tercetos (tabla.GetAmbitoActual(),terceto_argumento);
+												colaArgumentos.addElement(tupla_argumento);
+												}
 											}
 							}
 									  .)
-["," VArgumentos <simbolo, pos + 1>]]
+
+["," VArgumentos <simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos>]]
+
+		(. if ((pos == simbolo_funcion.GetNParametros() - 1) || (simbolo_funcion.GetNParametros() == 0))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
+				{
+				//Primero emitimos el terceto correspondiente a apilar el valor devuelto
+				String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+				colaTercetos.add(tupla);
+				//Ahora emitimos el terceto de aviso de apilar parametros
+				String terceto = new String(tercetos.Init_parametros());
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				//Ahora emitimos los tercetos de apilamiento de parametros
+        		for(int i=0; i< colaArgumentos.size(); i++)
+        			{
+		        	tupla = (tupla_Tercetos)colaArgumentos.elementAt(i);
+		        	colaTercetos.add(tupla);
+					}
+				//Ahora emitimos el terceto de terminar de apilar parametros
+				terceto = new String(tercetos.Fin_parametros());
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				
+				//Ahora tenemos que saltar a la etiqueta
+				terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				}
+		
+		.)
 .
 
 /**********************************************************/

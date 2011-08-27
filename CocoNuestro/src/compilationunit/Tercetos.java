@@ -118,22 +118,39 @@ public class Tercetos{
         return "CALL,"+nombre + "," + num_par+",\n";
     }
     
-    // hace el PARAM de cada parametro
-    public String parametro (String param){
-        return "PARAM,,," + param + "\n";
+    // Avisa de que va a comenzar el apilado de parametros para llamar a una funcion
+    public String Init_parametros (){
+        return "INIT_PARAM,,,\n";
     }
+    
+    // Avisa de que ya ha terminado el apilado de parametros para llamar a una funcion
+    public String Fin_parametros (){
+        return "FIN_PARAM,,,\n";
+    }
+    
+    //Avisa de que tiene que apilar la direccion de retorno de una llamada a una funcion
+    public String DirRetornoFuncion (String temporal)
+    	{
+    	return "DIR_RETORNO,"+ temporal + ",,\n";
+    	}
+    
+    public String ApilarParam (String parametro)
+    	{
+    	return "APILAR_PARAM,"+parametro+",,\n";
+    	}
 
     // Obtiene del terceto todos los parametros de la llamada a la funcion
 
-    public String[] call (String nombre, int num_par, String parametros[]){
+    public String llamada_subprograma (String nombre){
                 
-                String resultado[] = new String[num_par + 1];
-                int i = 0;
-                for (; i<num_par; i++){
-                    resultado[i] = "PARAM,"+parametros[i]+",,\n";
-                }
-                resultado[i] = "CALL,"+nombre+","+num_par+",\n";
-                return resultado;
+
+                return "CALL,"+nombre+",,\n";
+    }
+    
+    public String retorno_subprograma (){
+        
+
+        return "RET,,,\n";
     }
     
     
