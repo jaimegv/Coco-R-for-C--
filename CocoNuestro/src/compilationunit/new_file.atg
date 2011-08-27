@@ -17,7 +17,7 @@ import java.util.*;
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 
-	static public boolean modo_depuracion = false;
+	static public boolean modo_depuracion = true;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -803,18 +803,36 @@ parent_ab [Parametros <simbolo_funcion>] parent_ce llave_ab	Cuerpo<simbolo_funci
 
 /******************INSTRUCCIONES****************************/
 Instruccion <Simbolo simbolo_funcion> //Se le pasa el simbolo de la funcion o metodo que este activa en ese momento.
-(. int type = undef; .)
+(. int type = undef;
+   Simbolo simbolo_devuelto = null; .)
 = (. salidadep("Estamos en Instruccion");.)
-	InstReturn< out type > (. if (simbolo_funcion.GetTipoRetorno() != type)
-							  		SemErr("return devuelve un tipo distinto al declarado.");
-							  else if (type == identificador)
-							  		{
-							  		if (simbolo_funcion.GetClaseDevuelta() != simboloClaseObjeto)
-							  			{
-							  			SemErr("return devuelve una clase distinta a la declarada.");
-							  			}
-							  		}
-							  .)
+	InstReturn< out simbolo_devuelto > (. if (simbolo_devuelto != null)
+											  	{
+											  	if (simbolo_funcion.GetTipoRetorno() != simbolo_devuelto.GetType())
+											  		SemErr("return devuelve un tipo distinto al declarado.");
+											  	else if (simbolo_funcion.GetTipoRetorno() == identificador)
+								  					{
+								  					if (simbolo_funcion.GetClaseDevuelta() != simbolo_devuelto.GetClase())
+								  						{
+								  						SemErr("return devuelve una clase distinta a la declarada.");
+								  						}
+								  					}
+								  				//UNA VEZ SE HA COMPROBADO TODO EMITIMOS CODIGO INTERMEDIO		
+						  						String terceto = new String(tercetos.retorno(simbolo_devuelto.GetNombre()));
+						  						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						  						colaTercetos.add(tupla);
+											  	}
+										  else if (simbolo_funcion.GetTipoRetorno() != vacio)
+										  	 	{
+										  	 	SemErr("return devuelve un tipo distinto al declarado.");
+										  	 	}
+										  else  //Si ha ocurrido esto supondremos que se ha producido una instruccion de retorno vacia
+										  		{
+										  		String terceto = new String(tercetos.retorno_subprograma());
+								  				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+								  				colaTercetos.add(tupla);
+										  		}
+										.)
 	| InstCout | InstCin | InstIfElse<simbolo_funcion>
 .
 
@@ -932,15 +950,13 @@ InstExpresion <Simbolo simbolo>
 														puntoComa)
 .
 
-InstReturn <out int tipoDev>
-(.	tipoDev = undef;
-	Simbolo simbolo_temp = null; .)
+InstReturn <out Simbolo simbolo_devuelto>
+(.Simbolo simbolo_temp = null; 
+  simbolo_devuelto = null;.)
 = 	   (.salidadep("Entramos en InstReturn");
 		 simboloClaseObjeto = null;
 		 simbolo_temp = new Simbolo(tercetos.darTemporal(), undef, var);.)
-(rreturn [VExpresion<out simbolo_temp> (.   salidadep("Return devuelve un tipo:" + simbolo_temp.GetType());
-									tipoDev= simbolo_temp.GetType(); 
-									hayreturn = true;.) ] puntoComa)
+(rreturn [VExpresion<out simbolo_devuelto> (.hayreturn = true;.) ] puntoComa)
 .
 
 /****************************************************/

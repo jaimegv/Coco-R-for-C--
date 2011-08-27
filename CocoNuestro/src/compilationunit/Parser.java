@@ -85,7 +85,7 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	static public boolean modo_depuracion = false;
+	static public boolean modo_depuracion = true;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -868,18 +868,36 @@ public class Parser {
 	}
 
 	void Instruccion(Simbolo simbolo_funcion) {
-		int type = undef; 
+		int type = undef;
+		Simbolo simbolo_devuelto = null; 
 		if (la.kind == 18) {
 			salidadep("Estamos en Instruccion");
-			type  = InstReturn();
-			if (simbolo_funcion.GetTipoRetorno() != type)
-			SemErr("return devuelve un tipo distinto al declarado.");
-			else if (type == identificador)
+			simbolo_devuelto  = InstReturn();
+			if (simbolo_devuelto != null)
+			{
+			if (simbolo_funcion.GetTipoRetorno() != simbolo_devuelto.GetType())
+				SemErr("return devuelve un tipo distinto al declarado.");
+			else if (simbolo_funcion.GetTipoRetorno() == identificador)
+				{
+				if (simbolo_funcion.GetClaseDevuelta() != simbolo_devuelto.GetClase())
 					{
-					if (simbolo_funcion.GetClaseDevuelta() != simboloClaseObjeto)
-						{
-						SemErr("return devuelve una clase distinta a la declarada.");
-						}
+					SemErr("return devuelve una clase distinta a la declarada.");
+					}
+				}
+			//UNA VEZ SE HA COMPROBADO TODO EMITIMOS CODIGO INTERMEDIO		
+			String terceto = new String(tercetos.retorno(simbolo_devuelto.GetNombre()));
+			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			colaTercetos.add(tupla);
+			}
+			else if (simbolo_funcion.GetTipoRetorno() != vacio)
+				 	{
+				 	SemErr("return devuelve un tipo distinto al declarado.");
+				 	}
+			else  //Si ha ocurrido esto supondremos que se ha producido una instruccion de retorno vacia
+					{
+					String terceto = new String(tercetos.retorno_subprograma());
+					tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+					colaTercetos.add(tupla);
 					}
 			
 		} else if (la.kind == 19) {
@@ -1252,22 +1270,20 @@ public class Parser {
 		
 	}
 
-	int  InstReturn() {
-		int  tipoDev;
-		tipoDev = undef;
+	Simbolo  InstReturn() {
+		Simbolo  simbolo_devuelto;
 		Simbolo simbolo_temp = null; 
+		simbolo_devuelto = null;
 		salidadep("Entramos en InstReturn");
 		simboloClaseObjeto = null;
 		simbolo_temp = new Simbolo(tercetos.darTemporal(), undef, var);
 		Expect(18);
 		if (StartOf(10)) {
-			simbolo_temp = VExpresion();
-			salidadep("Return devuelve un tipo:" + simbolo_temp.GetType());
-			tipoDev= simbolo_temp.GetType(); 
+			simbolo_devuelto = VExpresion();
 			hayreturn = true;
 		}
 		Expect(42);
-		return tipoDev;
+		return simbolo_devuelto;
 	}
 
 	void InstCout() {

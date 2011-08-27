@@ -88,12 +88,7 @@ public class Tercetos{
     
     public String retorno(String nombre){
 
-        return "RETURNop,"+nombre+",,\n";
-    }
-    
-    public String retornoSinOp(){
-
-        return "RETURN,,,\n";
+        return "RETURN,"+nombre+",,\n";
     }
     
     
