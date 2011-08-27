@@ -565,25 +565,31 @@ DecVar <Simbolo simbolo_anterior>
 = (.simboloClaseObjeto = null;
 	int type = undef;
 	Simbolo simbolo_temp = null;.)
-[op_asig VExpresion<out simbolo_temp>	(. if (simbolo_temp.GetType() != simbolo_anterior.GetType())
+[op_asig VExpresion<out simbolo_temp>	
+							(. if (simbolo_temp.GetType() != simbolo_anterior.GetType())
 								 	SemErr("Error de tipos en la inicializacion de la variable");
-								 	else if (type == identificador)
-								 		{
-								 		if (simbolo_anterior.GetClase() == null)
-								 			SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
-								 		else if (simbolo_anterior.GetClase() != simboloClaseObjeto)
-								 			SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
-								 		}
-								 	else
-								 		simbolo_anterior.SetValor(null); //Así la variable constará como inicializada
-								 		simboloClaseObjeto = null;
+							   else if (simbolo_anterior.GetType() == identificador)
+							 		{
+							 		if (simbolo_anterior.GetClase() == null)
+							 			SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
+							 		else if (simbolo_anterior.GetClase() != simbolo_temp.GetClase())
+							 			SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
+							 		}
+							   else
+							   		{
+							 		simbolo_anterior.SetValor(null); //Así la variable constará como inicializada
+							 		simboloClaseObjeto = null;
+							 		//Empieza la generacion de codigo intermedio
+							 		String terceto = new String(tercetos.asignacion(simbolo_anterior.GetNombre(), simbolo_temp.GetNombre()));
+							 		}
+							 		
 								.)
 							] puntoComa
-	(.	if (simbolo_temp == null) {	// caso: int Var;
+	/*(.	if (simbolo_temp == null) {	// caso: int Var;
 			simbolo_anterior.SetEtiqueta(tercetos.darEtiqueta());
 		} else {	// caso: int Var=Expresion;
 		}
-	.)
+	.)*/
 .
 
 

@@ -434,7 +434,7 @@ public class Parser {
 		tabla.CerrarAmbito();
 		if ((simbolo_funcion.GetTipoRetorno() != vacio) && !hayreturn)
 				{
-				System.out.println(hayreturn);
+				System.out.println(simbolo_funcion.GetTipoRetorno());
 				SemErr("La funcion tiene que devolver algo (No se ha encontrado instruccion Return)");
 				}
 		else
@@ -470,24 +470,24 @@ public class Parser {
 			simbolo_temp = VExpresion();
 			if (simbolo_temp.GetType() != simbolo_anterior.GetType())
 			SemErr("Error de tipos en la inicializacion de la variable");
-			else if (type == identificador)
-				{
-				if (simbolo_anterior.GetClase() == null)
-					SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
-				else if (simbolo_anterior.GetClase() != simboloClaseObjeto)
-					SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
-				}
+			else if (simbolo_anterior.GetType() == identificador)
+			{
+			if (simbolo_anterior.GetClase() == null)
+				SemErr("Error de tipos en la inicializacion de la variable. Error en la clase.");
+			else if (simbolo_anterior.GetClase() != simbolo_temp.GetClase())
+				SemErr("Error de tipos en la inicializacion de la variable. Clases distintas.");
+			}
 			else
-				simbolo_anterior.SetValor(null); //AsÃ­ la variable constarÃ¡ como inicializada
-				simboloClaseObjeto = null;
+					{
+			simbolo_anterior.SetValor(null); //AsÃ­ la variable constarÃ¡ como inicializada
+			simboloClaseObjeto = null;
+			//Empieza la generacion de codigo intermedio
+			String terceto = new String(tercetos.asignacion(simbolo_anterior.GetNombre(), simbolo_temp.GetNombre()));
+			}
+			
 			
 		}
 		Expect(42);
-		if (simbolo_temp == null) {	// caso: int Var;
-		simbolo_anterior.SetEtiqueta(tercetos.darEtiqueta());
-		} else {	// caso: int Var=Expresion;
-		}
-		
 	}
 
 	void DecMetodo(String Clase, int tipoRetorno, String Nombre) {
@@ -758,6 +758,7 @@ public class Parser {
 					type = Ttipo();
 				} else {
 					Get();
+					type = vacio;
 				}
 				if (type == identificador)
 				{
@@ -769,6 +770,7 @@ public class Parser {
 					{
 					simbolo_anterior = tabla.GetSimboloRecur(t.val);
 					estaba_declarado = true;
+					System.out.println("trolorololo");
 					}
 				}
 				else if (la.val.contentEquals("["))
@@ -824,6 +826,7 @@ public class Parser {
 						}
 					} else SynErr(67);
 				} else SynErr(68);
+				estaba_declarado = false;
 			}
 		}
 	}
@@ -891,10 +894,18 @@ public class Parser {
 					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 					SemErr("Error de tipos en la expresion");
 					
-				} else {
+				} else if (la.kind == 54) {
 					simbolo_temp2 = VExpOR(simbolo_temp1);
 					if ((simbolo_temp1.GetType() != bool) || (simbolo_temp2.GetType() != bool))
 					SemErr("Error de tipos en la expresion");
+					
+				} else {
+					simbolo_temp2 = VExpRelacional(simbolo_temp1);
+					if ((simbolo_temp1 != null) && (simbolo_temp2 != null))
+					{
+					if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != bool))
+						SemErr("Error de tipos en la expresion");
+					}
 					
 				}
 				simbolo = simbolo_temp2;
@@ -1015,13 +1026,8 @@ public class Parser {
 				else
 					simboloClaseObjeto = null;
 				}
-			}
-			catch (NullPointerException e)
-				{
-				}
 			
-			
-			if (simbolo.GetType() == vector)
+																	if (simbolo.GetType() == vector)
 			{
 			if (ind_vector != null)
 				{
@@ -1075,8 +1081,12 @@ public class Parser {
 							}
 						
 						}
+			}
+			catch (NullPointerException e)
+				{
+				}
+					
 				
-			
 			Expect(42);
 		} else SynErr(72);
 	}
@@ -1269,51 +1279,58 @@ public class Parser {
 		int type, type1;
 		Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 		Simbolo simbolo_temp = null;
+		String etiqueta_else = null;
+		String etiqueta_final = null;
+		String terceto = null;
+		tupla_Tercetos tupla = null;
 		
+		etiqueta_else = new String(tercetos.darEtiqueta());
+		etiqueta_final = new String(tercetos.darEtiqueta()); 
 		Expect(23);
 		simbolo_temp = VExpresion();
-		if (simbolo_temp.GetType() != bool) {SemErr("La condicion de un if debe ser logica");}
-		simbolo = new Simbolo ("IF", 0, 0);
-		if (la.kind == 29) {
-			Get();
-			tabla.NuevoAmbito(simbolo); 
-			Cuerpo(simbolo_funcion);
-			tabla.CerrarAmbito();
-			Expect(36);
-		} else if (StartOf(4)) {
-			Instruccion(simbolo_funcion);
-		} else if (la.kind == 1) {
-			Get();
-			if (!(tabla.EstaRecur(t.val)))
-			{
-			SemErr(t.val + " no ha sido declarado previamente");
-			}
-			else
-				{
-				simbolo = tabla.GetSimboloRecur(t.val);
-			}
-			
-			InstExpresion(simbolo);
-		} else SynErr(73);
+		if (simbolo_temp.GetType() != bool) 
+		{
+		SemErr("La condicion de un if debe ser logica");
+		}
+		   simbolo = new Simbolo (tercetos.darTemporal(), 0, 0);
+		   
+		   terceto = new String (tercetos.saltoCondicional(simbolo_temp.GetNombre(), etiqueta_else));
+		   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		   colaTercetos.add(tupla);
+		   
+		 
+		Expect(29);
+		tabla.NuevoAmbito(simbolo); 
+		Cuerpo(simbolo_funcion);
+		tabla.CerrarAmbito();
+		terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
+				   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+				   colaTercetos.add(tupla);	
+		
+		Expect(36);
+		terceto = new String(tercetos.InsertarEtiqueta(etiqueta_else));
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
+		
 		if (la.kind == 24) {
 			Else(simbolo_funcion);
 		}
+		terceto = new String(tercetos.InsertarEtiqueta(etiqueta_final));
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);
+		
 	}
 
 	void Else(Simbolo simbolo_funcion) {
 		int type;
-		Simbolo sim = new Simbolo("ELSE", 0, 0);	// borrarcuando corrigas
+		Simbolo sim = new Simbolo(tercetos.darTemporal(), 0, 0);	// borrarcuando corrigas
 		
 		Expect(24);
-		if (la.kind == 29) {
-			Get();
-			tabla.NuevoAmbito(sim); 
-			Cuerpo(simbolo_funcion);
-			tabla.CerrarAmbito();
-			Expect(36);
-		} else if (StartOf(4)) {
-			Instruccion(simbolo_funcion);
-		} else SynErr(74);
+		Expect(29);
+		tabla.NuevoAmbito(sim); 
+		Cuerpo(simbolo_funcion);
+		tabla.CerrarAmbito();
+		Expect(36);
 	}
 
 	Simbolo  Arg_io() {
@@ -1420,7 +1437,7 @@ public class Parser {
 			   colaTercetos.add(tupla);
 			   tabla.InsertarEnActual(simbolo_resultado);
 										   		
-		} else SynErr(75);
+		} else SynErr(73);
 		return simbolo_resultado;
 	}
 
@@ -1463,7 +1480,7 @@ public class Parser {
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 			colaTercetos.add(tupla);
 			simbolo = simbolo_temp2;
-		} else SynErr(76);
+		} else SynErr(74);
 		return simbolo;
 	}
 
@@ -1605,7 +1622,7 @@ public class Parser {
 			 	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			 	 colaTercetos.add(tupla);
 			 	 tabla.InsertarEnActual(simbolo_resultado);
-		} else SynErr(77);
+		} else SynErr(75);
 		return simbolo_resultado;
 	}
 
@@ -1620,7 +1637,7 @@ public class Parser {
 		} else if (la.kind == 32) {
 			Get();
 			operacion = new String("RESTA");
-		} else SynErr(78);
+		} else SynErr(76);
 		simbolo_resultado = VExpresion();
 		if (simbolo_resultado.GetType() != entera)
 		SemErr("VExpSuma: Error de tipos en la expresion");
@@ -1649,7 +1666,7 @@ public class Parser {
 		} else if (la.kind == 40) {
 			Get();
 			operador = new String ("DIV");
-		} else SynErr(79);
+		} else SynErr(77);
 		if (StartOf(7)) {
 			simbolo_temp1 = ValorFinalExp();
 			Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var);
@@ -1686,7 +1703,7 @@ public class Parser {
 			   
 			 		
 			
-		} else SynErr(80);
+		} else SynErr(78);
 		return simbolo;
 	}
 
@@ -1724,7 +1741,7 @@ public class Parser {
 				{
 				simbolo = simbolo_temp1;
 				}
-		} else SynErr(81);
+		} else SynErr(79);
 		return simbolo;
 	}
 
@@ -1747,26 +1764,27 @@ public class Parser {
 		return simbolo;
 	}
 
-	void Operador_Aritmetico() {
-		if (la.kind == 34) {
-			Get();
-		} else if (la.kind == 32) {
-			Get();
-		} else if (la.kind == 39) {
-			Get();
-		} else if (la.kind == 40) {
-			Get();
-		} else SynErr(82);
-	}
-
-	void Operador_Logico() {
-		if (la.kind == 54) {
-			Get();
-		} else if (la.kind == 53) {
-			Get();
-		} else if (la.kind == 46) {
-			Get();
-		} else SynErr(83);
+	Simbolo  VExpRelacional(Simbolo simbolo_exp_anterior) {
+		Simbolo  simbolo_resultado;
+		System.out.println("Entramos VExpRelacional");
+		simbolo_resultado = null;
+		Simbolo simbolo_temp = null;
+		String operador = null;
+		Operador_Relacional();
+		operador = new String (t.val);
+		simbolo_temp = VExpresion();
+		if (simbolo_temp != null)
+		if ((simbolo_temp.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+		  		SemErr("VEXPRel: Error de tipos en la expresion");
+		  else
+		  		{
+		  		simbolo_resultado = new Simbolo(tercetos.darTemporal(),bool,var);
+		  		tabla.InsertarEnActual(simbolo_resultado);
+		  		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), operador, simbolo_resultado.GetNombre()));
+		  		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		  		colaTercetos.add(tupla);
+		  		}
+		return simbolo_resultado;
 	}
 
 	void Operador_Relacional() {
@@ -1795,8 +1813,30 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(84); break;
+		default: SynErr(80); break;
 		}
+	}
+
+	void Operador_Aritmetico() {
+		if (la.kind == 34) {
+			Get();
+		} else if (la.kind == 32) {
+			Get();
+		} else if (la.kind == 39) {
+			Get();
+		} else if (la.kind == 40) {
+			Get();
+		} else SynErr(81);
+	}
+
+	void Operador_Logico() {
+		if (la.kind == 54) {
+			Get();
+		} else if (la.kind == 53) {
+			Get();
+		} else if (la.kind == 46) {
+			Get();
+		} else SynErr(82);
 	}
 
 
@@ -1819,7 +1859,7 @@ public class Parser {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x},
 		{x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
@@ -1920,18 +1960,16 @@ class Errors {
 			case 70: s = "invalid VExpresion"; break;
 			case 71: s = "invalid Llamada"; break;
 			case 72: s = "invalid InstExpresion"; break;
-			case 73: s = "invalid InstIfElse"; break;
-			case 74: s = "invalid Else"; break;
-			case 75: s = "invalid VCambio_Signo"; break;
-			case 76: s = "invalid VNegacion"; break;
-			case 77: s = "invalid ValorFinalExp"; break;
-			case 78: s = "invalid VExpSuma"; break;
-			case 79: s = "invalid VExpMul"; break;
-			case 80: s = "invalid VExpMul"; break;
-			case 81: s = "invalid VExpAND"; break;
-			case 82: s = "invalid Operador_Aritmetico"; break;
-			case 83: s = "invalid Operador_Logico"; break;
-			case 84: s = "invalid Operador_Relacional"; break;
+			case 73: s = "invalid VCambio_Signo"; break;
+			case 74: s = "invalid VNegacion"; break;
+			case 75: s = "invalid ValorFinalExp"; break;
+			case 76: s = "invalid VExpSuma"; break;
+			case 77: s = "invalid VExpMul"; break;
+			case 78: s = "invalid VExpMul"; break;
+			case 79: s = "invalid VExpAND"; break;
+			case 80: s = "invalid Operador_Relacional"; break;
+			case 81: s = "invalid Operador_Aritmetico"; break;
+			case 82: s = "invalid Operador_Logico"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);

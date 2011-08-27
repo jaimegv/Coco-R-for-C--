@@ -84,7 +84,7 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
          * Bucle para imprimir toda la cola de tercetos!
          */
         System.out.println("-----------------------------------");
-        //System.out.println("Tamano de la lista:"+colaTercetos.size());
+        System.out.println("Tamano de la lista:"+colaTercetos.size());
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
         tupla_Tercetos tupla_temp;
         while (it.hasNext()) {
