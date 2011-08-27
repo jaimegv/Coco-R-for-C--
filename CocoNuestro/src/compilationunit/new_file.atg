@@ -770,7 +770,7 @@ Subprograma <Simbolo simbolo_funcion> = (.  simbolo_funcion.SetKind (funcion);
 											simbolo_funcion.SetType(undef);
 											simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
 											//Vamos a emitir el tercetos que nos asigna aqui una etiqueta
-											String terceto = new String(tercetos.InsertarEtiqueta(simbolo_funcion.GetEtiqueta()));
+											String terceto = new String(tercetos.EtiquetaSubprograma(simbolo_funcion.GetEtiqueta()));
 											tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 											colaTercetos.add(tupla);
 											//*****************************

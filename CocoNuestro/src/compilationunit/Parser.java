@@ -433,7 +433,7 @@ public class Parser {
 		simbolo_funcion.SetType(undef);
 		simbolo_funcion.SetEtiqueta(tercetos.darEtiqueta());
 		//Vamos a emitir el tercetos que nos asigna aqui una etiqueta
-		String terceto = new String(tercetos.InsertarEtiqueta(simbolo_funcion.GetEtiqueta()));
+		String terceto = new String(tercetos.EtiquetaSubprograma(simbolo_funcion.GetEtiqueta()));
 		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 		colaTercetos.add(tupla);
 		//*****************************
@@ -1220,12 +1220,11 @@ public class Parser {
 		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 		colaTercetos.add(tupla);
 		}
-
-		if (!(pos == (simbolo_funcion.GetNParametros()-1)) && !haysiguienteargumento)
-			SemErr("Numero de parametros no coincidente");
-		else if ((pos==0) && (simbolo_funcion.GetNParametros()==0) && !haysiguienteargumento)
-			SemErr("Numero de parametros no coincidente");
-
+		else
+			{
+			if ((!(pos == (simbolo_funcion.GetNParametros() - 1)) && !haysiguienteargumento)
+				SemErr("Numero de parametros no coincidente");
+			}
 				
 	}
 
