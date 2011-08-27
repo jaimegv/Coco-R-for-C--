@@ -233,18 +233,6 @@ CEMASMAS
 										}
 			 						.)
 			 			| voidd (. type = vacio;.)
-			 				/*| ident	(.	// En caso de declarar un Objeto de una clase
-											Simbolo simbolo = new Simbolo(t.val, type, 0);
-											simbolo.SetLine(t.line);
-											System.out.println("Declarando objeto de clase");
-											simbolo.SetColumn(t.col);
-											if (tabla.EstaEnActual(simbolo.GetNombre())) {
-												Simbolo simbolonuevo = tabla.GetSimboloRecur(t.val);
-												SemErr(simbolonuevo.GetNombre() + " ya estaba declarado en la linea " + simbolonuevo.GetLine() + " columna " + simbolonuevo.GetColumn());
-											} else {
-											   tabla.InsertarEnActual(simbolo);
-											}
-	 									.)	*/
 	 							) //Parentedid de Ttipo|voidd|ident
 			 			(Main <type, nombre>
 			 				| ident	

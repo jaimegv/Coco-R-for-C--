@@ -96,15 +96,6 @@ public class Tercetos{
         return "RETURN,,,\n";
     }
     
-    public String asignaArray(String op1,String nombre,int num){
-
-        return "AARRAYNUN,"+op1+","+nombre+","+num+"\n";
-    }
-    
-    public String asignaArray(String op1,String nombre,String indice){
-
-        return "AARRAYIND,"+op1+","+nombre+","+indice+"\n";
-    }
     
     
     public String meteEnArray(String array,String nombre,String num){
@@ -134,7 +125,7 @@ public class Tercetos{
 
     // Obtiene del terceto todos los parametros de la llamada a la funcion
 
-    public String[] call (String nombre, int num_par, String parametros[], String etiqueta){
+    public String[] call (String nombre, int num_par, String parametros[]){
                 
                 String resultado[] = new String[num_par + 1];
                 int i = 0;
@@ -186,19 +177,4 @@ public class Tercetos{
         return "TEMP," + temporal + ","+ valor + ",\n";
     }
     
-    public String guardar_res (String temporal){
-        return "GUARDAres,"+ temporal + ",,\n";
-    }
-    
-    public String elemento_vector (String ident, int indice, String temporal){
-        return "ASIGNAR_TEMP_A_POSVECTOR," + ident + "," + indice + "," + temporal + ",\n";
-    }//Esto efectua temporal = ident[indice]
-    
-    public String a_elemento_vector (String ident, int indice, String temporal){
-        return "ASIGNAR_A_POSVECTOR_TEMP," + ident + "," + indice + "," + temporal + ",\n";
-    }//Esto efectua ident[indice] = temporal
-    
-    public String constructor (String ident){
-        return "CONSTRUCTOR," + ident + ",,\n";
-    }
 } 
