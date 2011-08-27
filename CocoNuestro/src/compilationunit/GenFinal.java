@@ -25,7 +25,7 @@ public class GenFinal {
     
 
 // TODO consumir ColaGlobal
-public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, LinkedList<tupla_Tercetos> colaGlobal, Tablas tabla, String fichero) {
+public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fichero) {
     
     int desp_total;  //variable para el desplazamiento total de las tablas de simbolos
     archiEscri= new File(fichero);
@@ -42,11 +42,9 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, LinkedList<tupla_Tercet
     //preparamos el fichero que contendra el codigo objeto
     try	{
         bw= new BufferedWriter(new FileWriter(fichero));
-    	}
-    catch (IOException e) 
-    	{
-         System.out.println("Error fichero de salida para Codigo Objeto.");
-    	}
+    } catch (IOException e) {
+         System.err.println("Error fichero de salida para Codigo Objeto ("+fichero+")");
+    }
     
 
     //inicializamos el codigo objeto y lo dejamos todo preparado para leer los
@@ -67,8 +65,9 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, LinkedList<tupla_Tercet
         desp_total = tabla_aux.GetDesplazamiento(); //cogemos el desp de la tabla de simbolos global
         bw.write ("ADD #-" + desp_total + ", .SP\n"); //sumamos desp_total de la tabla de simbolos padre al SP
         bw.write("MOVE .A, .SP\n"); //actualizamos SP
-        bw.write("PUSH .IX\n");  	//guardamos el IX para saber donde empiezan los atributos de la tabla de simbolos padre
         
+        // Saltamos a ejecutar el main
+        bw.write("PUSH .IX\n");  	//guardamos el IX para saber donde empiezan los atributos de la tabla de simbolos padre
         //Vamos a buscar el main para que el PC
         //Si el analisis semantico ha validado el codigo, dentro del ambito global deberia estar el objeto main
         simbolo = tabla_aux.GetSimbolo("main");
@@ -80,12 +79,11 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, LinkedList<tupla_Tercet
         bw.write("HALT ;Cuando se vuelva del Main se terminara la ejecucion\n");
                 
         /*
-         * Bucle para imprimir toda la cola de tercetos!
+         * Bucle para imprimir toda la cola de tercetos del resto de ambitos
          */
         System.out.println("-----------------------------------");
         System.out.println("Tamano de la lista:"+colaTercetos.size());
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
-        tupla_Tercetos tupla_temp;
         while (it.hasNext()) {
             //this.separar(it.next().GetTerceto());
         	tupla_actual = it.next();
@@ -125,13 +123,10 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, LinkedList<tupla_Tercet
 
         // Importante! sino no se guarda nada en el fichero!
         bw.close();
+    } catch (IOException e) {
+    	System.err.println("Tranquilo vaquero");
     }
-       
-    catch (IOException e)
-    	{
-    	System.out.println("Tranquilo vaquero");
-    	}
-    }
+}
 
 
 private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {	
