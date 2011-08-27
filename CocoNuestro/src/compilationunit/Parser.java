@@ -85,7 +85,7 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	static public boolean modo_depuracion = true;
+	static public boolean modo_depuracion = false;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -119,6 +119,7 @@ public class Parser {
 	// Esta variable indicarÃ¡ si se ha producido un return en una funcion/metodo que devuelva
 	// algo distinto de void
 	public boolean hayreturn = false;
+	
 	
 	
 	Simbolo indice_vector = null; //Aqui almacenaremos el indice de un vector (creo que al final no se utiliza)
@@ -1149,10 +1150,16 @@ public class Parser {
 		Simbolo simbolo_nuevo = null; 
 		salidadep("Entramos en VArgumentos");
 		Simbolo simbolo_temp = null;
+		boolean haysiguienteargumento = false;
 		if (pos == 0)
 			{
 			 colaArgumentos = new Vector ();
 			}
+		
+		if  (pos >= simbolo_funcion.GetNParametros())
+		{
+		SemErr("Numero de parametros no coincidente");
+		}
 		
 		if (StartOf(10)) {
 			simbolo_temp = VExpresion();
@@ -1165,15 +1172,18 @@ public class Parser {
 				else
 					{ 
 					simbolo_nuevo = simbolo_funcion.GetParametros(pos);
-					if (simbolo_nuevo.GetType() != simbolo_temp.GetType())
-						SemErr("Tipo de los parametros no coincidente");
-					else if (simbolo_nuevo.GetClase() != simbolo_temp.GetClase())
-						SemErr("Clase de los parametros no coincidente");
-					else
+					if (simbolo_temp != null)
 						{
-						String terceto_argumento = new String(tercetos.ApilarParam(simbolo_temp.GetNombre()));
-						tupla_Tercetos tupla_argumento = new tupla_Tercetos (tabla.GetAmbitoActual(),terceto_argumento);
-						colaArgumentos.addElement(tupla_argumento);
+						if (simbolo_nuevo.GetType() != simbolo_temp.GetType())
+							SemErr("Tipo de los parametros no coincidente");
+						else if (simbolo_nuevo.GetClase() != simbolo_temp.GetClase())
+							SemErr("Clase de los parametros no coincidente");
+						else
+							{
+							String terceto_argumento = new String(tercetos.ApilarParam(simbolo_temp.GetNombre()));
+							tupla_Tercetos tupla_argumento = new tupla_Tercetos (tabla.GetAmbitoActual(),terceto_argumento);
+							colaArgumentos.addElement(tupla_argumento);
+							}
 						}
 					}
 			}
@@ -1181,9 +1191,10 @@ public class Parser {
 			if (la.kind == 27) {
 				Get();
 				VArgumentos(simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos);
+				haysiguienteargumento = true;
 			}
 		}
-		if ((pos == simbolo_funcion.GetNParametros() - 1) || (simbolo_funcion.GetNParametros() == 0))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
+		if ((pos == (simbolo_funcion.GetNParametros() - 1)) || (simbolo_funcion.GetNParametros() == 0))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
 		{
 		//Primero emitimos el terceto correspondiente a apilar el valor devuelto
 		String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
@@ -1209,7 +1220,13 @@ public class Parser {
 		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 		colaTercetos.add(tupla);
 		}
-			
+
+		if (!(pos == (simbolo_funcion.GetNParametros()-1)) && !haysiguienteargumento)
+			SemErr("Numero de parametros no coincidente");
+		else if ((pos==0) && (simbolo_funcion.GetNParametros()==0) && !haysiguienteargumento)
+			SemErr("Numero de parametros no coincidente");
+
+				
 	}
 
 	int  InstReturn() {
@@ -1597,21 +1614,22 @@ public class Parser {
 				if (la.kind == 31) {
 					Get();
 					Simbolo simbolo_valor_devuelto = null;
-					tabla.InsertarEnActual(simbolo_valor_devuelto);
 					if  (simbolo != null)			// Esto es la llamada a una funcion
-					 		{
-					  	if (simbolo.GetKind() != funcion)
-						 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
-						else
-							{
-							simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
-							simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
-							}
-							
-					 	}
-					  
+					{
+					if (simbolo.GetKind() != funcion)
+					SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
+					else
+						{
+						simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
+						simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
+						tabla.InsertarEnActual(simbolo_valor_devuelto);
+						}
+						
+						}
+					 
 					VArgumentos(simbolo, aux, simbolo_valor_devuelto, null);
 					Expect(38);
+					simbolo_resultado = simbolo_valor_devuelto;
 				} else if (la.kind == 28) {
 					Get();
 					Expect(1);
