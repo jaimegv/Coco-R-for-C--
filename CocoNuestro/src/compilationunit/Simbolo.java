@@ -44,7 +44,7 @@ public class Simbolo {
 
 public Simbolo(String nombre, int type, int kind){
 	   this.nombre = nombre;
-	   System.out.println("Nuevo simbolo con nombre: " + this.nombre);
+	   Parser.salidadep("Nuevo simbolo con nombre: " + this.nombre);
 	   this.type = type;
 	   this.kind = kind;
 	   this.nparametros = 0;
@@ -188,7 +188,7 @@ public Object GetValor()
 		return this.valor.elementAt(0);
 	else
 		{
-		System.out.println("Se ha intentado leer una variable no inicializada");
+		Parser.salidadep("Se ha intentado leer una variable no inicializada");
 		return null;
 		}
 		

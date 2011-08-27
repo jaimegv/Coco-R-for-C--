@@ -1,5 +1,6 @@
 package compilationunit;
 
+import compilationunit.Parser;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,7 +14,10 @@ import java.util.Queue;
 import java.util.LinkedList;
 */
 
+
+
 public class TablaSimbolos {
+
 	
 	// Declaracion de constantes para tipos
 	final int undef=0, entera=1, bool=2, cadena=3, vacio=4, identificador=5;
@@ -58,7 +62,7 @@ public class TablaSimbolos {
             	}
 			}
 		tabla.addElement(simbolo);
-		System.out.println(simbolo.GetNombre());
+		Parser.salidadep(simbolo.GetNombre());
 		this.desplazamiento = this.desplazamiento + simbolo.Actualiza_Tamano();
 		return 0;
 		}
@@ -125,7 +129,7 @@ public class TablaSimbolos {
 			simbolito = (Simbolo) tabla.elementAt(i);
 			if (simbolito.Actualiza_Tamano() != 0)
 				simbolito.SetDesplazamiento(desplazamiento);
-			System.out.println("El tamano del simbolo " + simbolito.GetNombre() + " es: " + simbolito.Actualiza_Tamano() + " y su desplazamiento es " + simbolito.GetDesplazamiento());
+			Parser.salidadep("El tamano del simbolo " + simbolito.GetNombre() + " es: " + simbolito.Actualiza_Tamano() + " y su desplazamiento es " + simbolito.GetDesplazamiento());
 			this.desplazamiento = this.desplazamiento + simbolito.Actualiza_Tamano();
 			}
 		return this.desplazamiento;
