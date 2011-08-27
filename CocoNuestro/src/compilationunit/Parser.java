@@ -85,7 +85,7 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	static public boolean modo_depuracion = true;
+	static public boolean modo_depuracion = false;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -1200,7 +1200,7 @@ public class Parser {
 				haysiguienteargumento = true;
 			}
 		}
-		if ((pos == (simbolo_funcion.GetNParametros() - 1)) || (simbolo_funcion.GetNParametros() == 0))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
+		if ((pos == (simbolo_funcion.GetNParametros() - 1)))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
 		{
 		//Primero emitimos el terceto correspondiente a apilar el valor devuelto
 		String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
