@@ -171,16 +171,21 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("NEG_LOG")) {	// NOT lógico
 		nemonico = "XOR";
 		OpUnaria(ambitoterceto);	// opUnaria op2=1
+	} else if ((operacion.equals("==")) ||
+					(operacion.equals("!="))) {		// OpRel.
+		// TODO
+		nemonico ="CMP";	// nemonico para todos los relacionales¿?
+		OpRelacional(ambitoterceto);
 	} else if (operacion.equals("READ")) {		// CIN
 		nemonico = "ININT";
 		GetEntero(ambitoterceto);
-	} else if (operacion.equals("PUT_BOOLEANO")) {	// PRINT Boolean
+	} else if (operacion.equals("PUT_BOOLEANO")) {	// PRINT Boolean COUT
 		nemonico="WRSTR";
 		PutBool(ambitoterceto);
-	} else if (operacion.equals("PUT_CADENA")) {	// PRINT CADENA
+	} else if (operacion.equals("PUT_CADENA")) {	// PRINT CADENA	COUT
 		nemonico="WRSTR";
 		PutCadena(ambitoterceto);
-	} else if (operacion.equals("PUT_ENTERO")) {	// PRINT ENTERO
+	} else if (operacion.equals("PUT_ENTERO")) {	// PRINT ENTERO COUT
 		nemonico="WRINT";
 		PutEntero(ambitoterceto);
 	} else if (operacion.equals("PUT_SALTO_LINEA")) {// PRINT SALTO_LINEA
@@ -197,6 +202,89 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 
 //***********************************************************************************************
 
+/*
+ * OpRelacional
+ * Realizaremos dependiendo de la operacion el calculo. < > == =! <= >= 
+ */
+private void OpRelacional (TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
+		Simbolo simbolo_res = ambito_terceto.GetSimbolo(op3);	// Simbolo Resultado. Siempre local=temp
+		// pe. op1 < op2 -> resultado, el resultado siempte se dejara en una direccion en local
+		TablaSimbolos tabla_op_lejano = null;	// En caso de tener q ir a buscar algo
+
+		// Nemonico en todos los casos: CMP
+		// Recuerda que CMP solo actualiza el SR con op1-op2.
+	// TODO hecho para los poeradores relacionales == y != revisar todo si añades más	
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
+			// Comparo el contenido de memoria de los dos operandos.
+			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
+			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
+			if (operacion.equals("!=")) {
+				bw.write("XOR .A, #0\n");
+			}//  else if (operacion.equals("==")) { // nada en este caso }
+			// Muevo la operacion relacional
+			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) { 	//op1 No local
+			// Busco el operando 1.
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Comparo el contenido de memoria de los dos operandos.
+			bw.write(nemonico+" #-"+despl_op1+"[.IY], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
+			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
+			if (operacion.equals("!=")) {
+				bw.write("XOR .A, #0\n");
+			}//  else if (operacion.equals("==")) { // nada en este caso }
+			// Muevo la operacion relacional
+			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
+		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
+			// Busco el operando 2.
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// Comparo el contenido de memoria de los dos operandos.
+			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IY], #-"+despl_op2+"[.IX]\n");
+			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
+			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
+			if (operacion.equals("!=")) {
+				bw.write("XOR .A, #0\n");
+			}//  else if (operacion.equals("==")) { // nada en este caso }
+			// Muevo la operacion relacional
+			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
+		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//NADA local
+			// Busco el operando 1.
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Ya q op2 usara el registro IY muevo este a R9
+			bw.write("MOVE .IY, .R9\n");
+			// Busco el operando 2.
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			bw.write(nemonico+" #-"+despl_op1+"[.R9], #-"+despl_op2+"[.IY]\n");
+			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
+			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
+			if (operacion.equals("!=")) {
+				bw.write("XOR .A, #0\n");
+			}//  else if (operacion.equals("==")) { // nada en este caso }
+			// Muevo la operacion relacional
+			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
+		} else {
+			System.err.println("Op "+nemonico+". Caso no contemplado");			
+		}		
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar OpRelacional.");
+	}
+}
 
 /*
  * AsignaValorVector
