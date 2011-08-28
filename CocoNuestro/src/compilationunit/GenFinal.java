@@ -246,7 +246,8 @@ private void OpCondicional(TablaSimbolos ambito_terceto) {
 		// op2= etiqueta
 		
 		if (ambito_terceto.Esta(op1)) {	// op1 local
-			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto");
+			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto \n");
+			bw.write("BNZ /"+op2+"\n");	// salto si el resultado no es cierto
 		} else if (ambito_terceto.Esta(op1)) {	// op1 no local	
 			
 		} else {
