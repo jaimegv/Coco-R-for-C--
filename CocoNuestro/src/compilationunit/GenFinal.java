@@ -1024,11 +1024,20 @@ private void separar(String linea)	{
     linea=linea.substring(u+1);
     
     u= linea.indexOf(",");
-    op1=linea.substring(0,u);
+    op1=linea.substring(0,u);	// Tenemos op1
     linea=linea.substring(u+1);
 
-    u= linea.indexOf(",");
-    op2=linea.substring(0,u);
+    // Problemas con cadenas
+    if (linea.contains("\"")) {	// Terceto con cadena de texto
+    	//System.err.println("Es algo con cadenas!"+linea);
+    	//aklinea=linea.substring(u+1);
+    	u= linea.indexOf("\",")+1;
+    	//System.err.println("Es algo con cadenas:"+linea.substring(0,u));
+	    op2=linea.substring(0,u);
+    } else {
+	    u= linea.indexOf(",");
+	    op2=linea.substring(0,u);
+    }
     linea=linea.substring(u+1);
 
     op3=linea.substring(0,linea.indexOf("\n"));
