@@ -243,13 +243,20 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 private void OpCondicional(TablaSimbolos ambito_terceto) {
 	try {
 		Simbolo simbolo_condicion = ambito_terceto.GetSimbolo(op1);	// op1= Condicion
+		TablaSimbolos tabla_op_lejano=null;
 		// op2= etiqueta
 		
 		if (ambito_terceto.Esta(op1)) {	// op1 local
 			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto \n");
 			bw.write("BNZ /"+op2+"\n");	// salto si el resultado no es cierto
 		} else if (ambito_terceto.Esta(op1)) {	// op1 no local	
-			
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_vector = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// TODO REVISAR ESTO MAL.
+			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto \n");
+			bw.write("BNZ /"+op2+"\n");	// salto si el resultado no es cierto
 		} else {
 			System.err.println("Error: OpCondicional. Caso no contemplado.");
 		}
@@ -279,7 +286,7 @@ private void OpGoto () {
  */
 private void EtiquetaIf () {
 	try {
-		bw.write(op1+" ;Etiqueta IFs\n");
+		bw.write(op1+": ;Etiqueta IFs\n");
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar Insertar Etiqua IF.");
 	}
