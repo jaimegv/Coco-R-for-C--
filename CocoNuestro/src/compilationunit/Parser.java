@@ -85,7 +85,7 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	static public boolean modo_depuracion = false;
+	static public boolean modo_depuracion = true;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -332,7 +332,7 @@ public class Parser {
 				if (la.kind == 16) {
 					Get();
 					Expect(26);
-					visible=publico; 
+					visible=privado; 
 					Cuerpo_Clase(visible, simbolo);
 				}
 			} else {
@@ -539,6 +539,7 @@ public class Parser {
 				{
 				sim = new Simbolo(t.val, simbolo_anterior.GetType(), simbolo_anterior.GetKind());
 				sim.SetClase(simbolo_anterior.GetClase());
+				sim.SetVisibilidad(simbolo_anterior.GetVisibilidad());
 				tabla.InsertarEnActual(sim);
 				}
 			}
@@ -672,11 +673,13 @@ public class Parser {
 				} else {
 					Get();
 					Expect(1);
+					salidadep("AQUIIIIIIIIIIIIIIII "+t.val);
 					Simbolo simbol = new Simbolo(t.val, 0, metodo);
 					simbol.SetKind(metodo);
 					simbol.SetTipoRetorno(vacio);
 					simbol.SetClase(simClase);		// a q clase pertenece le metodo
 					simbol.SetAmbitoAsociado(tabla.GetAmbitoActual());	// ambito de accion
+					tabla.InsertarEnActual(simbol);
 					
 					DecCabMet(simbol);
 				}
@@ -1199,15 +1202,21 @@ public class Parser {
 			 colaArgumentos = new Vector ();
 			}
 		
-		if  ((pos >= simbolo_funcion.GetNParametros()) && (simbolo_funcion.GetNParametros() != 0))
+		if (simbolo_funcion != null)
 		{
-		SemErr("Numero de parametros no coincidente");
+		if  ((pos >= simbolo_funcion.GetNParametros()) && (simbolo_funcion.GetNParametros() != 0))
+			{
+			SemErr("Numero de parametros no coincidente");
+			}
 		}
 		
 		if (StartOf(10)) {
 			hayargumento = true;
+			if (simbolo_funcion != null)
+			{
 			if (pos >= simbolo_funcion.GetNParametros())
-			SemErr("Numero de parametros no coincidente"); 
+				SemErr("Numero de parametros no coincidente");
+			} 
 			simbolo_temp = VExpresion();
 			if (simbolo_funcion != null)
 			{
@@ -1240,32 +1249,34 @@ public class Parser {
 				haysiguienteargumento = true;
 			}
 		}
-		if ((pos == (simbolo_funcion.GetNParametros() - 1)))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
+		if (simbolo_funcion != null)
 		{
-		//Primero emitimos el terceto correspondiente a apilar el valor devuelto
-		String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
-		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
-		colaTercetos.add(tupla);
-		//Ahora emitimos el terceto de aviso de apilar parametros
-		String terceto = new String(tercetos.Init_parametros());
-		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-		colaTercetos.add(tupla);
-		//Ahora emitimos los tercetos de apilamiento de parametros
-		    		for(int i=0; i< colaArgumentos.size(); i++)
-		    			{
-		      	tupla = (tupla_Tercetos)colaArgumentos.elementAt(i);
-		      	colaTercetos.add(tupla);
+			if ((pos == (simbolo_funcion.GetNParametros() - 1)))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
+			{
+			//Primero emitimos el terceto correspondiente a apilar el valor devuelto
+			String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+			colaTercetos.add(tupla);
+			//Ahora emitimos el terceto de aviso de apilar parametros
+			String terceto = new String(tercetos.Init_parametros());
+			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			colaTercetos.add(tupla);
+			//Ahora emitimos los tercetos de apilamiento de parametros
+		     		for(int i=0; i< colaArgumentos.size(); i++)
+		     			{
+		       	tupla = (tupla_Tercetos)colaArgumentos.elementAt(i);
+		       	colaTercetos.add(tupla);
+				}
+			//Ahora emitimos el terceto de terminar de apilar parametros
+			terceto = new String(tercetos.Fin_parametros());
+			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			colaTercetos.add(tupla);
+			
+			//Ahora tenemos que saltar a la etiqueta
+			terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+			colaTercetos.add(tupla);
 			}
-		//Ahora emitimos el terceto de terminar de apilar parametros
-		terceto = new String(tercetos.Fin_parametros());
-		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-		colaTercetos.add(tupla);
-		
-		//Ahora tenemos que saltar a la etiqueta
-		terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
-		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-		colaTercetos.add(tupla);
-		}
 		else if ((simbolo_funcion.GetNParametros() == 0) && !haysiguienteargumento && !hayargumento && (pos==0))
 			{
 			//Primero emitimos el terceto correspondiente a apilar el valor devuelto
@@ -1287,9 +1298,8 @@ public class Parser {
 			{
 			SemErr("Numero de parametros no coincidente");
 			}
+		}	
 				
-		
-		
 	}
 
 	Simbolo  InstReturn() {
@@ -1446,6 +1456,7 @@ public class Parser {
 	}
 
 	void InstIfElse(Simbolo simbolo_funcion) {
+		salidadep("Entramos en instruccion InstIfElse"); 
 		Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 		Simbolo simbolo_temp = null;
 		String etiqueta_else = null;
@@ -1470,10 +1481,9 @@ public class Parser {
 		 
 		Expect(29);
 		Cuerpo(simbolo_funcion);
-		tabla.CerrarAmbito();
 		terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
-		   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-		   colaTercetos.add(tupla);	
+		tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		colaTercetos.add(tupla);	
 		
 		Expect(36);
 		terceto = new String(tercetos.InsertarEtiqueta(etiqueta_else));
@@ -1491,7 +1501,7 @@ public class Parser {
 
 	void Else(Simbolo simbolo_funcion) {
 		int type;
-		Simbolo sim = new Simbolo(tercetos.darTemporal(), 0, 0);	// borrarcuando corrigas
+		Simbolo sim = new Simbolo(tercetos.darTemporal(), 0, 0);
 		
 		Expect(24);
 		Expect(29);
@@ -1655,6 +1665,7 @@ public class Parser {
 			Get();
 			if (!(tabla.EstaRecur(t.val)))
 			{
+			salidadep("cococoococo");
 			SemErr(t.val + " no estaba declarado previamente");
 			}
 			else
@@ -1717,12 +1728,13 @@ public class Parser {
 							else if (simbolo_metodoatributo.GetKind() == var)
 								{
 								//System.out.println("EL TIPO DE " + simbolo_metodoatributo.GetNombre() +" ES " + simbolo_metodoatributo.GetType());
-								String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
+								//String nombreatributo = new String (simbolo.GetNombre() + "." + simbolo_metodoatributo.GetNombre());
 								//System.out.println(nomdar_posbreatributo);
-								//tipoDev = simbolo_metodoatributo.GetType();//Lo mismo, aqui tendremos que emitir el simbolo correspondiente al atributo
-								simbolo_resultado=simbolo_metodoatributo;
+								//tipoDev = simbolo_metodoatributo.GetType();//Lo mismo, aqui tendremos que emitir el simbolo correspondiente al atributo			 				
+								simbolo_resultado = simbolo.GetAtributo(simbolo.GetNombre() + "." +simbolo_metodoatributo.GetNombre());
+								salidadep(simbolo_resultado.GetNombre());
 								//simbolo_resultado.SetType(entera);
-											String terceto;
+											//String terceto;
 											//terceto = tercetos.asignacion(simbolo_resultado.GetNombre(), nombreatributo);
 											//tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 									 	//colaTercetos.add(tupla);

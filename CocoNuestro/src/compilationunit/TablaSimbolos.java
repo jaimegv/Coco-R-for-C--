@@ -63,7 +63,6 @@ public class TablaSimbolos {
 			}
 		tabla.addElement(simbolo);
 		Parser.salidadep(simbolo.GetNombre());
-		this.desplazamiento = this.desplazamiento + simbolo.Actualiza_Tamano();
 		return 0;
 		}
 	
@@ -129,6 +128,10 @@ public class TablaSimbolos {
 			simbolito = (Simbolo) tabla.elementAt(i);
 			if (simbolito.Actualiza_Tamano() != 0)
 				simbolito.SetDesplazamiento(desplazamiento);
+			if (simbolito.GetType() == identificador)
+				{
+				
+				}
 			Parser.salidadep("El tamano del simbolo " + simbolito.GetNombre() + " es: " + simbolito.Actualiza_Tamano() + " y su desplazamiento es " + simbolito.GetDesplazamiento());
 			this.desplazamiento = this.desplazamiento + simbolito.Actualiza_Tamano();
 			}
@@ -138,6 +141,11 @@ public class TablaSimbolos {
 	public Simbolo GetSimboloAsociado()
 		{
 		return this.simbolo_asociado;
+		}
+	
+	public Vector GetVectorSimbolos()
+		{
+		return this.tabla;
 		}
 
 	}

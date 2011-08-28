@@ -39,6 +39,8 @@ public class Simbolo {
 	
 	private int desplazamiento; //Esto indicara que posicion de la tabla de simbolos ocupa.
 								//Sera necesario para localizar las variables locales en la GCF
+	private Vector atributos;   //Si es una clase, tendra dentro los atributos asociados
+	private Simbolo objeto_perteneciente;
 	
 
 
@@ -56,6 +58,7 @@ public Simbolo(String nombre, int type, int kind){
 	   this.clase_devuelta = null;
 	   this.ambito_asociado = null;
 	   this.desplazamiento = -1;
+	   this.objeto_perteneciente = null;
 
 	}
 
@@ -87,6 +90,8 @@ public void SetNParametros(int nparametros){
 	}
 
 public void SetVisibilidad(int visible){
+	   Parser.salidadep("Situando la visibilidad del atributo " + this.nombre + " a ");
+	   Parser.salidadep(visible);
 	   this.visible = visible;
 	}
 
@@ -117,6 +122,23 @@ public void SetValor(Object valor)
 public void SetClase(Simbolo simbolo)
 {
 	clase_perteneciente = simbolo;
+	if ((this.GetType() == identificador) && (this.GetKind() == var))
+		{
+		Simbolo simbolito;
+		this.atributos = new Vector();
+		for(int i=0; i< this.clase_perteneciente.GetAmbitoAsociado().GetVectorSimbolos().size(); i++)
+			{
+			simbolito = (Simbolo) this.clase_perteneciente.GetAmbitoAsociado().GetVectorSimbolos().elementAt(i);
+			if (simbolito.GetKind() == var)
+				{
+				Simbolo simbolo_atributo = new Simbolo(this.nombre + "."+ simbolito.GetNombre(),simbolito.GetType(),var);
+				simbolo_atributo.SetVisibilidad(simbolito.GetVisibilidad());
+				simbolo_atributo.SetDesplazamiento(simbolito.GetDesplazamiento());
+				simbolo_atributo.objeto_perteneciente = this;
+				this.atributos.addElement(simbolo_atributo);
+				}
+			}
+		}
 }
 
 public void SetAmbitoAsociado(TablaSimbolos ambito_asociado)
@@ -242,6 +264,30 @@ public String GetEtiqueta ()
 	{
 	return this.etiqueta;
 	}
+
+public Simbolo GetObjetoPerteneciente()
+	{
+	return this.objeto_perteneciente;
+	}
+
+public Simbolo GetAtributo(String nombre)
+	{
+	if (this.GetType() != identificador)
+		return null;
+	else
+		{
+		Simbolo simbolito;
+		for(int i=0; i< this.atributos.size(); i++)
+			{
+			simbolito = (Simbolo) this.atributos.elementAt(i);
+			Parser.salidadep(simbolito.GetNombre());
+			if (simbolito.GetNombre().contentEquals(nombre))
+				return simbolito;
+			}
+		Parser.salidadep("NO ENCONTRADO");
+		return null;
+		}
+	}
 //************************************************//////
 
 public void AnadirParametro (Simbolo simbolo)
@@ -268,7 +314,7 @@ public int Actualiza_Tamano ()
 			}
 		else if (type == cadena)
 			{
-			this.tamano = 20;
+			this.tamano = 1;
 			return this.tamano;
 			}
 		else
@@ -283,5 +329,6 @@ public int Actualiza_Tamano ()
 		return this.tamano;
 		}
 	}
+
 
 }
