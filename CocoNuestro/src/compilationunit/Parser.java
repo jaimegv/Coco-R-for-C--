@@ -1,4 +1,4 @@
-package compilationunit;
+package bin.compilationunit;
 
 import java.util.Vector;
 import java.util.HashMap;
