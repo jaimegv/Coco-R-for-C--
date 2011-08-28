@@ -162,36 +162,60 @@ public void SetEtiqueta (String etiqueta)
 	}
 //*****************MÉTODOS DE ACCESO*******************///
 public String GetNombre(){
-	   return this.nombre;
+	   if (this != null)
+		   return this.nombre;
+	   else
+		   return null;
 	}
 
 public int GetType(){
-	   return this.type;
+		if (this != null)
+			return this.type;
+		else
+			return -1;
 	}
 
 public int GetKind(){
-	   return this.kind;
+	if (this != null)
+		return this.kind;
+	else
+		return -1;
 	}
 
 public int GetLine(){
-	   return this.line;
+	if (this != null)
+		return this.line;
+	else
+		return -1;
 	}
 
 public int GetColumn(){
-	   return this.column;
+	if (this != null)
+		return this.column;
+	else
+		return -1;
 	}
 
 public int GetNParametros(){
-	   return this.nparametros;
+	if (this != null)
+		return this.nparametros;
+	else
+		return -1;
 	}
 
 public int GetVisibilidad(){
-	   return this.visible;
+	if (this != null)
+		return this.visible;
+	else
+		return -1;
 	}
 
 public int GetTipoRetorno()
 	{
-	return this.tiporetorno;
+	if (this != null)
+		return this.tiporetorno;
+	else
+		return -1;
 	}
 
 public int GetTipoParametro (int numero)  //numero indica el parametro del que quieres saber su tipo
@@ -201,7 +225,10 @@ public int GetTipoParametro (int numero)  //numero indica el parametro del que q
 
 public boolean Es_Vector ()
 	{
-	return this.es_vector;
+	if (this != null)
+		return this.es_vector;
+	else
+		return false;
 	}
 
 public Object GetValor()
@@ -227,12 +254,19 @@ public Object GetValor(int posicion)
 
 public Vector GetParametros()
 	{
-	return this.parametros;
+	if (this != null)
+		return this.parametros;
+	else
+		return null;
+	
 	}
 
 public Simbolo GetParametros(int pos)
 	{
-	return (Simbolo)this.parametros.elementAt(pos);
+	if (this != null)
+		return (Simbolo)this.parametros.elementAt(pos);
+	else
+		return null;
 	}
 
 public Vector GetPosicionesVector()
@@ -242,22 +276,37 @@ public Vector GetPosicionesVector()
 
 public Simbolo GetClase()
 	{
-	return this.clase_perteneciente;
+	if (this != null)
+		return this.clase_perteneciente;
+	else
+		return null;
+	
 	}
 
 public TablaSimbolos GetAmbitoAsociado()
 {
-return this.ambito_asociado;
+	if (this != null)
+		return this.ambito_asociado;
+	else
+		return null;
+
 }
 
 public Simbolo GetClaseDevuelta ()
 	{
-	return this.clase_devuelta;
+	if (this != null)
+		return this.clase_devuelta;
+	else
+		return null;
+	
 	}
 
 public int GetDesplazamiento ()
 	{
-	return this.desplazamiento;
+	if (this != null)
+		return this.desplazamiento;
+	else
+		return -1;
 	}
 
 public String GetEtiqueta ()

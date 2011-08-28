@@ -616,7 +616,7 @@ public class Parser {
 		tabla.CerrarAmbito();	// Cerramos el ambito de la clase
 								// y volveremos, seguramente, al global
 		} else {
-			SemErr("DeclaraciÃ³n metodo devuelve un tipo diferente a la declaraciÃ³n en la Clase: "+Clase+", en linea-col:"+simMetodo.GetColumn()+"-"+simMetodo.GetColumn());
+			SemErr("Declaracion metodo devuelve un tipo diferente a la declaracion en la Clase: "+Clase);
 		}
 		} else {
 			SemErr("Existe la clase: "+Clase+", pero no tiene ningun metodo asociado: "+t.val);
