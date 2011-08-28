@@ -158,9 +158,11 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("SACA_DE_ARRAY")){
 		// TODO revisar-hacer
 		ObtenerValorVector(ambitoterceto);
-	} else if (operacion.equals("ETIQUETA"))	{	// Etiqueta
+	} else if (operacion.equals("IF")) 	{		// If
+		OpCondicional(ambitoterceto);
+	} else if (operacion.equals("ETIQUETA")) {	// Etiqueta
 		EtiquetaIf();
-	} else if (operacion.equals("GOTO"))		{	// GOTO
+	} else if (operacion.equals("GOTO")) {		// GOTO
 		OpGoto();
 	} else if (operacion.equals("INIT_PARAM")) {	// SP+desplz
 		// TODO comprobrar
@@ -232,6 +234,31 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * OpCondicional
+ * Condicional IF. Si no se cumple op1 saltamos a op2
+ * Usamos las etiquetas de v_cierto y v_falso declaradas en memoria
+ */
+private void OpCondicional(TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_condicion = ambito_terceto.GetSimbolo(op1);	// op1= Condicion
+		// op2= etiqueta
+		
+		if (ambito_terceto.Esta(op1)) {	// op1 local
+			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto");
+		} else if (ambito_terceto.Esta(op1)) {	// op1 no local	
+			
+		} else {
+			System.err.println("Error: OpCondicional. Caso no contemplado.");
+		}
+		
+		System.out.println("operando1"+op1);
+		System.out.println("operando2"+op2);
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar Operacion If.");
+	}
+}
 
 /*
  * OpGoto
