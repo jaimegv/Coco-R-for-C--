@@ -1420,7 +1420,6 @@ public class Parser {
 	}
 
 	void InstIfElse(Simbolo simbolo_funcion) {
-		int type, type1;
 		Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 		Simbolo simbolo_temp = null;
 		String etiqueta_else = null;
@@ -1444,12 +1443,11 @@ public class Parser {
 		   
 		 
 		Expect(29);
-		tabla.NuevoAmbito(simbolo); 
 		Cuerpo(simbolo_funcion);
 		tabla.CerrarAmbito();
 		terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
-				   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-				   colaTercetos.add(tupla);	
+		   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		   colaTercetos.add(tupla);	
 		
 		Expect(36);
 		terceto = new String(tercetos.InsertarEtiqueta(etiqueta_else));
@@ -1471,9 +1469,7 @@ public class Parser {
 		
 		Expect(24);
 		Expect(29);
-		tabla.NuevoAmbito(sim); 
 		Cuerpo(simbolo_funcion);
-		tabla.CerrarAmbito();
 		Expect(36);
 	}
 

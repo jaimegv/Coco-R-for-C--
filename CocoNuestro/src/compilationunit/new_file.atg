@@ -961,8 +961,7 @@ InstReturn <out Simbolo simbolo_devuelto>
 /****************************************************/
 
 InstIfElse <Simbolo simbolo_funcion>	
-(. int type, type1;
-	Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
+(.  Simbolo simbolo = null; //new Simbolo(t.val, 0, 0);	// borrarcuando corrigas
 	Simbolo simbolo_temp = null;
 	String etiqueta_else = null;
 	String etiqueta_final = null;
@@ -984,12 +983,11 @@ InstIfElse <Simbolo simbolo_funcion>
 								  		 .)
 								  		 
 								  		    
-	(llave_ab (. tabla.NuevoAmbito(simbolo); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();
-																		   terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
-								  		   								   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-								  		   								   colaTercetos.add(tupla);	
-																		.) llave_ce) 
-	//En caso de que no se habrán llaves no se abrirá un ámbito nuevo (no tiene ningún sentido)
+	(llave_ab Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();
+									     terceto = new String (tercetos.saltoIncondicional(etiqueta_final));
+	   								     tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	   								     colaTercetos.add(tupla);	
+									  .) llave_ce) 
 	 	
 	(.
 	terceto = new String(tercetos.InsertarEtiqueta(etiqueta_else));
@@ -1009,7 +1007,7 @@ Else<Simbolo simbolo_funcion>	(. int type;
 	Simbolo sim = new Simbolo(tercetos.darTemporal(), 0, 0);	// borrarcuando corrigas
 .) 
 =
-	elsse (llave_ab (. tabla.NuevoAmbito(sim); .) Cuerpo<simbolo_funcion> (. tabla.CerrarAmbito();.) llave_ce) .
+	elsse (llave_ab Cuerpo<simbolo_funcion>  llave_ce) .
 
 /***************************************************/
 
