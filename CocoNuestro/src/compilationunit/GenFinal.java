@@ -26,7 +26,7 @@ public class GenFinal {
     int dirGlobal=65535;			// comienzo del MarcoPila para ambitoGlobal y resto de programas
     
 
-// TODO consumir ColaGlobal
+
 public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fichero) {
     
     int desp_total;  //variable para el desplazamiento total de las tablas de simbolos
@@ -162,6 +162,9 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("CALL")) {		// Llamada a Funcion!
 		// TODO no comprobada
 		LlamadaProg(ambitoterceto);
+	} else if (operacion.equals("RETURNop")) {	// return Valor;
+		// TODO hacer-comprobrar
+		ReturnOp(ambitoterceto);
 	} else if (operacion.equals("RET")) {		// Retornar de una funcion
 		// TODO	no comprobada
 		RetornoProg(ambitoterceto);
@@ -217,6 +220,40 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * ReturnOp
+ * Guardaremos el valor del simbolo pasado como argumento, op1, en la direccion apilada antes de llamar
+ * a la funcion. Para saber mas mirar PushDirRetorno
+ * usamos R9
+ */
+private void ReturnOp (TablaSimbolos ambito_terceto)  {
+	try {
+		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		TablaSimbolos tabla_op_lejano = null; 
+		// Movemos la direccion de Retorno a un Registro
+		bw.write("MOVE #4[.IX], .R9\n");	// R9 tiene la dirRetorno
+		
+		if (ambito_terceto.Esta(op1)) {			// op1 Local
+			Parser.salidadep(simbolo_op1.Actualiza_Tamano()+"!!!!!!!!!!!!!");
+			
+			//Muevo el valor a donde apunta .R9
+			bw.write("MOVE #-"+simbolo_op1.GetDesplazamiento()+"[.IX], [.R9]\n");
+		} else if (!ambito_terceto.Esta(op1)) {	// op1 no local
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// Comparo el contenido de memoria de los dos operandos.
+			bw.write("MOVE #-"+despl_op1+"[.IY], [.R9]\n");
+		} else {
+			System.err.println("Error: ReturnOp. Caso no contemplado.");
+		}
+
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar ReturnOp.");
+	}
+}
 
 /*
  * InitParam
@@ -854,14 +891,6 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
  */
 private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto) {
 	try {
-		/*bw.write("MOVE .IX, .IY\n");	// Nos moveremos sobre este registro
-		TablaSimbolos ambito_simbolo = ambito_terceto;	// Variable para moverme por tablas		
-		while (!ambito_simbolo.Esta(Nombre)) {
-			Parser.salidadep("Simbolo con nombre:"+Nombre);
-			bw.write("MOVE #2[.IY],.IY\n");
-			ambito_simbolo = ambito_simbolo.Ambito_Padre();	// esta en el padre?
-		}
-		*/
 		TablaSimbolos ambito_simbolo = null;
 		if (!ambito_terceto.Esta(Nombre)) {	// Esta en ambito global
 			ambito_simbolo = ambito_global;	// ambito_global -> dec al comienzo
