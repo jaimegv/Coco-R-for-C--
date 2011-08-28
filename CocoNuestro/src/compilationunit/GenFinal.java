@@ -21,7 +21,9 @@ public class GenFinal {
     int lista_ini=12000;	// comienzo en memoria de la lista_data
     int count_char=lista_ini;	// Numero de characters emitidos en lista data
     int true_false = lista_ini - 200;	// En esta direccion se guarda cadena "true" y "false" y valor 1 y 0 y mas constantes
-	String nemonico = new String();		
+	String nemonico = new String();	
+    TablaSimbolos ambito_global;	// guardamos el ambito_global para MarcoDir
+    int dirGlobal=65535;			// comienzo del MarcoPila para ambitoGlobal y resto de programas
     
 
 // TODO consumir ColaGlobal
@@ -35,7 +37,6 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
     //cola para ir metiendo los metodos a los que se llama
     LinkedList<String> colaMetodos = new LinkedList<String> (); 
     Simbolo simbolo;
-    TablaSimbolos tabla_aux;
     c_etiqueta = 0;
     
     Parser.salidadep("Comienza la fase de generacion de codigo objeto");
@@ -53,16 +54,16 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         bw.write("ORG 0\n");
         // Inicializamos la pila al maximo puesto que es decreciente
         // y la guardamos en el puntero de pila
-        bw.write ("MOVE #65535, .SP\n");
-        bw.write ("MOVE .SP, .IX\n");
+        bw.write ("MOVE #"+dirGlobal+", .SP\n");	// ambito_global
+        bw.write ("MOVE .SP, .IX\n");		
         
         /* creamos el RA de la clase que contiene el metodo principal, dejando
          * hueco para todos sus atributos, despues guardamos el IX, que apuntará
          * al primer atributo de la clase que contiene el metodo main
          * para luego poder acceder cogiendo el desplazamiento de la tabla
          * de simbolos */
-        tabla_aux = tabla.GetAmbitoGlobal();  //buscamos la tabla de la clase del metodo principal
-        desp_total = tabla_aux.GetDesplazamiento(); //cogemos el desp de la tabla de simbolos global
+        ambito_global = tabla.GetAmbitoGlobal();  //buscamos la tabla de la clase del metodo principal
+        desp_total = ambito_global.GetDesplazamiento(); //cogemos el desp de la tabla de simbolos global
         bw.write ("ADD #-" + desp_total + ", .SP\n"); //sumamos desp_total de la tabla de simbolos padre al SP
         bw.write("MOVE .A, .SP\n"); //actualizamos SP
         
@@ -70,7 +71,7 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         bw.write("PUSH .IX\n");  	//guardamos el IX para saber donde empiezan los atributos de la tabla de simbolos padre
         //Vamos a buscar el main para que el PC
         //Si el analisis semantico ha validado el codigo, dentro del ambito global deberia estar el objeto main
-        simbolo = tabla_aux.GetSimbolo("main");
+        simbolo = ambito_global.GetSimbolo("main");
         String etiqueta_main;
         etiqueta_main = simbolo.GetEtiqueta();
         bw.write("CALL /" + etiqueta_main + " ; VAMOS AL MAIN\n");
@@ -846,19 +847,30 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
 
 /*
  * Busca la direccion de un elemento-simbolo(String) que no este en el ambito dado
- * como parametro. Ademas va escribiendo en la salida del fichero el codigo necesario
- * para dejar en IY el valor del MARCO DE PILA del ambito donde esta declarado
+ * como parametro. Sólo hay dos posibilidades en esta funcion:
+ * 1- El simbolo es local, por lo que no se ha necesitado esta funcion
+ * 2- En caso de no ser local es variable global y se devuelve el ambito global y la
+ * direccion del IX global, almacenado en una variable al inicio global
  */
 private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto) {
 	try {
-		bw.write("MOVE .IX, .IY\n");	// Nos moveremos sobre este registro
-		TablaSimbolos ambito_simbolo = ambito_terceto;	// Variable para moverme por tablas
-		
+		/*bw.write("MOVE .IX, .IY\n");	// Nos moveremos sobre este registro
+		TablaSimbolos ambito_simbolo = ambito_terceto;	// Variable para moverme por tablas		
 		while (!ambito_simbolo.Esta(Nombre)) {
 			Parser.salidadep("Simbolo con nombre:"+Nombre);
 			bw.write("MOVE #2[.IY],.IY\n");
 			ambito_simbolo = ambito_simbolo.Ambito_Padre();	// esta en el padre?
 		}
+		*/
+		TablaSimbolos ambito_simbolo = null;
+		if (!ambito_terceto.Esta(Nombre)) {	// Esta en ambito global
+			ambito_simbolo = ambito_global;	// ambito_global -> dec al comienzo
+			bw.write("MOVE #"+dirGlobal+",.IY\n");
+		} else {
+			// TODO
+			System.err.println("Error: BuscaMarcoDir, No es local ni global -> Objeto.");
+		}
+		
 		return ambito_simbolo;
 	} catch (Exception e) {
 		System.err.println("Error: Buscar Direccion simbolo error.");
