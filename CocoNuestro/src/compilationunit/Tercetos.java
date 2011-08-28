@@ -142,6 +142,12 @@ public class Tercetos{
                 return "CALL,"+nombre+",,\n";
     }
     
+    public String llamada_metodo (String objeto, String etiqueta_metodo){
+        
+
+        return "CALL," + objeto + "," + etiqueta_metodo + ",\n";
+}
+    
     public String retorno_subprograma (){
         
 

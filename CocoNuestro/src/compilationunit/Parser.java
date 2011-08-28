@@ -1065,7 +1065,7 @@ public class Parser {
 				tabla.InsertarEnActual(simbolo_valor_devuelto);
 				}
 			
-			VArgumentos(simbolo_metodoargumento, 0, simbolo_valor_devuelto, null);
+			VArgumentos(simbolo_metodoargumento, 0, simbolo_valor_devuelto, null, simbolo_objeto);
 			Expect(38);
 			Expect(42);
 		} else if (StartOf(5)) {
@@ -1101,7 +1101,7 @@ public class Parser {
 				}
 				
 			Get();
-			VArgumentos(simbolo, 0, simbolo_valor_devuelto, null);
+			VArgumentos(simbolo, 0, simbolo_valor_devuelto, null, null);
 			Expect(38);
 			Expect(42);
 		} else if (StartOf(9)) {
@@ -1213,7 +1213,7 @@ public class Parser {
 		} else SynErr(73);
 	}
 
-	void VArgumentos(Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos) {
+	void VArgumentos(Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos, Simbolo simbolo_objeto) {
 		Simbolo simbolo_nuevo = null; 
 		salidadep("Entramos en VArgumentos");
 		Simbolo simbolo_temp = null;
@@ -1267,7 +1267,7 @@ public class Parser {
 			  
 			if (la.kind == 27) {
 				Get();
-				VArgumentos(simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos);
+				VArgumentos(simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos, simbolo_objeto);
 				haysiguienteargumento = true;
 			}
 		}
@@ -1295,9 +1295,18 @@ public class Parser {
 			colaTercetos.add(tupla);
 			
 			//Ahora tenemos que saltar a la etiqueta
-			terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
-			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-			colaTercetos.add(tupla);
+			if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
+				{
+				terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				}
+			else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
+				{
+				terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				}
 			}
 		else if ((simbolo_funcion.GetNParametros() == 0) && !haysiguienteargumento && !hayargumento && (pos==0))
 			{
@@ -1306,9 +1315,18 @@ public class Parser {
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
 			colaTercetos.add(tupla);
 			//Ahora tenemos que saltar a la etiqueta
-			String terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
-			tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-			colaTercetos.add(tupla);
+			if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
+				{
+				String terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				}
+			else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
+				{
+				String terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+				tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+				colaTercetos.add(tupla);
+				}
 			}
 		else if ((simbolo_funcion.GetNParametros() == 0) && (haysiguienteargumento || hayargumento))
 		
@@ -1718,7 +1736,7 @@ public class Parser {
 						
 						}
 					 
-					VArgumentos(simbolo, aux, simbolo_valor_devuelto, null);
+					VArgumentos(simbolo, aux, simbolo_valor_devuelto, null, null);
 					Expect(38);
 					simbolo_resultado = simbolo_valor_devuelto;
 				} else if (la.kind == 28) {
@@ -1796,7 +1814,7 @@ public class Parser {
 								tabla.InsertarEnActual(simbolo_valor_devuelto);
 								}
 						
-						VArgumentos(simbolo_metodoatributo, 0, simbolo_valor_devuelto, null);
+						VArgumentos(simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, null);
 						Expect(38);
 					}
 				} else {

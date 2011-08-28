@@ -789,7 +789,7 @@ punto ident (. if (simbolo_objeto != null)
 	 	tabla.InsertarEnActual(simbolo_valor_devuelto);
 	 	}
 	.)
- VArgumentos<simbolo_metodoargumento, 0, simbolo_valor_devuelto, null> parent_ce puntoComa)
+ VArgumentos<simbolo_metodoargumento, 0, simbolo_valor_devuelto, null, simbolo_objeto> parent_ce puntoComa)
  | InstExpresion<simbolo_metodoargumento> (.simboloObjetoGlob = null;.))
 .
 
@@ -901,7 +901,7 @@ InstExpresion <Simbolo simbolo>
 				 		}
 				 		.) //En este caso el valor devuelto por la funcion nos importara un pito
 				 parent_ab 
-				 VArgumentos <simbolo, 0, simbolo_valor_devuelto, null> parent_ce puntoComa //Llamada a una función
+				 VArgumentos <simbolo, 0, simbolo_valor_devuelto, null, null> parent_ce puntoComa //Llamada a una función
 			//*************************************************************************************
 				| 	//(. if .)
 					(op_asig | op_asig_mas | op_asig_menos |
@@ -1598,7 +1598,7 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 							
 					 	}
 				   .)
-	 VArgumentos<simbolo, aux, simbolo_valor_devuelto, null> parent_ce)
+	 VArgumentos<simbolo, aux, simbolo_valor_devuelto, null, null> parent_ce)
 	 (.simbolo_resultado = simbolo_valor_devuelto;.)
 	 
 	 
@@ -1681,7 +1681,7 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 		  			  		tabla.InsertarEnActual(simbolo_valor_devuelto);
 	 		  			  		}
 	 		  			  .)
-	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null> parent_ce])
+	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, null> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
 	 							   |(DarPosVector<out simbolo_resultado, simbolo>))]
   
@@ -1719,7 +1719,7 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 
 .
 
-VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos>
+VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos, Simbolo simbolo_objeto>
 = (. Simbolo simbolo_nuevo = null; 
 	 salidadep("Entramos en VArgumentos");
 	 Simbolo simbolo_temp = null;
@@ -1770,7 +1770,7 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 										}
 									  .)
 
-["," VArgumentos <simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos> (.haysiguienteargumento = true;.)]]
+["," VArgumentos <simbolo_funcion, pos + 1, simbolo_valor_devuelto, colaArgumentos, simbolo_objeto> (.haysiguienteargumento = true;.)]]
 
 		(.  if (simbolo_funcion != null)
 				{
@@ -1796,9 +1796,18 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 					colaTercetos.add(tupla);
 					
 					//Ahora tenemos que saltar a la etiqueta
-					terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
-					tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-					colaTercetos.add(tupla);
+					if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
+						{
+						terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						colaTercetos.add(tupla);
+						}
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
+						{
+						terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						colaTercetos.add(tupla);
+						}
 					}
 				else if ((simbolo_funcion.GetNParametros() == 0) && !haysiguienteargumento && !hayargumento && (pos==0))
 					{
@@ -1807,9 +1816,18 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 					tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
 					colaTercetos.add(tupla);
 					//Ahora tenemos que saltar a la etiqueta
-					String terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
-					tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-					colaTercetos.add(tupla);
+					if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
+						{
+						String terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
+						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						colaTercetos.add(tupla);
+						}
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
+						{
+						String terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						colaTercetos.add(tupla);
+						}
 					}
 				else if ((simbolo_funcion.GetNParametros() == 0) && (haysiguienteargumento || hayargumento))
 				
