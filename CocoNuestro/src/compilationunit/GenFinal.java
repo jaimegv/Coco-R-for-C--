@@ -253,16 +253,12 @@ private void OpCondicional(TablaSimbolos ambito_terceto) {
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_vector = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			// TODO REVISAR ESTO MAL.
-			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto \n");
+			int despl_cond = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			bw.write("CMP #-"+despl_cond+"[.IY], /v_cierto \n");
 			bw.write("BNZ /"+op2+"\n");	// salto si el resultado no es cierto
 		} else {
 			System.err.println("Error: OpCondicional. Caso no contemplado.");
 		}
-		
-		System.out.println("operando1"+op1);
-		System.out.println("operando2"+op2);
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar Operacion If.");
 	}
