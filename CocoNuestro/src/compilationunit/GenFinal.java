@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.StringTokenizer;
 
 public class GenFinal {
     BufferedWriter bw;
@@ -23,8 +21,7 @@ public class GenFinal {
     int true_false = lista_ini - 200;	// En esta direccion se guarda cadena "true" y "false" y valor 1 y 0 y mas constantes
 	String nemonico = new String();	
     TablaSimbolos ambito_global;	// guardamos el ambito_global para MarcoDir
-    int dirGlobal=65535;			// comienzo del MarcoPila para ambitoGlobal y resto de programas
-    
+    private int dirGlobal=65535;			// comienzo del MarcoPila para ambitoGlobal y resto de programas
 
 
 public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fichero) {
@@ -32,10 +29,10 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
     int desp_total;  //variable para el desplazamiento total de las tablas de simbolos
     archiEscri= new File(fichero);
     tupla_Tercetos tupla_actual;
-    String terceto_actual;
-    TablaSimbolos ambito_actual;
+    //String terceto_actual;
+    //TablaSimbolos ambito_actual;
     //cola para ir metiendo los metodos a los que se llama
-    LinkedList<String> colaMetodos = new LinkedList<String> (); 
+    //LinkedList<String> colaMetodos = new LinkedList<String> (); 
     Simbolo simbolo;
     c_etiqueta = 0;
     
@@ -150,7 +147,7 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("ASIGNACION_CADENA")) {	// ETI: data "HOLA"
 		EjecutarAsignaCad(op1, op2, ambitoterceto);
 	} else if (operacion.equals("ASIGNA")){				// asignamos a un temp el valor de otro tmp
-		EjecutarAsigna(op1, op2, ambitoterceto);
+		EjecutarAsigna(ambitoterceto);
 	} else if (operacion.equals("METE_EN_ARRAY")) {		// Asignar valor en posicion del vector
 		// TODO
 		// METE_EN_ARRAY,caracola,temporal2,temporal1
@@ -971,16 +968,46 @@ private void EjecutarAsignaCad (String op1, String op2, TablaSimbolos ambito_ter
 /*
  * Asignamos el valor de op2 a op1 
  * op1 y op2 pueden ser o no variables locales
+ * op1 y op2 pueden ser atributos
  */
-private void EjecutarAsigna (String op1, String op2, TablaSimbolos ambito_terceto) {
+private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
-		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);
+		Simbolo simbolo_op1 = null;
+		Simbolo simbolo_op2 = null;
 		TablaSimbolos tabla_op_lejano = null;
-
+		String Atributo1=null, Objeto1=null;
+		String Atributo2=null, Objeto2=null;
+		int Despla1=0, Despla2=0;
+		
+		if (EsObjeto(op1)) {	// Es objeto op1?
+			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
+			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
+		}		
+		if (EsObjeto(op2)) {	// Es objeto op2?
+			Objeto2 = NombreObjeto(op2);		// ahora tenemos el nombre del objeto
+			op2 = NombreObjeto(op2);
+		} else {
+			simbolo_op2 = ambito_terceto.GetSimbolo(op2);	
+		}
+		// En cualquier caso hago esto, he mnodificado op* en caso de Objeto
+		simbolo_op1 = ambito_terceto.GetSimbolo(op1);
+		simbolo_op2 = ambito_terceto.GetSimbolo(op2);
+		
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	// todo local!
+			// Miramos si es asignaciona a atributo de objeto
+			if (Atributo1 != null) {
+				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				Despla1 = simbolo_op1.GetDesplazamiento();
+			}
+			// Es asignacion de un valor de un atributo
+			if (Atributo2 != null) {
+				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				Despla2 = simbolo_op2.GetDesplazamiento();
+			}
 			// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
-			bw.write("MOVE #-" + simbolo_op2.GetDesplazamiento() + "[.IX], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE #-" + Despla2 + "[.IX], #-"+Despla1+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	//op1 No local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
@@ -1101,6 +1128,40 @@ private void separar(String linea)	{
 
     op3=linea.substring(0,linea.indexOf("\n"));
 }
+
+/*
+ * Devuelve Cierto si es una llamada a objeto
+ */
+private boolean EsObjeto (String operando) {
+	try {
+		return operando.contains(".");			
+	} catch (Exception e) {
+		System.err.println("Error: EsObjeto.");
+		return false;	// hay q poner algo...
+	}
+}
+
+/*
+ * Devuelve Nombre edl objeto
+ */
+private String NombreObjeto (String operando) {
+	try {
+		return operando.substring(0, operando.indexOf("."));
+	} catch (Exception e) {
+		System.err.println("Error: NombreObjeto.");
+		return "Error: NombreObjeto.";
+	}
+}
+
+private String NombreAtributo (String operando) {
+	try {
+	    return operando.substring(operando.indexOf(".")+1, operando.length());
+	} catch (Exception e) {
+		System.err.println("Error: NombreAtributo.");
+		return "Error: NombreAtributo.";
+	}
+}
+
 
 private void daInformacion (String operando, TablaSimbolos ambito_terceto) {
 	try {
