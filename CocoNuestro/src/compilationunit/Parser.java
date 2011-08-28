@@ -1814,7 +1814,7 @@ public class Parser {
 								tabla.InsertarEnActual(simbolo_valor_devuelto);
 								}
 						
-						VArgumentos(simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, null);
+						VArgumentos(simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, simbolo);
 						Expect(38);
 					}
 				} else {

@@ -1681,7 +1681,7 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 		  			  		tabla.InsertarEnActual(simbolo_valor_devuelto);
 	 		  			  		}
 	 		  			  .)
-	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, null> parent_ce])
+	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, simbolo> parent_ce])
 	 		  //CASO DE QUE SEA UN VECTOR
 	 							   |(DarPosVector<out simbolo_resultado, simbolo>))]
   
