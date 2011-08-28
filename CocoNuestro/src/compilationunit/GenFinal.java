@@ -975,8 +975,8 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 		Simbolo simbolo_op1 = null;
 		Simbolo simbolo_op2 = null;
 		TablaSimbolos tabla_op_lejano = null;
-		String Atributo1=null, Objeto1=null;
-		String Atributo2=null, Objeto2=null;
+		String Atributo1=null;
+		String Atributo2=null;
 		int Despla1=0, Despla2=0;
 		
 		if (EsObjeto(op1)) {	// Es objeto op1?
@@ -984,7 +984,8 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
 		}		
 		if (EsObjeto(op2)) {	// Es objeto op2?
-			Objeto2 = NombreObjeto(op2);		// ahora tenemos el nombre del objeto
+			System.out.println("Op2 es una objeto");
+			Atributo2 = NombreAtributo(op2);	// ahora tenemos el nombre del atributo
 			op2 = NombreObjeto(op2);
 		} else {
 			simbolo_op2 = ambito_terceto.GetSimbolo(op2);	
@@ -1011,32 +1012,56 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	//op1 No local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// si son objetos
+			if (Atributo1 != null) {
+				// Obtengo el desplazamiento
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			}
 			// Pongo el valor local en el hueco ajeno
-			bw.write("MOVE #-"+ simbolo_op2.GetDesplazamiento() +"[.IX], #-"+ despl_op1+"[.IY]\n");
-		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { //op2 No local			
+			bw.write("MOVE #-"+ simbolo_op2.GetDesplazamiento() +"[.IX], #-"+ Despla1+"[.IY]\n");
+		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { //op2 No local	
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// si son objetos
+			if (Atributo2 != null) {
+				// Obtengo el desplazamiento
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			}
 			// Pongo el valor ajeno en el hueco local
-			bw.write("MOVE #-"+ despl_op2 +"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE #-"+ Despla2 +"[.IY], #-"+simbolo_op1.GetDesplazamiento()+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) {	// NADA LOCAL!
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);	// Nos deja en IY la dir del marco
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// si son objetos
+			if (Atributo1 != null) {
+				// Obtengo el desplazamiento
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			}
 			// Puesto q op2 tambien usara esta func. muevo el IY a otro reg
 			bw.write("MOVE .IY, .R9\n");	// DIR del MARCO de OP1 en R9!!!!
-			bw.write("ADD #-"+despl_op1+",.R9\n");	//Dejo en R9 la direccion exacta del dato
+			bw.write("ADD #-"+Despla1+",.R9\n");	//Dejo en R9 la direccion exacta del dato
 			bw.write("MOVE .A, .R9\n");
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// si son objetos
+			if (Atributo2 != null) {
+				// Obtengo el desplazamiento
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			}
 			// Pongo el valor local en el hueco ajeno
-			bw.write("MOVE #-"+ despl_op2 +"[.IY], [.R9]\n");	// RECUERDA R9!!
+			bw.write("MOVE #-"+ Despla2 +"[.IY], [.R9]\n");	// RECUERDA R9!!
 		} else {
 			System.err.println("Ejecutar Asigna. Caso no contemplado");
 		}
@@ -1085,16 +1110,14 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
  */
 private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto) {
 	try {
-		TablaSimbolos ambito_simbolo = null;
 		if (!ambito_terceto.Esta(Nombre)) {	// Esta en ambito global
-			ambito_simbolo = ambito_global;	// ambito_global -> dec al comienzo
 			bw.write("MOVE #"+dirGlobal+",.IY\n");
+			return ambito_global;	// ambito_global -> dec al comienzo
 		} else {
 			// TODO
 			System.err.println("Error: BuscaMarcoDir, No es local ni global -> Objeto.");
+			return null;
 		}
-		
-		return ambito_simbolo;
 	} catch (Exception e) {
 		System.err.println("Error: Buscar Direccion simbolo error.");
 		return null;	// si va mal, va mal!
