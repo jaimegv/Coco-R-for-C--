@@ -152,13 +152,19 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		// TODO
 		// METE_EN_ARRAY,caracola,temporal2,temporal1
 		AsignaValorVector(ambitoterceto);				// pe: v[2]=23
-	} else if (operacion.equals("CALL")) {
+	} else if (operacion.equals("INIT_PARAM")) {	// SP+desplz
+		// TODO comprobrar
+		InitParam();
+	} else if (operacion.equals("FIN_PARAM")) {		// SP-desplz
+		// TODO comprobrar
+		FinParam();
+	} else if (operacion.equals("CALL")) {		// Llamada a Funcion!
 		// TODO no comprobada
 		LlamadaProg(ambitoterceto);
 	} else if (operacion.equals("RET")) {		// Retornar de una funcion
 		// TODO	no comprobada
 		RetornoProg(ambitoterceto);
-	} else if (operacion.equals("DIR_RETORNO")) {	// Push DirRetorno	
+	} else if (operacion.equals("DIR_RETORNO")) {	// Push DirRetorno donde dev el valor Retornado	
 		PushDirRetorno(ambitoterceto);
 	} else if (operacion.equals("SUMA")) {		// Suma
 		nemonico = "ADD";
@@ -212,6 +218,41 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 //***********************************************************************************************
 
 /*
+ * InitParam
+ * Movera el SP tantas posiciones como sean necesarias para poder ir colocando los parametros-argumentos
+ * en el ambito de la funcion a la que se va a llamar. 
+ * Nota: Para saber cuantas posiciones has de desplazar el SP puedes mirar LlamadaProg y PushDIrRetorno
+ * Usamos R2
+ */
+private void InitParam () {
+	try {
+		// Movemos el SP tantas posiciones como sean necesarias.
+		bw.write("MOVE .SP, .R2\n");
+		bw.write("SUB .SP, #2\n");	//	Atento a los elem q apilas antes de CALL
+		bw.write("MOVE .A, .SP\n");
+		// Ahora tendran que venir PARAM para apilar
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar InitParam.");
+	}
+	
+}
+
+/*
+ * FinParam
+ * Movera el SP tantas posiciones hacia abajo como haya movido la funcion InitParam. 
+ * Nota: Para saber cuantas posiciones has de desplazar el SP puedes mirar LlamadaProg y PushDIrRetorno. y InitParam
+ * Usamos R2: Contenia el antiguo valor de SP, metido ahi por InitParam
+ */
+private void FinParam () {
+	try {
+		// Movemos el SP tantas posiciones como sean necesarias.
+		bw.write("MOVE .R2, .SP\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar InitParam.");
+	}	
+}
+
+/*
  * PushDirRetorno
  * Apilamos la direccion donde dejaremos el valor de retorno. Esta direccion sera la 
  * direccion ABSOLUTA.
@@ -223,7 +264,7 @@ private void PushDirRetorno (TablaSimbolos ambito_terceto) {
 		// Resto a IX el desplazamiento para llegar al temporal
 		bw.write("SUB .IX,#"+simbolo_return.GetDesplazamiento()+"\n");
 		// Apilo dicha direccion en la cima
-		bw.write("PUSH .A\n");
+		bw.write("PUSH .A; Apilando donde se guardara el retorno funcion\n");
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar PushDirRetorno.");
 	}
@@ -245,7 +286,7 @@ private void LlamadaProg (TablaSimbolos ambito_terceto) {
 		bw.write("POP .IX\n");
 		bw.write("POP .SR\n");
 		// Hay otro valor en la pila. PushDirRetorno lo metio!
-		bw.write("POP .R0\n"); // siempre se apila
+		bw.write("POP .R0; Sacando el antiguo retorno funcion\n"); // siempre se apila
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar Llamada a Programa.");
 	}
@@ -812,7 +853,6 @@ private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto
 	try {
 		bw.write("MOVE .IX, .IY\n");	// Nos moveremos sobre este registro
 		TablaSimbolos ambito_simbolo = ambito_terceto;	// Variable para moverme por tablas
-		// op1 SI LOCAL. op2 NO LOCAL
 		
 		while (!ambito_simbolo.Esta(Nombre)) {
 			Parser.salidadep("Simbolo con nombre:"+Nombre);
