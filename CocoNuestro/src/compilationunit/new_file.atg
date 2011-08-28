@@ -568,7 +568,7 @@ DecVar <Simbolo simbolo_anterior>
 = (.simboloClaseObjeto = null;
 	int type = undef;
 	Simbolo simbolo_temp = null;.)
-[op_asig VExpresion<out simbolo_temp>	
+([op_asig VExpresion<out simbolo_temp>	
 							(. if (simbolo_temp.GetType() != simbolo_anterior.GetType())
 								 	SemErr("Error de tipos en la inicializacion de la variable");
 							   else if (simbolo_anterior.GetType() == identificador)
@@ -597,7 +597,33 @@ DecVar <Simbolo simbolo_anterior>
 							 		}
 							 		
 								.)
-							] puntoComa
+							] (comma ident
+								
+							   (. Simbolo sim = null;
+							   	  	if (!simbolo_anterior.Es_Vector())
+							   	  		{
+									    if (tabla.EstaEnActual(t.val))
+									    	{
+									    	sim = tabla.GetSimboloRecur(t.val);
+									    	SemErr("El identificador " + t.val + " ya estaba declarado en la linea " + sim.GetLine());
+									    	}
+									    else
+									    	{
+									    	sim = new Simbolo(t.val, simbolo_anterior.GetType(), simbolo_anterior.GetKind());
+									    	sim.SetClase(simbolo_anterior.GetClase());
+									    	tabla.InsertarEnActual(sim);
+									    	}
+									    }
+									else
+										{
+										SemErr("No esta permitido declarar varios vectores en una misma sentencia.");
+										}
+							   .)
+							   DecVar <sim>
+							
+							
+							| puntoComa)
+							) 
 	/*(.	if (simbolo_temp == null) {	// caso: int Var;
 			simbolo_anterior.SetEtiqueta(tercetos.darEtiqueta());
 		} else {	// caso: int Var=Expresion;
@@ -841,7 +867,7 @@ InstExpresion <Simbolo simbolo>
 	   simboloClaseObjeto = null;
 	   Simbolo simbolo_resultado = null;
 	   Simbolo ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
-	   if (!(t.val.contentEquals("]")))
+	   if ((!t.val.contentEquals("]")) && (simbolo!= null))
 	   		{
 	  	    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
 	   			SemErr("Operacion no permitida: La parte izquierda de la asignacion es un vector");
@@ -861,7 +887,8 @@ InstExpresion <Simbolo simbolo>
 				 			}
 				 		}
 				 		.) //En este caso el valor devuelto por la funcion nos importara un pito
-				 parent_ab VArgumentos <simbolo, 0, simbolo_valor_devuelto, null> parent_ce puntoComa //Llamada a una función
+				 parent_ab 
+				 VArgumentos <simbolo, 0, simbolo_valor_devuelto, null> parent_ce puntoComa //Llamada a una función
 			//*************************************************************************************
 				| 	//(. if .)
 					(op_asig | op_asig_mas | op_asig_menos |

@@ -279,7 +279,7 @@ public class Parser {
 				} else if (la.kind == 30) {
 					Vector(simbolo);
 					Expect(42);
-				} else if (la.kind == 41 || la.kind == 42) {
+				} else if (la.kind == 27 || la.kind == 41 || la.kind == 42) {
 					DecVar(simbolo);
 				} else if (la.kind == 17) {
 					String Clase= (String) t.val; 
@@ -524,7 +524,33 @@ public class Parser {
 			
 			
 		}
-		Expect(42);
+		if (la.kind == 27) {
+			Get();
+			Expect(1);
+			Simbolo sim = null;
+			if (!simbolo_anterior.Es_Vector())
+				{
+			if (tabla.EstaEnActual(t.val))
+				{
+				sim = tabla.GetSimboloRecur(t.val);
+				SemErr("El identificador " + t.val + " ya estaba declarado en la linea " + sim.GetLine());
+				}
+			else
+				{
+				sim = new Simbolo(t.val, simbolo_anterior.GetType(), simbolo_anterior.GetKind());
+				sim.SetClase(simbolo_anterior.GetClase());
+				tabla.InsertarEnActual(sim);
+				}
+			}
+			else
+				{
+				SemErr("No esta permitido declarar varios vectores en una misma sentencia.");
+				}
+			 
+			DecVar(sim);
+		} else if (la.kind == 42) {
+			Get();
+		} else SynErr(65);
 	}
 
 	void DecMetodo(String Clase, int tipoRetorno, String Nombre) {
@@ -622,7 +648,7 @@ public class Parser {
 					    sim.SetColumn(t.col);
 					    //System.out.println(t.val+" Simbolo q estas mirando, y su tipo:"+type);
 					
-					if (la.kind == 41 || la.kind == 42) {
+					if (la.kind == 27 || la.kind == 41 || la.kind == 42) {
 						sim.SetKind(var);	// Es variable
 						sim.SetType(type);	// Su tipo
 						if (type==identificador) {
@@ -642,7 +668,7 @@ public class Parser {
 						}
 						
 						DecCabMet(sim);
-					} else SynErr(65);
+					} else SynErr(66);
 				} else {
 					Get();
 					Expect(1);
@@ -780,7 +806,7 @@ public class Parser {
 					SemErr("Error tipos declaracion Metodo.");
 			}
 			
-		} else SynErr(66);
+		} else SynErr(67);
 	}
 
 	void Cuerpo(Simbolo simbolo_funcion) {
@@ -854,10 +880,10 @@ public class Parser {
 					if (la.kind == 30) {
 						Vector(simbolo);
 						Expect(42);
-					} else if (la.kind == 41 || la.kind == 42) {
+					} else if (la.kind == 27 || la.kind == 41 || la.kind == 42) {
 						DecVar(simbolo);
-					} else SynErr(67);
-				} else SynErr(68);
+					} else SynErr(68);
+				} else SynErr(69);
 				estaba_declarado = false;
 			}
 		}
@@ -902,7 +928,7 @@ public class Parser {
 			InstCin();
 		} else if (la.kind == 23) {
 			InstIfElse(simbolo_funcion);
-		} else SynErr(69);
+		} else SynErr(70);
 	}
 
 	Simbolo  VExpresion() {
@@ -960,7 +986,7 @@ public class Parser {
 				}
 				simbolo = simbolo_temp2;
 			}
-		} else SynErr(70);
+		} else SynErr(71);
 		return simbolo;
 	}
 
@@ -1020,7 +1046,7 @@ public class Parser {
 		} else if (StartOf(5)) {
 			InstExpresion(simbolo_metodoargumento);
 			simboloObjetoGlob = null;
-		} else SynErr(71);
+		} else SynErr(72);
 	}
 
 	void InstExpresion(Simbolo simbolo) {
@@ -1029,7 +1055,7 @@ public class Parser {
 		simboloClaseObjeto = null;
 		Simbolo simbolo_resultado = null;
 		Simbolo ind_vector = indice_vector; //Guardamos indice_vector por si el simbolo anterior era un vector y no queremos perder el indice
-		if (!(t.val.contentEquals("]")))
+		if ((!t.val.contentEquals("]")) && (simbolo!= null))
 				{
 		    if (((la.val.contentEquals("=")) || (la.val.contentEquals("+=")) || (la.val.contentEquals("-=")) || (la.val.contentEquals("*="))|| (la.val.contentEquals("/="))|| (la.val.contentEquals("%="))) && simbolo.Es_Vector())
 					SemErr("Operacion no permitida: La parte izquierda de la asignacion es un vector");
@@ -1159,7 +1185,7 @@ public class Parser {
 					
 				
 			Expect(42);
-		} else SynErr(72);
+		} else SynErr(73);
 	}
 
 	void VArgumentos(Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, Vector colaArgumentos) {
@@ -1570,7 +1596,7 @@ public class Parser {
 			   colaTercetos.add(tupla);
 			   tabla.InsertarEnActual(simbolo_resultado);
 										   		
-		} else SynErr(73);
+		} else SynErr(74);
 		return simbolo_resultado;
 	}
 
@@ -1613,7 +1639,7 @@ public class Parser {
 			tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 			colaTercetos.add(tupla);
 			simbolo = simbolo_temp2;
-		} else SynErr(74);
+		} else SynErr(75);
 		return simbolo;
 	}
 
@@ -1769,7 +1795,7 @@ public class Parser {
 			 	 tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 			 	 colaTercetos.add(tupla);
 			 	 tabla.InsertarEnActual(simbolo_resultado);
-		} else SynErr(75);
+		} else SynErr(76);
 		return simbolo_resultado;
 	}
 
@@ -1784,7 +1810,7 @@ public class Parser {
 		} else if (la.kind == 32) {
 			Get();
 			operacion = new String("RESTA");
-		} else SynErr(76);
+		} else SynErr(77);
 		simbolo_resultado = VExpresion();
 		if (simbolo_resultado.GetType() != entera)
 		SemErr("VExpSuma: Error de tipos en la expresion");
@@ -1813,7 +1839,7 @@ public class Parser {
 		} else if (la.kind == 40) {
 			Get();
 			operador = new String ("DIV");
-		} else SynErr(77);
+		} else SynErr(78);
 		if (StartOf(7)) {
 			simbolo_temp1 = ValorFinalExp();
 			Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var);
@@ -1849,7 +1875,7 @@ public class Parser {
 			   
 			 		
 			
-		} else SynErr(78);
+		} else SynErr(79);
 		return simbolo;
 	}
 
@@ -1887,7 +1913,7 @@ public class Parser {
 				{
 				simbolo = simbolo_temp1;
 				}
-		} else SynErr(79);
+		} else SynErr(80);
 		return simbolo;
 	}
 
@@ -1959,7 +1985,7 @@ public class Parser {
 			Get();
 			break;
 		}
-		default: SynErr(80); break;
+		default: SynErr(81); break;
 		}
 	}
 
@@ -1972,7 +1998,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 40) {
 			Get();
-		} else SynErr(81);
+		} else SynErr(82);
 	}
 
 	void Operador_Logico() {
@@ -1982,7 +2008,7 @@ public class Parser {
 			Get();
 		} else if (la.kind == 46) {
 			Get();
-		} else SynErr(82);
+		} else SynErr(83);
 	}
 
 
@@ -2098,24 +2124,25 @@ class Errors {
 			case 62: s = "invalid CEMASMAS"; break;
 			case 63: s = "invalid CEMASMAS"; break;
 			case 64: s = "invalid Ttipo"; break;
-			case 65: s = "invalid Cuerpo_Clase"; break;
-			case 66: s = "invalid Parametros"; break;
-			case 67: s = "invalid Cuerpo"; break;
+			case 65: s = "invalid DecVar"; break;
+			case 66: s = "invalid Cuerpo_Clase"; break;
+			case 67: s = "invalid Parametros"; break;
 			case 68: s = "invalid Cuerpo"; break;
-			case 69: s = "invalid Instruccion"; break;
-			case 70: s = "invalid VExpresion"; break;
-			case 71: s = "invalid Llamada"; break;
-			case 72: s = "invalid InstExpresion"; break;
-			case 73: s = "invalid VCambio_Signo"; break;
-			case 74: s = "invalid VNegacion"; break;
-			case 75: s = "invalid ValorFinalExp"; break;
-			case 76: s = "invalid VExpSuma"; break;
-			case 77: s = "invalid VExpMul"; break;
+			case 69: s = "invalid Cuerpo"; break;
+			case 70: s = "invalid Instruccion"; break;
+			case 71: s = "invalid VExpresion"; break;
+			case 72: s = "invalid Llamada"; break;
+			case 73: s = "invalid InstExpresion"; break;
+			case 74: s = "invalid VCambio_Signo"; break;
+			case 75: s = "invalid VNegacion"; break;
+			case 76: s = "invalid ValorFinalExp"; break;
+			case 77: s = "invalid VExpSuma"; break;
 			case 78: s = "invalid VExpMul"; break;
-			case 79: s = "invalid VExpAND"; break;
-			case 80: s = "invalid Operador_Relacional"; break;
-			case 81: s = "invalid Operador_Aritmetico"; break;
-			case 82: s = "invalid Operador_Logico"; break;
+			case 79: s = "invalid VExpMul"; break;
+			case 80: s = "invalid VExpAND"; break;
+			case 81: s = "invalid Operador_Relacional"; break;
+			case 82: s = "invalid Operador_Aritmetico"; break;
+			case 83: s = "invalid Operador_Logico"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
