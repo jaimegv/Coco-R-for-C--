@@ -158,6 +158,10 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("SACA_DE_ARRAY")){
 		// TODO revisar-hacer
 		ObtenerValorVector(ambitoterceto);
+	} else if (operacion.equals("ETIQUETA"))	{	// Etiqueta
+		EtiquetaIf();
+	} else if (operacion.equals("GOTO"))		{	// GOTO
+		OpGoto();
 	} else if (operacion.equals("INIT_PARAM")) {	// SP+desplz
 		// TODO comprobrar
 		InitParam();
@@ -228,6 +232,30 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 }
 
 //***********************************************************************************************
+
+/*
+ * OpGoto
+ * Hacemos un salto incondicional a dicha etiqueta
+ */
+private void OpGoto () {
+	try {
+		bw.write("br /"+op1+" ;Etiqueta IFs\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar Insertar Etiqua IF.");
+	}
+}
+
+/*
+ * EtiquetaIf
+ * Simplemente escritibremos en el fichero el nombre de la etiqueta pasada como 1º argumento, op1
+ */
+private void EtiquetaIf () {
+	try {
+		bw.write(op1+" ;Etiqueta IFs\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar Insertar Etiqua IF.");
+	}
+}
 
 /*
  * ObtenerValorVector
