@@ -176,7 +176,7 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("CALL")) {		// Llamada a Funcion!
 		// TODO no comprobada
 		LlamadaProg(ambitoterceto);
-	} else if (operacion.equals("RETURNop")) {	// return Valor;
+	} else if (operacion.equals("RETURN")) {	// return Valor;
 		// TODO hacer-comprobrar
 		ReturnOp(ambitoterceto);
 	} else if (operacion.equals("RET")) {		// Retornar de una funcion
