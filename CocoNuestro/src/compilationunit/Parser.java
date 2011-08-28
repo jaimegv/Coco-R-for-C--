@@ -85,7 +85,7 @@ public class Parser {
 	public Scanner scanner;
 	public Errors errors;
 
-	static public boolean modo_depuracion = true;
+	static public boolean modo_depuracion = false;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)

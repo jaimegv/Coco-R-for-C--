@@ -17,7 +17,7 @@ import java.util.*;
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 
-	static public boolean modo_depuracion = true;
+	static public boolean modo_depuracion = false;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)

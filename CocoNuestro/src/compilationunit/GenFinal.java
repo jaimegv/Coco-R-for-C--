@@ -38,7 +38,7 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
     TablaSimbolos tabla_aux;
     c_etiqueta = 0;
     
-    System.out.println("Comienza la fase de generacion de codigo objeto");
+    Parser.salidadep("Comienza la fase de generacion de codigo objeto");
     //preparamos el fichero que contendra el codigo objeto
     try	{
         bw= new BufferedWriter(new FileWriter(fichero));
@@ -81,17 +81,17 @@ public GenFinal(LinkedList<tupla_Tercetos> colaTercetos, Tablas tabla, String fi
         /*
          * Bucle para imprimir toda la cola de tercetos del resto de ambitos
          */
-        System.out.println("-----------------------------------");
-        System.out.println("Tamano de la lista:"+colaTercetos.size());
+        Parser.salidadep("-----------------------------------");
+        Parser.salidadep("Tamano de la lista:"+colaTercetos.size());
         Iterator<tupla_Tercetos> it = colaTercetos.iterator();
         while (it.hasNext()) {
             //this.separar(it.next().GetTerceto());
         	tupla_actual = it.next();
-            System.out.println("Terceto: "+tupla_actual.GetTerceto());
-            //System.out.println("Ambito_actual: "+it.next().GetAmbitoActual());
+            Parser.salidadep("Terceto: "+tupla_actual.GetTerceto());
+            //Parser.salidadep("Ambito_actual: "+it.next().GetAmbitoActual());
             ProcesarTerceto(tupla_actual, tabla);
         }
-        System.out.println("-----------------------------------");
+        Parser.salidadep("-----------------------------------");
         
         /*
          * Ponemos un HALT, si se acaban los tercetos es final de MAIN
@@ -815,7 +815,7 @@ private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto
 		// op1 SI LOCAL. op2 NO LOCAL
 		
 		while (!ambito_simbolo.Esta(Nombre)) {
-			System.out.println("Simbolo con nombre:"+Nombre);
+			Parser.salidadep("Simbolo con nombre:"+Nombre);
 			bw.write("MOVE #2[.IY],.IY\n");
 			ambito_simbolo = ambito_simbolo.Ambito_Padre();	// esta en el padre?
 		}
@@ -848,9 +848,9 @@ private void separar(String linea)	{
 private void daInformacion (String operando, TablaSimbolos ambito_terceto) {
 	try {
 		Simbolo simbolito = ambito_terceto.GetSimbolo(operando);
-		System.out.println("-> Dando informacion acerca del operando: "+operando);
-		System.out.println("Nombre: "+simbolito.GetNombre());
-		System.out.println("Etiqueta: "+simbolito.GetEtiqueta());
+		Parser.salidadep("-> Dando informacion acerca del operando: "+operando);
+		Parser.salidadep("Nombre: "+simbolito.GetNombre());
+		Parser.salidadep("Etiqueta: "+simbolito.GetEtiqueta());
 	} catch (Exception e) {
 		System.err.println("Fallo en impresion de informacion de un operando.");
 	}
