@@ -153,6 +153,9 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		// TODO
 		// METE_EN_ARRAY,caracola,temporal2,temporal1
 		AsignaValorVector(ambitoterceto);				// pe: v[2]=23
+	} else if (operacion.equals("SACA_DE_ARRAY")){
+		// TODO revisar-hacer
+		ObtenerValorVector(ambitoterceto);
 	} else if (operacion.equals("INIT_PARAM")) {	// SP+desplz
 		// TODO comprobrar
 		InitParam();
@@ -225,6 +228,31 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 //***********************************************************************************************
 
 /*
+ * ObtenerValorVector
+ * Obtenemos el valor de la posicion (op3) del vector (op1) y lo guardamos en un resultado (op2) 
+ */
+private void ObtenerValorVector (TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_vector = ambito_terceto.GetSimbolo(op1);	// op1= vector
+		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(op2);	// op2= resultado	siempre_local
+		Simbolo simbolo_indice = ambito_terceto.GetSimbolo(op3);	// op3= indice
+		//int indice=0;
+		
+		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op3)) {		// todo local
+			// Obtengo el desplzamiento total hasta el elemento ->.A
+			bw.write("ADD #-"+simbolo_indice.GetDesplazamiento()+"[.IX], #"+simbolo_vector.GetDesplazamiento()+"\n");
+			bw.write("SUB .IX, .A\n");	// Tengo en .A la direccion al elemento del vector
+			bw.write("MOVE [.A], #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+		} else {
+			// TODO hacer el resto de if
+			System.err.println("Error: ObtenerValorVector. Caso no contemplado.");
+		}
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar ObtenerValorVector.");
+	}
+}
+
+/*
  * PushParam
  * Apilamos a partir de SP, que se movio en INIT_PARAM, los argumentos que tendra la funcion llamada.
  * Cuando la funcion llamada pase a ejecutar tendra en su marco de pila todos loa valores ya colocados
@@ -236,8 +264,6 @@ private void PushParam (TablaSimbolos ambito_terceto) {
 		int total=0;
 		
 		if (ambito_terceto.Esta(op1)) {	// op1 Local
-			System.out.println("desplazamiento:"+simbolo_param.GetDesplazamiento());
-			System.out.println("tamano:"+simbolo_param.Actualiza_Tamano());
 			total = simbolo_param.GetDesplazamiento()+simbolo_param.Actualiza_Tamano();
 			for (int i=simbolo_param.GetDesplazamiento(); i<total; i++) {
 				bw.write("PUSH #-"+i+"[.IX]\n");	//apilo valores
