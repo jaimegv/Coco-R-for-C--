@@ -156,6 +156,9 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("INIT_PARAM")) {	// SP+desplz
 		// TODO comprobrar
 		InitParam();
+	} else if (operacion.equals("APILAR_PARAM")) {	// Apilar Parametros
+		// TODO revisar-hacer
+		PushParam(ambitoterceto);
 	} else if (operacion.equals("FIN_PARAM")) {		// SP-desplz
 		// TODO comprobrar
 		FinParam();
@@ -222,6 +225,33 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 //***********************************************************************************************
 
 /*
+ * PushParam
+ * Apilamos a partir de SP, que se movio en INIT_PARAM, los argumentos que tendra la funcion llamada.
+ * Cuando la funcion llamada pase a ejecutar tendra en su marco de pila todos loa valores ya colocados
+ * NO PODEMOS TOCAR R2 !!!
+ */
+private void PushParam (TablaSimbolos ambito_terceto) {
+	try {
+		Simbolo simbolo_param = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		int total=0;
+		
+		if (ambito_terceto.Esta(op1)) {	// op1 Local
+			System.out.println("desplazamiento:"+simbolo_param.GetDesplazamiento());
+			System.out.println("tamano:"+simbolo_param.Actualiza_Tamano());
+			total = simbolo_param.GetDesplazamiento()+simbolo_param.Actualiza_Tamano();
+			for (int i=simbolo_param.GetDesplazamiento(); i<total; i++) {
+				bw.write("PUSH #-"+i+"[.IX]\n");	//apilo valores
+			}
+		} else {
+			// TODO hacer el resto de if
+			System.err.println("Error: PushParam. Caso no contemplado.");
+		}
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar PushParam.");
+	}
+}
+
+/*
  * ReturnOp
  * Guardaremos el valor del simbolo pasado como argumento, op1, en la direccion apilada antes de llamar
  * a la funcion. Para saber mas mirar PushDirRetorno
@@ -231,21 +261,38 @@ private void ReturnOp (TablaSimbolos ambito_terceto)  {
 	try {
 		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
 		TablaSimbolos tabla_op_lejano = null; 
+		int indice=0,indice2=0; 	// para devolver objetos necesito indices
 		// Movemos la direccion de Retorno a un Registro
 		bw.write("MOVE #4[.IX], .R9\n");	// R9 tiene la dirRetorno
 		
 		if (ambito_terceto.Esta(op1)) {			// op1 Local
-			Parser.salidadep(simbolo_op1.Actualiza_Tamano()+"!!!!!!!!!!!!!");
-			
-			//Muevo el valor a donde apunta .R9
-			bw.write("MOVE #-"+simbolo_op1.GetDesplazamiento()+"[.IX], [.R9]\n");
+			bw.write("MOVE .R9, .IY\n");	// R9 tiene la dirRetorno
+			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
+			indice2= simbolo_op1.Actualiza_Tamano()-1;	// indice para el destino
+			indice = indice + simbolo_op1.GetDesplazamiento() - 1;	// desplazamiento hasta el elem
+			while (indice2 >= 0) {	// Muevo los valores del ambito local a la dir IY
+				bw.write("MOVE #-"+indice+"[.IX], #-"+indice2+"[.IY]\n");
+				indice--;
+				indice2--;
+			}
 		} else if (!ambito_terceto.Esta(op1)) {	// op1 no local
+			// TODO revisar funcionalidad
+			// Tenemos en R9 la direccion a partir de la cual debemos dejar el valor de retorno
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			// Comparo el contenido de memoria de los dos operandos.
-			bw.write("MOVE #-"+despl_op1+"[.IY], [.R9]\n");
+			// Necesitamo, en caso de objeto el simbolo
+			simbolo_op1 = tabla_op_lejano.GetSimbolo(op1);
+						
+			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
+			indice2= simbolo_op1.Actualiza_Tamano()-1;	// indice para el destino
+			indice = indice + simbolo_op1.GetDesplazamiento() - 1;	// desplazamiento hasta el elem
+			while (indice2 >= 0) {	// Muevo los valores del ambito local a la dir IY
+				bw.write("MOVE #-"+indice+"[.IX], #-"+indice2+"[.IY]\n");
+				indice--;
+				indice2--;
+			}
 		} else {
 			System.err.println("Error: ReturnOp. Caso no contemplado.");
 		}
@@ -266,7 +313,7 @@ private void InitParam () {
 	try {
 		// Movemos el SP tantas posiciones como sean necesarias.
 		bw.write("MOVE .SP, .R2\n");
-		bw.write("SUB .SP, #2\n");	//	Atento a los elem q apilas antes de CALL
+		bw.write("SUB .SP, #3\n");	//	Atento a los elem q apilas antes de CALL
 		bw.write("MOVE .A, .SP\n");
 		// Ahora tendran que venir PARAM para apilar
 	} catch (Exception e) {
