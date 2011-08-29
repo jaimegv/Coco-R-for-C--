@@ -1687,6 +1687,8 @@ ValorFinalExp <out Simbolo simbolo_resultado>
   
 
   | enteros (. simbolo_resultado = new Simbolo (tercetos.darTemporal(), entera, var);
+  			   if (Integer.parseInt(t.val) > 65535)
+  			   		SemErr("Tamano de entero excedido: Los valores enteros no deben superar el 65535");
   			   String terceto;
   			   terceto = tercetos.asignacion_valor(simbolo_resultado.GetNombre(), Integer.parseInt(t.val));
   			   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
