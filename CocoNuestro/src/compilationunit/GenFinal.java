@@ -1112,6 +1112,7 @@ private void OpUnaria (TablaSimbolos ambito_terceto) {
 		if (ambito_terceto.Esta(op1)) {			// todo local!
 			// operando1
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
+			System.err.println("el terceto es:"+op1+", "+Atributo1+". y el nemonico:"+nemonico);
 			bw.write(nemonico+" #-"+Despla1+"[.IX], #"+op2+"\n");
 			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
@@ -1119,8 +1120,9 @@ private void OpUnaria (TablaSimbolos ambito_terceto) {
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// operando1
 			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			System.err.println("el terceto es:"+op1+", "+Atributo1+". y el nemonico:"+nemonico);
 			// La operacion unaria se queda en el acumulador, luego la llevamos a la dir de mem
-			bw.write(nemonico+" #-"+Despla1+"[.IX], #"+op2+"\n");
+			bw.write(nemonico+" #-"+Despla1+"[.IY], #"+op2+"\n");
 			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
@@ -1449,11 +1451,12 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
 private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto) {
 	try {
 		if (!ambito_terceto.Esta(Nombre)) {	// Esta en ambito global
-			bw.write("MOVE #"+dirGlobal+",.IY\n");
-			if (ambito_global.Esta(Nombre)) {	
+			if (ambito_global.Esta(Nombre)) {
+				bw.write("MOVE #"+dirGlobal+",.IY\n");
 				return ambito_global;	// ambito_global -> dec al comienzo
 			} else { // No esta en local ni en global!, atributo de clase
 				// TODO simbolo que no esta en local ni global es atributo de objeto
+				// bw.write("MOVE #"+dirGlobal+",.IY\n");
 				System.err.println("Error: BuscaMarcoDir. Atributo de clase. tadavia no hecho.");
 				return null;
 			}
