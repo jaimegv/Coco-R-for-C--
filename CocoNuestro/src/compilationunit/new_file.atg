@@ -1,10 +1,12 @@
-
-
-
-
 /*
-Autores: Víctor Gómez Aragoneses
-		 Luis Ildefonso Gómez Solana
+Autores: Victor Gomez Aragoneses
+		 Luis Ildefonso Gomez Solana
+
+Este programa es Software Libre. Puede modificarlo y redistribuirlo siempre
+respetando los terminos de la licencia GPLv3.0
+
+La ausencia de tildes en los comentarios y en las salidas por pantalla es 
+intencionada para permitir la portabilidad del codigo entre plataformas
 */
 import java.util.Vector;
 import java.util.HashMap;
@@ -17,7 +19,7 @@ import java.util.*;
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 
-	static public boolean modo_depuracion = false;
+	static public boolean modo_depuracion = true;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -929,7 +931,7 @@ InstExpresion <Simbolo simbolo>
 														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
 															else if (simbolo_resultado.GetType() == identificador)
 																{
-																if (simbolo.GetClase() != simboloClaseObjeto)
+																if (simbolo.GetClase() != simbolo_resultado.GetClase())
 																	{
 																	SemErr("La clase del identificador no coincide con la clase de la expresion");
 																	}
