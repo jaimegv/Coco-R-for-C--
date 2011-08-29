@@ -1026,16 +1026,18 @@ InstIfElse <Simbolo simbolo_funcion>
 .) 
 = (. etiqueta_else = new String(tercetos.darEtiqueta());
 	 etiqueta_final = new String(tercetos.darEtiqueta()); .)
-		iff VExpresion<out simbolo_temp> (.if (simbolo_temp.GetType() != bool) 
+		iff VExpresion<out simbolo_temp> (. if (simbolo_temp != null)
 												{
-												SemErr("La condicion de un if debe ser logica");
+												if (simbolo_temp.GetType() != bool) 
+													{
+													SemErr("La condicion de un if debe ser logica");
+													}
+									  		    simbolo = new Simbolo (tercetos.darTemporal(), 0, 0);
+									  		    
+									  		    terceto = new String (tercetos.saltoCondicional(simbolo_temp.GetNombre(), etiqueta_else));
+									  		    tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+									  		    colaTercetos.add(tupla);												
 												}
-								  		   simbolo = new Simbolo (tercetos.darTemporal(), 0, 0);
-								  		   
-								  		   terceto = new String (tercetos.saltoCondicional(simbolo_temp.GetNombre(), etiqueta_else));
-								  		   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-								  		   colaTercetos.add(tupla);
-								  		   
 								  		 .)
 								  		 
 								  		    
@@ -1391,30 +1393,42 @@ VNegacion <out Simbolo simbolo>
  	  simbolo = null;.)
  	op_negacion (ValorFinalExp <out simbolo_temp>
  	(.
- 	if (simbolo_temp.GetType() != bool)
- 		SemErr("El operador de negacion solo se puede utilizar con booleanos");
- 	simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
- 	tabla.InsertarEnActual(simbolo_temp2);
- 	String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
- 	tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
- 	colaTercetos.add(tupla);
- 	simbolo = simbolo_temp2;
+ 	if (simbolo_temp != null)
+ 		{
+	 	if (simbolo_temp.GetType() != bool)
+	 		SemErr("El operador de negacion solo se puede utilizar con booleanos");
+	 	simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
+	 	tabla.InsertarEnActual(simbolo_temp2);
+	 	String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
+	 	tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+	 	colaTercetos.add(tupla);
+	 	simbolo = simbolo_temp2;	
+ 		}
+ 	
  	.) 
  	
  	[VExpAND <out simbolo, simbolo_temp2> | VExpOR <out simbolo, simbolo_temp2>] 
- 	(. if ((simbolo.GetType() != bool) || (simbolo_temp2.GetType() != bool))
-			SemErr("Error de tipos en la expresion");.)
+ 	(.  if ((simbolo != null) && (simbolo_temp2 != null))
+ 			{
+	 		if ((simbolo.GetType() != bool) || (simbolo_temp2.GetType() != bool))
+				SemErr("Error de tipos en la expresion");	
+ 			}
+ 	.)
 			 
  			 | parent_ab VExpresion <out simbolo_temp> parent_ce 
  			 
- 			 (.if (simbolo_temp.GetType() != bool)
- 			 		SemErr("VNegacion: Error de tipos en la expresion");
- 			 	simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
- 				tabla.InsertarEnActual(simbolo_temp2);
- 				String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
- 				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
- 				colaTercetos.add(tupla);
- 				simbolo = simbolo_temp2;.)
+ 			 (. if (simbolo_temp != null)
+ 			 		{
+					if (simbolo_temp.GetType() != bool)
+ 			 			SemErr("VNegacion: Error de tipos en la expresion");
+	 			 	simbolo_temp2 = new Simbolo(tercetos.darTemporal(),bool,var);
+	 				tabla.InsertarEnActual(simbolo_temp2);
+	 				String terceto = new String(tercetos.operacionUnaria(simbolo_temp.GetNombre(),"NEG_LOG",simbolo_temp2.GetNombre()));
+	 				tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+	 				colaTercetos.add(tupla);
+	 				simbolo = simbolo_temp2; 			 		
+ 			 		}
+ 			 	.)
  			 
  			 )
  .
@@ -1508,12 +1522,16 @@ VNegacion <out Simbolo simbolo>
   	   Simbolo simbolo_temp1 = null;
   	   Simbolo simbolo_temp2 = null;.)
     (op_and (ValorFinalExp<out simbolo_temp1> //simbolo_temp1 --> valor recogido por VExpFinal
-    (. simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var); //En simbolo_temp2 estara el resultado
-       tabla.InsertarEnActual(simbolo_temp2);
-       String terceto = new String (tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(),"AND",simbolo_temp2.GetNombre()));
-       tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-       colaTercetos.add(tupla);
-       simbolo = simbolo_temp2;.)
+    (. if ((simbolo_exp_anterior != null) && (simbolo_temp1 != null))
+    		{
+    		simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var); //En simbolo_temp2 estara el resultado
+	        tabla.InsertarEnActual(simbolo_temp2);
+	        String terceto = new String (tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(),"AND",simbolo_temp2.GetNombre()));
+	        tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	        colaTercetos.add(tupla);
+	        simbolo = simbolo_temp2;
+    		}
+       .)
    
     
     [(VExpAND <out simbolo, simbolo_temp2> 
@@ -1521,14 +1539,18 @@ VNegacion <out Simbolo simbolo>
     VExpOR <out simbolo, simbolo_temp2>)])
     					   		 |
     					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce
-    					   		 					(. if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
-	 														{
-												  			SemErr("VExpAND: Error de tipos en la expresion");
-												  			}
-												  		else
-												  			{
-												  			simbolo = simbolo_temp1;
-												  			}.)
+    					   		 					(.  if ((simbolo != null) && (simbolo_exp_anterior != null))
+    					   		 							{
+    					   		 							if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
+		 														{
+													  			SemErr("VExpAND: Error de tipos en la expresion");
+													  			}
+													  		else
+													  			{
+													  			simbolo = simbolo_temp1;
+													  			}
+    					   		 							} 
+    					   		 						.)
     					   													  			
     					   	)
     					   	 
