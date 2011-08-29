@@ -1412,12 +1412,17 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			if (!Atributo2.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
+				Despla2 = Despla2 + tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+				tamanio=tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).Actualiza_Tamano();	// tamanio del simbolo;
+				System.err.println("!!!!!!!!!q rico sabe");
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+				tamanio=tabla_op_lejano.GetSimbolo(op2).Actualiza_Tamano();	// tamanio del simbolo
 			}
 			// Pongo el valor ajeno en el hueco local
-			bw.write("MOVE #-"+ Despla2 +"[.IY], #-"+Despla1+"[.IX]\n");
+			//bw.write("MOVE #-"+ Despla2 +"[.IY], #-"+Despla1+"[.IX]\n");
+			CopiaBloqMem(".IY", Despla2, ".IX", Despla1, tamanio);
 		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) {	// NADA LOCAL!
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);	// Nos deja en IY la dir del marco
