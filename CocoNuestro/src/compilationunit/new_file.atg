@@ -1540,17 +1540,23 @@ VNegacion <out Simbolo simbolo>
     					   		 |
     					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce
     					   		 					(.  
-    					   		 						if ((simbolo != null) && (simbolo_exp_anterior != null))
+    					   		 						if ((simbolo_temp1 != null) && (simbolo_exp_anterior != null))
     					   		 							{
-    					   		 							if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
+    					   		 							if ((simbolo_temp1.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
 		 														{
 													  			SemErr("VExpAND: Error de tipos en la expresion");
 													  			}
 													  		else
 													  			{
-													  			simbolo = simbolo_temp1;
-													  			}
-    					   		 							} 
+													  			
+													  			simbolo_temp2 = new Simbolo(tercetos.darTemporal(), bool, var); //En simbolo_temp2 estara el resultado
+	        													tabla.InsertarEnActual(simbolo_temp2);
+	        													String terceto = new String (tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(),"AND",simbolo_temp2.GetNombre()));
+	        													tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	        													colaTercetos.add(tupla);
+													  			simbolo = simbolo_temp2;
+													  			}													  		
+    					   		 							}
     					   		 						.)
     					   													  			
     					   	))
