@@ -1378,16 +1378,16 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			if (!Atributo1.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
-				Despla1 = Despla1 + simbolo_op1.GetDesplazamiento();
+				Despla1 = Despla1 + tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 				tamanio=tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).Actualiza_Tamano();	// tamanio del simbolo;
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-				tamanio = simbolo_op1.Actualiza_Tamano();
+				tamanio = tabla_op_lejano.GetSimbolo(op1).Actualiza_Tamano();
 			}
 			if (!Atributo2.isEmpty()) {
 				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
-				Despla2 = Despla2 + simbolo_op1.GetDesplazamiento();
+				Despla2 = Despla2 + simbolo_op2.GetDesplazamiento();
 				tamanio=simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();	// tamanio del simbolo;
 			} else {
 				Despla2 = simbolo_op2.GetDesplazamiento();
@@ -1399,9 +1399,13 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { //op2 No local	
 			if (!Atributo1.isEmpty()) {
 				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
+				Despla1 = Despla1 + simbolo_op1.GetDesplazamiento();
+				tamanio=simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();	// tamanio del simbolo;
 			} else {
 				Despla1 = simbolo_op1.GetDesplazamiento();
+				tamanio=simbolo_op1.Actualiza_Tamano();	// tamanio del simbolo
 			}
+// TODO por aki
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// si son objetos
