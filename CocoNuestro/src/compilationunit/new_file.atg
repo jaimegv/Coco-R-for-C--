@@ -1539,7 +1539,7 @@ VNegacion <out Simbolo simbolo>
     VExpOR <out simbolo, simbolo_temp2>]
     					   		 |
     					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce
-    					   		 					(.  salidadep ("LLEGAMOS AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    					   		 					(.  
     					   		 						if ((simbolo != null) && (simbolo_exp_anterior != null))
     					   		 							{
     					   		 							if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
@@ -1568,7 +1568,7 @@ VNegacion <out Simbolo simbolo>
     (.if ((simbolo_temp.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool)) 
     		SemErr("VExpoOR: Error de tipos en la expresion");
 
-		simbolo = new Simbolo(tercetos.darEtiqueta(), bool, var);
+		simbolo = new Simbolo(tercetos.darTemporal(), bool, var);
 		tabla.InsertarEnActual(simbolo);
 		String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp.GetNombre(), "OR", simbolo.GetNombre()));
 		tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
