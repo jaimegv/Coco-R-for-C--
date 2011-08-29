@@ -374,12 +374,28 @@ private void ObtenerValorVector (TablaSimbolos ambito_terceto) {
  */
 private void PushParam (TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_param = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		Simbolo simbolo_param = null;
+		TablaSimbolos tabla_op_lejano = null;
+		String Atributo1="";
 		int total=0;
+		int Despla1=0;
+		int indice=0,indice2=0; 	// para devolver objetos necesito indices
+		
+		if (EsObjeto(op1)) {	// Es objeto op1?
+			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
+			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
+		}
+		simbolo_param = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
 		
 		if (ambito_terceto.Esta(op1)) {	// op1 Local
-			total = simbolo_param.GetDesplazamiento()+simbolo_param.Actualiza_Tamano();
-			for (int i=simbolo_param.GetDesplazamiento(); i<total; i++) {
+			if (!Atributo1.isEmpty()) {
+				Despla1 = simbolo_param.GetAtributo(simbolo_param.GetNombre()+"."+Atributo1).GetDesplazamiento()+simbolo_param.GetDesplazamiento();
+				total = Despla1 + simbolo_param.GetAtributo(simbolo_param.GetNombre()+"."+Atributo1).Actualiza_Tamano();
+			} else {
+				Despla1 = simbolo_param.GetDesplazamiento();
+				total = simbolo_param.GetDesplazamiento()+simbolo_param.Actualiza_Tamano();
+			}
+			for (int i=Despla1; i<total; i++) {
 				bw.write("PUSH #-"+i+"[.IX]\n");	//apilo valores
 			}
 		} else {
@@ -395,18 +411,36 @@ private void PushParam (TablaSimbolos ambito_terceto) {
  * ReturnOp
  * Guardaremos el valor del simbolo pasado como argumento, op1, en la direccion apilada antes de llamar
  * a la funcion. Para saber mas mirar PushDirRetorno
+ * Es decir, al acabar una funcion colocamos el valor de retorno a partir de la direccion especificada
  * usamos R9
  */
 private void ReturnOp (TablaSimbolos ambito_terceto)  {
 	try {
-		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
-		TablaSimbolos tabla_op_lejano = null; 
+		Simbolo simbolo_op1 = null;
+		TablaSimbolos tabla_op_lejano = null;
+		String Atributo1="";
+		int Despla1=0;
 		int indice=0,indice2=0; 	// para devolver objetos necesito indices
+		
+		if (EsObjeto(op1)) {	// Es objeto op1?
+			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
+			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
+		}
+		
+		simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
 		// Movemos la direccion de Retorno a un Registro
 		bw.write("MOVE #4[.IX], .R9\n");	// R9 tiene la dirRetorno
 		
 		if (ambito_terceto.Esta(op1)) {			// op1 Local
 			bw.write("MOVE .R9, .IY\n");	// R9 tiene la dirRetorno
+/*			// Objeto1?
+			if (!Atributo1.isEmpty()) {
+				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				Despla1 = simbolo_op1.GetDesplazamiento();
+			}
+*/
+			
 			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
 			indice2= simbolo_op1.Actualiza_Tamano()-1;	// indice para el destino
 			indice = indice + simbolo_op1.GetDesplazamiento() - 1;	// desplazamiento hasta el elem
@@ -538,18 +572,44 @@ private void RetornoProg (TablaSimbolos ambito_terceto) {
  */
 private void OpRelacional (TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
-		Simbolo simbolo_op2 = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
+		Simbolo simbolo_op1 = null;	// Simbolo op1
+		Simbolo simbolo_op2 = null;	// Simbolo op2
 		Simbolo simbolo_res = ambito_terceto.GetSimbolo(op3);	// Simbolo Resultado. Siempre local=temp
-		// pe. op1 < op2 -> resultado, el resultado siempte se dejara en una direccion en local
-		TablaSimbolos tabla_op_lejano = null;	// En caso de tener q ir a buscar algo
+		TablaSimbolos tabla_op_lejano = null;
+		String Atributo1="";
+		String Atributo2="";
+		int Despla1=0, Despla2=0;
+		
+		if (EsObjeto(op1)) {	// Es objeto op1?
+			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
+			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
+		}		
+		if (EsObjeto(op2)) {	// Es objeto op2?
+			Atributo2 = NombreAtributo(op2);	// ahora tenemos el nombre del atributo
+			op2 = NombreObjeto(op2);
+		}
+		// En cualquier caso hago esto, he mnodificado op* en caso de Objeto
+		simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		simbolo_op2 = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
 
 		// Nemonico en todos los casos: CMP
 		// Recuerda que CMP solo actualiza el SR con op1-op2.
 	// TODO hecho para los poeradores relacionales == y != revisar todo si añades más	
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
+			// Objeto1?
+			if (!Atributo1.isEmpty()) {
+				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				Despla1 = simbolo_op1.GetDesplazamiento();
+			}
+			// Objeto2?
+			if (!Atributo2.isEmpty()) {
+				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				Despla2 = simbolo_op2.GetDesplazamiento();
+			}
 			// Comparo el contenido de memoria de los dos operandos.
-			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IX], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write(nemonico+" #-"+Despla1+"[.IX], #-"+Despla2+"[.IX]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
@@ -561,10 +621,22 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Busco el operando 1.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// si son objetos
+			if (!Atributo1.isEmpty()) {
+				// Obtengo el desplazamiento
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			}
+			// Objeto2?
+			if (!Atributo2.isEmpty()) {
+				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				Despla2 = simbolo_op2.GetDesplazamiento();
+			}
 			// Comparo el contenido de memoria de los dos operandos.
-			bw.write(nemonico+" #-"+despl_op1+"[.IY], #-"+simbolo_op2.GetDesplazamiento()+"[.IX]\n");
+			bw.write(nemonico+" #-"+Despla1+"[.IY], #-"+Despla2+"[.IX]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
@@ -573,13 +645,25 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Muevo la operacion relacional
 			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
+			// Objeto1?
+			if (!Atributo1.isEmpty()) {
+				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				Despla1 = simbolo_op1.GetDesplazamiento();
+			}
 			// Busco el operando 2.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			// si son objetos
+			if (!Atributo2.isEmpty()) {
+				// Obtengo el desplazamiento
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			}
 			// Comparo el contenido de memoria de los dos operandos.
-			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IY], #-"+despl_op2+"[.IX]\n");
+			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IY], #-"+Despla2+"[.IX]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
@@ -591,18 +675,30 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Busco el operando 1.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// si son objetos
+			if (!Atributo1.isEmpty()) {
+				// Obtengo el desplazamiento
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			}
 			// Ya q op2 usara el registro IY muevo este a R9
 			//bw.write("MOVE .IY, .R9\n");
-			bw.write("SUB .IY, #"+despl_op1+"\n");
+			bw.write("SUB .IY, #"+Despla1+"\n");
 			bw.write("MOVE .A, .R9\n");
 			// Busco el operando 2.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			bw.write(nemonico+" [.R9], #-"+despl_op2+"[.IY]\n");
+			// si son objetos
+			if (!Atributo2.isEmpty()) {
+				// Obtengo el desplazamiento
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
+			} else {
+				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+			}
+			bw.write(nemonico+" [.R9], #-"+Despla2+"[.IY]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
@@ -745,7 +841,7 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			bw.write("MOVE .IY, .R8\n");	// contenido que deja la función a R7
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			// int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 			bw.write("SUB .R8, .A\n");	// BuscaMarcoDir ha dejado en IY la direccion del marco del vector
 			bw.write("MOVE .A, .R8\n");	// R8 = Desplzamiento total hasta elemento del vector
 			// A BUSCAR OP2
@@ -1233,6 +1329,7 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 		String Atributo1="";
 		String Atributo2="";
 		int Despla1=0, Despla2=0;
+		int tamanio=1;
 		
 		if (EsObjeto(op1)) {	// Es objeto op1?
 			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
@@ -1249,18 +1346,27 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	// todo local!
 			// Miramos si es asignaciona a atributo de objeto
 			if (!Atributo1.isEmpty()) {
-				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
+				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();	// dentro de la clase
+				Despla1 = Despla1 + simbolo_op1.GetDesplazamiento();
+				tamanio=simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();	// tamanio del simbolo;
 			} else {
 				Despla1 = simbolo_op1.GetDesplazamiento();
+				tamanio = simbolo_op1.Actualiza_Tamano();
 			}
 			// Es asignacion de un valor de un atributo
 			if (!Atributo2.isEmpty()) {
 				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
+				Despla2 = Despla2 + simbolo_op1.GetDesplazamiento();
+				tamanio=simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();	// tamanio del simbolo;
 			} else {
 				Despla2 = simbolo_op2.GetDesplazamiento();
+				tamanio=simbolo_op2.Actualiza_Tamano();	// tamanio del simbolo
 			}
+			Parser.salidadep("Desplazamiento "+op1+" "+Atributo1+"op1:"+Despla1+", y tamanio:"+tamanio);
+			Parser.salidadep("Desplazamiento "+op1+" op2:"+Despla2+", y tamanio:"+tamanio);
 			// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
-			bw.write("MOVE #-" + Despla2 + "[.IX], #-"+Despla1+"[.IX]\n");
+			CopiaBloqMem(".IX", Despla2, ".IX", Despla1, tamanio);
+			//bw.write("MOVE #-" + Despla2 + "[.IX], #-"+Despla1+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	//op1 No local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
@@ -1331,6 +1437,24 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
+}
+
+/*
+ * Asigna un bloque de memoria a otro
+ * Copiamos a partir de la direccion Base con desplazamiento base en la direccion edstino con desplzamiento destino
+ * tantas posiciones como tamanio diga
+ */
+private void CopiaBloqMem (String dirBase, int DesplBase, String dirDest, int DesplDest, int tamanio) {
+	try {
+		int despl1=DesplBase, despl2=DesplDest;
+		for (int i=0; i<tamanio;i++) {
+			bw.write("MOVE #-"+despl1+"["+dirBase+"], #-"+despl2+"["+dirDest+"]\n");
+			despl1++;
+			despl2++;
+		}
+	} catch (Exception e) {
+        System.err.println("Error: Ejecutar CopiaBloqMem.");
+	}
 }
 
 /*
@@ -1431,7 +1555,7 @@ private boolean EsObjeto (String operando) {
 }
 
 /*
- * Devuelve Nombre edl objeto
+ * Devuelve Nombre del objeto
  */
 private String NombreObjeto (String operando) {
 	try {
