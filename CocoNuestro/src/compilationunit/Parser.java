@@ -606,7 +606,7 @@ public class Parser {
 		SemErr("El metodo tiene que devolver el tipo especificado en la declaracion (no hay sentencia return)");
 		else
 			{
-			terceto = new String (tercetos.retorno_subprograma());
+			terceto = new String (tercetos.retorno_metodo());
 		 			tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
 		 			colaTercetos.add(tupla);
 			hayreturn = false;

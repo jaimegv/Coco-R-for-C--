@@ -154,6 +154,12 @@ public class Tercetos{
         return "RET,,,\n";
     }
     
+    public String retorno_metodo (){
+        
+
+        return "RET_METODO,,,\n";
+    }
+    
     
     public String putCadena(String op1){
      
