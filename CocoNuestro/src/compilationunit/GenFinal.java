@@ -995,7 +995,7 @@ private void PutEntero (TablaSimbolos ambito_terceto) {
 			if (!Atributo1.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
-				Despla1 = Despla1 + simbolo_op1.GetDesplazamiento();
+				Despla1 = Despla1 + tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
@@ -1045,7 +1045,7 @@ private void PutCadena (TablaSimbolos ambito_terceto) {
 			if (!Atributo1.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
-				Despla1 = Despla1 + simbolo_op1.GetDesplazamiento();
+				Despla1 = Despla1 + tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
@@ -1097,7 +1097,7 @@ private void PutBool (TablaSimbolos ambito_terceto) {
 			if (!Atributo1.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
-				Despla1 = Despla1 + simbolo_op1.GetDesplazamiento();
+				Despla1 = Despla1 + tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
