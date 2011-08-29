@@ -1328,6 +1328,7 @@ private void EjecutarAsignaCad (TablaSimbolos ambito_terceto) {
  * op1 y op2 pueden ser o no variables locales
  * op1 y op2 pueden ser atributos
  */
+// TODO opcion asignar a un OBJETO otro OBJETO
 private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 	try {
 		Simbolo simbolo_op1 = null;
@@ -1384,6 +1385,7 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+				Parser.salidadep("Desplazamiento de op1:"+op1+",Despla:"+Despla1);
 				tamanio = tabla_op_lejano.GetSimbolo(op1).Actualiza_Tamano();
 			}
 			if (!Atributo2.isEmpty()) {
@@ -1474,13 +1476,19 @@ private void CopiaBloqMem (String dirBase, int DesplBase, String dirDest, int De
 	try {
 		int despl1=DesplBase, despl2=DesplDest;
 		for (int i=0; i<tamanio;i++) {
-			if (dirDest.contains(".IX")) {
-				bw.write("MOVE #-"+despl1+"["+dirBase+"], #-"+despl2+"["+dirDest+"]\n");
-			} else {	// nos envian un .R9 u otro registro
-				bw.write("MOVE #-"+despl1+"["+dirBase+"], ["+dirDest+"]\n");
+			if (!dirDest.equals(".R9")) {
+				bw.write("MOVE #-"+despl1+"["+dirBase+"], #-"+despl2+"["+dirDest+"]; Moviendo bloque\n");
+			} else {	// nos envian un .R9 u otro registro, y despl2 no es indiferente
+				bw.write("MOVE #-"+despl1+"["+dirBase+"], ["+dirDest+"]; Moviendo bloque\n");
+				//decremento el valor de .R9
+				bw.write("SUB .R9, #1\n");
+				bw.write("MOVE .A, .R9\n");
 			}
 			despl1++;
 			despl2++;
+		}
+		if (tamanio==0) {
+			System.err.println("ERROR en CopiaBloqMem");
 		}
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar CopiaBloqMem.");
