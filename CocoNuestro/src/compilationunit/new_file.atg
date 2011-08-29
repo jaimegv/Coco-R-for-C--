@@ -1534,11 +1534,11 @@ VNegacion <out Simbolo simbolo>
        .)
    
     
-    [(VExpAND <out simbolo, simbolo_temp2> 
+    [VExpAND <out simbolo, simbolo_temp2> 
     | 
-    VExpOR <out simbolo, simbolo_temp2>)])
+    VExpOR <out simbolo, simbolo_temp2>]
     					   		 |
-    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce
+    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce)
     					   		 					(.  if ((simbolo != null) && (simbolo_exp_anterior != null))
     					   		 							{
     					   		 							if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
