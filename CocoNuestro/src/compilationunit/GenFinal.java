@@ -349,7 +349,7 @@ private void ObtenerValorVector (TablaSimbolos ambito_terceto) {
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3? indice
 			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
+				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
@@ -834,9 +834,7 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 			bw.write("MOVE #-"+Despla2+"[.IY], [.R8]\n");	// Muevo el valor del elemento al vector
 		} else {
 			System.err.println("Ejecutar Asigna. Caso no contemplado");
-		}
-		
-		
+		}		
 	} catch (Exception e) {
         System.err.println("Error: Ejecutar AsignaValorVector.");
 	}
@@ -1375,7 +1373,6 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
  */
 private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto) {
 	try {
-		Parser.salidadep("Elemento a buscar, Busca MarcoDir:"+Nombre);
 		if (!ambito_terceto.Esta(Nombre)) {	// Esta en ambito global
 			bw.write("MOVE #"+dirGlobal+",.IY\n");
 			if (!ambito_global.Esta(Nombre)) {	// No esta en local ni en global!, atributo de clase
