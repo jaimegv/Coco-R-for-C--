@@ -689,6 +689,19 @@ Parametros <Simbolo simbolo_nombre_funcion>
 				[{comma Ttipo<out type>ident (. simbolo_parametro = new Simbolo(t.val, type, parametro);
 												simbolo_parametro.SetLine(t.line);
 												simbolo_parametro.SetColumn(t.col);
+												if (type == identificador)
+													{
+													if (!(tabla.EstaRecur(nombre_clase)))
+														SemErr(t.val + " no estaba declarado previamente");
+													else
+														{
+														Simbolo simbolo_clase = tabla.GetSimboloRecur(nombre_clase);
+														if (simbolo_clase.GetKind() != clase)
+															SemErr(t.val + " no es una clase");
+														else
+															simbolo_parametro.SetClase(simbolo_clase);
+														}
+													}
 												if (simbolo_nombre_funcion.GetKind() != metodo) {						
 													if (tabla.EstaEnActual(simbolo_parametro.GetNombre())) {
 														SemErr("Hay otro parametro con el mismo nombre");
