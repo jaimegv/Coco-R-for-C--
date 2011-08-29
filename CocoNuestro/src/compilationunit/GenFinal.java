@@ -273,7 +273,7 @@ private void OpGoto () {
 private void EtiquetaIf () {
 	try {
 		bw.write(op1+": ;Etiqueta IFs\n");
-		bw.write("NOP");
+		bw.write("NOP\n");
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar Insertar Etiqua IF.");
 	}
