@@ -1444,19 +1444,19 @@ VNegacion <out Simbolo simbolo>
      | op_menos (.operacion = new String("RESTA");.)
      
      
-     ) VExpresion<out simbolo_resultado> (.		if (simbolo_resultado !=null)
+     ) VExpresion<out simbolo_resultado> (.		if ((simbolo_resultado !=null) &&(simbolo_exp_anterior != null))
      												{
-	     											if (simbolo_resultado.GetType() != entera)
+	     											if ((simbolo_resultado.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
 	    											 		SemErr("VExpSuma: Error de tipos en la expresion");
-    											 	}.)
-      (.if (simbolo_resultado != null)
+    											 	}
+    									 .)
+      (.if ((simbolo_resultado != null) && (simbolo_exp_anterior != null))
 	      	{
 	      	Simbolo simbolo_temp1 = new Simbolo(tercetos.darTemporal(),entera,var);
 	      	tabla.InsertarEnActual(simbolo_temp1);
 	      	salidadep(simbolo_resultado.GetNombre()+"CUCU");
 	      	salidadep(simbolo_temp1.GetNombre()+"CUCU");
-	      	//LUIS
-	        //String terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_exp_anterior.GetNombre(),operacion,simbolo_temp1.GetNombre()));
+	      	
 	        String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(),operacion,simbolo_temp1.GetNombre()));
 	
 	
