@@ -1470,22 +1470,29 @@ VNegacion <out Simbolo simbolo>
   = (. salidadep("Entramos VExpMul");
   	   Simbolo simbolo_temp1 = null;
   	   String operador = null;
-  	   simbolo = null;.)
+  	   simbolo = null;
+  	   Simbolo simbolo_temp2 = null;.)
   	(   
     (op_producto (.operador = new String("MUL");.) | op_division (.operador = new String ("DIV");.))  
     
     ((ValorFinalExp<out simbolo_temp1> 
     
-    (.
-      Simbolo simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var);
-      tabla.InsertarEnActual(simbolo_temp2);
-//	LUIs
-//      String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo_temp2.GetNombre()));
-	  String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp1.GetNombre(), operador, simbolo_temp2.GetNombre()));
-      tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-            
-      colaTercetos.add(tupla);
-      simbolo = simbolo_temp2;.)
+    (.if ((simbolo_exp_anterior != null) && (simbolo_temp1 != null))
+    		{
+    		if ((simbolo_temp1.GetType() != entera) ||  (simbolo_exp_anterior.GetType() != entera))
+    			SemErr("Error de tipos en la expresion");
+    		else
+    			{
+    			simbolo_temp2 = new Simbolo(tercetos.darTemporal(),entera,var);
+	      		tabla.InsertarEnActual(simbolo_temp2);
+			  	String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(), simbolo_temp1.GetNombre(), operador, simbolo_temp2.GetNombre()));
+		      	tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		      	colaTercetos.add(tupla);
+		      	simbolo = simbolo_temp2;
+    			} 
+			
+    		}
+      .)
       
     
     [VExpSuma <out simbolo, simbolo_temp2> 
@@ -1499,16 +1506,20 @@ VNegacion <out Simbolo simbolo>
     parent_ab VExpresion <out simbolo_temp1> parent_ce
     
      
-    (. if ((simbolo_temp1.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
-    		SemErr("ExpMul: Error de tipos en la expresion");
-       else
-       		{
-       		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
-  	        tabla.InsertarEnActual(simbolo);
-	        String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
-	        tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
-	        colaTercetos.add(tupla);
-	        }
+    (. if ((simbolo_temp1 != null) && (simbolo_exp_anterior != null))
+    		{
+	    	if ((simbolo_temp1.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+	    		SemErr("Error de tipos en la expresion");
+	        else
+	       		{
+	       		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
+	  	        tabla.InsertarEnActual(simbolo);
+		        String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
+		        tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+		        colaTercetos.add(tupla);
+		        }
+    		}
+
 	        
        		
     .))
