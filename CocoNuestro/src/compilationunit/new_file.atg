@@ -1538,8 +1538,9 @@ VNegacion <out Simbolo simbolo>
     | 
     VExpOR <out simbolo, simbolo_temp2>]
     					   		 |
-    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce)
-    					   		 					(.  if ((simbolo != null) && (simbolo_exp_anterior != null))
+    					   		 parent_ab VExpresion <out simbolo_temp1> parent_ce
+    					   		 					(.  salidadep ("LLEGAMOS AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    					   		 						if ((simbolo != null) && (simbolo_exp_anterior != null))
     					   		 							{
     					   		 							if ((simbolo.GetType() != bool) || (simbolo_exp_anterior.GetType() != bool))
 		 														{
@@ -1552,7 +1553,7 @@ VNegacion <out Simbolo simbolo>
     					   		 							} 
     					   		 						.)
     					   													  			
-    					   	)
+    					   	))
     					   	 
     .
 
