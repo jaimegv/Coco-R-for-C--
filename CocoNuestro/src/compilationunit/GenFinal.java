@@ -273,6 +273,7 @@ private void OpGoto () {
 private void EtiquetaIf () {
 	try {
 		bw.write(op1+": ;Etiqueta IFs\n");
+		bw.write("NOP");
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar Insertar Etiqua IF.");
 	}
@@ -1274,7 +1275,7 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
 			}
 			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
-			bw.write(nemonico+" #-"+Despla2+"[.IY], [.R9]\n");
+			//bw.write(nemonico+" #-"+Despla2+"[.IY], [.R9]\n");
 			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
@@ -1405,7 +1406,6 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 				Despla1 = simbolo_op1.GetDesplazamiento();
 				tamanio=simbolo_op1.Actualiza_Tamano();	// tamanio del simbolo
 			}
-// TODO por aki
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// si son objetos
@@ -1414,7 +1414,6 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
 				Despla2 = Despla2 + tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
 				tamanio=tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).Actualiza_Tamano();	// tamanio del simbolo;
-				System.err.println("!!!!!!!!!q rico sabe");
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
@@ -1425,14 +1424,17 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			CopiaBloqMem(".IY", Despla2, ".IX", Despla1, tamanio);
 		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) {	// NADA LOCAL!
 			// Dejará en IY el marco de pila para acceder al simbolo op.
-			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);	// Nos deja en IY la dir del marco
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// si son objetos
 			if (!Atributo1.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
+				Despla1 = Despla1 + tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+				tamanio=tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).Actualiza_Tamano();	// tamanio del simbolo;
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+				tamanio = tabla_op_lejano.GetSimbolo(op1).Actualiza_Tamano();
 			}
 			// Puesto q op2 tambien usara esta func. muevo el IY a otro reg
 			bw.write("MOVE .IY, .R9\n");	// DIR del MARCO de OP1 en R9!!!!
@@ -1444,12 +1446,16 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			if (!Atributo2.isEmpty()) {
 				// Obtengo el desplazamiento
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
+				Despla2 = Despla2 + tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+				tamanio=tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).Actualiza_Tamano();	// tamanio del simbolo;
 			} else {
 				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
+				tamanio=tabla_op_lejano.GetSimbolo(op2).Actualiza_Tamano();	// tamanio del simbolo
 			}
 			// Pongo el valor local en el hueco ajeno
-			bw.write("MOVE #-"+ Despla2 +"[.IY], [.R9]\n");	// RECUERDA R9!!
+			//bw.write("MOVE #-"+ Despla2 +"[.IY], [.R9]\n");	// RECUERDA R9!!
+			CopiaBloqMem(".IY", Despla2, ".R9", 0, tamanio);
 		} else {
 			System.err.println("Ejecutar Asigna. Caso no contemplado");
 		}
@@ -1468,7 +1474,11 @@ private void CopiaBloqMem (String dirBase, int DesplBase, String dirDest, int De
 	try {
 		int despl1=DesplBase, despl2=DesplDest;
 		for (int i=0; i<tamanio;i++) {
-			bw.write("MOVE #-"+despl1+"["+dirBase+"], #-"+despl2+"["+dirDest+"]\n");
+			if (dirDest.contains(".IX")) {
+				bw.write("MOVE #-"+despl1+"["+dirBase+"], #-"+despl2+"["+dirDest+"]\n");
+			} else {	// nos envian un .R9 u otro registro
+				bw.write("MOVE #-"+despl1+"["+dirBase+"], ["+dirDest+"]\n");
+			}
 			despl1++;
 			despl2++;
 		}
