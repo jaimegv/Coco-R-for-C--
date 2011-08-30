@@ -140,7 +140,11 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	if (operacion.equals("ASIGNACION")) {				// caso de asignar un entero a algo
     	EjecutarAsignacion(op1, op2, ambitoterceto);	// paso el destino(op1) y el valor(op2)
 	} else if (operacion.equals("ETIQUETA_SUBPROGRAMA")) {
-		ComienzoSubprograma(op1, ambitoterceto);		// op1: nombre de la etiqueta
+		ComienzoSubprograma(op1, ambitoterceto); // op1: etiqueta
+	} else if (operacion.equals("ETIQUETA_METODO")) {	// Comienzo Metodo
+		// TODO simplemente llamados a ComienzoSubrograma
+		ComienzoMetodo(ambitoterceto); // op1: etiqueta
+		//ComienzoSubprograma(op1, ambitoterceto);
 	} else if (operacion.equals("ASIGNACION_CADENA")) {	// ETI: data "HOLA"
 		EjecutarAsignaCad(ambitoterceto);
 	} else if (operacion.equals("ASIGNA")){				// asignamos a un temp el valor de otro tmp
@@ -164,16 +168,23 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 	} else if (operacion.equals("FIN_PARAM")) {		// SP-desplz
 		FinParam();
 	} else if (operacion.equals("CALL")) {		// Llamada a Funcion!
-		// TODO no comprobada
 		LlamadaProg(ambitoterceto);
+	} else if (operacion.equals("CALL_METODO")) {		// Llamada a Funcion!
+		LlamadaMetodo(ambitoterceto);
 	} else if (operacion.equals("RETURN")) {	// return Valor;
 		// TODO hacer-comprobrar
 		ReturnOp(ambitoterceto);
-	} else if (operacion.equals("RET")) {		// Retornar de una funcion
+	} else if (operacion.equals("RET_METODO")) {// Retornar de un Metodo
+		// TODO actualmente RetonoMetodo llama a RetornoProg
+		RetornoMetodo(ambitoterceto);
+		// RetornoProg(ambitoterceto);
+	} else if (operacion.equals("RET")) {		// Retornar de una Funcion
 		// TODO	no comprobada
 		RetornoProg(ambitoterceto);
 	} else if (operacion.equals("DIR_RETORNO")) {	// Push DirRetorno donde dev el valor Retornado	
 		PushDirRetorno(ambitoterceto);
+	} else if (operacion.equals("DIR_RETORNO_METODO")) {	// Apilamos la dir del objeto
+		PushObjetoDirRetorno(ambitoterceto);				// Push DirRetorno donde dev el valor Retornado
 	} else if (operacion.equals("SUMA")) {		// Suma
 		nemonico = "ADD";
 		OpBinaria(ambitoterceto);
@@ -475,7 +486,6 @@ private void InitParam () {
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar InitParam.");
 	}
-	
 }
 
 /*
@@ -498,10 +508,49 @@ private void FinParam () {
  * Apilamos la direccion donde dejaremos el valor de retorno. Esta direccion sera la 
  * direccion ABSOLUTA.
  * Nota: En caso NO devolver nada, void, la funcion se apilara con una direccion IX
+ * SIEMPRE SE LLAMA A ESTA FUNCION HAYA O NO VALOR DEVUELTO
  */
 private void PushDirRetorno (TablaSimbolos ambito_terceto) {
 	try {
 		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		// Resto a IX el desplazamiento para llegar al temporal
+		bw.write("SUB .IX,#"+simbolo_return.GetDesplazamiento()+"\n");
+		// Apilo dicha direccion en la cima
+		bw.write("PUSH .A; Apilando donde se guardara el retorno funcion\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar PushDirRetorno.");
+	}
+}
+
+/*
+ * PushObjetoDirRetorno
+ * Apilamos la direccion del objeto al que se ha llamado para aplicar un metodo
+ */
+private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
+	try {
+		int Despla1=0;
+		TablaSimbolos tabla_op_lejano = null;
+		// Buscamos la direccion del objeto y la apilamos
+		if (ambito_terceto.Esta(op1)) {	// Solo puede ser un objeto
+			// operando1
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, "");
+			// Sumo IX mas el desplazamiento y lo apilo->dir_objeto
+			bw.write("SUB .IX, #"+Despla1+"\n");
+		} else {
+			// Busco el operando 1.
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			// operando1
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, "");
+			// Sumo IY mas el desplazamiento y lo apilo->dir_objeto
+			bw.write("SUB .IY, #"+Despla1+"\n");
+		}
+		// Apilo el resultado .A que contiene la direccion del objeto
+		bw.write("PUSH .A");
+		System.err.println("Valor de op1, objeto: "+op1);
+		
+		// a partir de aki igual q PushDirRetorno
+		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
 		// Resto a IX el desplazamiento para llegar al temporal
 		bw.write("SUB .IX,#"+simbolo_return.GetDesplazamiento()+"\n");
 		// Apilo dicha direccion en la cima
@@ -527,9 +576,42 @@ private void LlamadaProg (TablaSimbolos ambito_terceto) {
 		bw.write("POP .IX\n");
 		bw.write("POP .SR\n");
 		// Hay otro valor en la pila. PushDirRetorno lo metio!
-		bw.write("POP .R0; Sacando el antiguo retorno funcion\n"); // siempre se apila
+		bw.write("POP .R0; Sacando el DIR VALOR retorno\n"); // siempre se apila
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar Llamada a Programa.");
+	}
+}
+
+/*
+ * LlamadaMetodo
+ */
+private void LlamadaMetodo (TablaSimbolos ambito_terceto) {
+	try {
+		// Apilamos todo lo necesario para la vuelta
+		bw.write("PUSH .SR\n");
+		bw.write("PUSH .IX\n");
+		// Salto a etiqueta
+		bw.write("CALL /"+op1+"; SALTO A METODO\n");
+		// Desapilamos lo mismo que apilamos
+		bw.write("POP .IX\n");
+		bw.write("POP .SR\n");
+		// Hay otro valor en la pila. PushDirRetorno lo metio!
+		bw.write("POP .R0; Sacando el DIR VALOR retorno\n"); // siempre se apila
+		bw.write("POP .R0; Sacando el DIR OBJETO\n"); // siempre se apila
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar Llamada a Programa.");
+	}
+}
+
+/*
+ * ReturnMetodo
+ * Simplemente llamado a RetornoFuncion
+ */
+private void RetornoMetodo (TablaSimbolos ambito_terceto) {
+	try {
+		RetornoProg(ambito_terceto);
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar RetornoPrograma.");
 	}
 }
 
@@ -1341,6 +1423,13 @@ private void ComienzoSubprograma (String subprograma, TablaSimbolos ambito_terce
 	} catch (Exception e) {
 		System.err.println("Error: Comienzo Subprograma.");
 	}
+}
+
+/*
+ *	Comienzo Metodo
+ */
+private void ComienzoMetodo (TablaSimbolos ambito_terceto) {
+	ComienzoSubprograma(op1, ambito_terceto);
 }
 
 /*
