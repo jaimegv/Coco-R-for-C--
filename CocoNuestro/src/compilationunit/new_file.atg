@@ -345,6 +345,7 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								sim.SetVisibilidad(visible);
 								sim.SetLine(t.line);
 	 						    sim.SetColumn(t.col);
+	 						    
 	 						    //System.out.println(t.val+" Simbolo q estas mirando, y su tipo:"+type);
 							.)
 						( 	(. /* Caso en que es una Declaracion de variable */
@@ -356,10 +357,12 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 							.) 
 								DecVar<sim> 
 							| (./* Caso Declaracion Cabecera de un metodo */
+								sim.SetVisibilidad(visible);
 								sim.SetKind(metodo);
 								sim.SetTipoRetorno(type);
 								sim.SetClase(simClase);		// a q clase pertenece le metodo
 								sim.SetAmbitoAsociado(tabla.GetAmbitoActual());	// ambito de accion
+								
 								//System.out.println("El Metodo pertenece a la clase:"+sim.GetClase().GetNombre());
 								if (type==identificador) {
 									sim.SetClaseDevuelta(ObjetoDevuelto);	//devuelve un tipo objeto
@@ -372,6 +375,7 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 							  | voidd ident (.		Simbolo simbol = new Simbolo(t.val, 0, metodo);
 											  		simbol.SetKind(metodo);
 											  		simbol.SetTipoRetorno(vacio);
+											  		simbol.SetVisibilidad(visible);
 													simbol.SetClase(simClase);		// a q clase pertenece le metodo
 													simbol.SetAmbitoAsociado(tabla.GetAmbitoActual());	// ambito de accion
 													tabla.InsertarEnActual(simbol);
@@ -779,7 +783,10 @@ punto ident (. if (simbolo_objeto != null)
 				 				{
 				 				simbolo_metodoargumento = ambito_clase.GetSimbolo(t.val);
 				 				if ((simbolo_metodoargumento.GetVisibilidad() == privado) && (tabla.GetAmbitoActual().Ambito_Padre() != simbolo_metodoargumento.GetClase().GetAmbitoAsociado()))
+				 					{
+				 					salidadep(simbolo_metodoargumento.GetNombre() + " tiene visibilidad " + simbolo_metodoargumento.GetVisibilidad());
 				 					SemErr(simbolo_metodoargumento.GetNombre() + " no es publico.");
+				 					}
 				 				}
 				 			}
 				 		} 
@@ -1074,8 +1081,10 @@ Else<Simbolo simbolo_funcion>	(. int type;
 InstCout
 (. Simbolo simbolo = null;.)
 =
-	cout {menor_menor VExpresion<out simbolo>(.if (simbolo.GetType()==undef) 
+	cout {menor_menor VExpresion<out simbolo>
+									(.if (simbolo.GetType()==undef) 
 											{
+											salidadep(simbolo.GetNombre());
 											SemErr("InstCout: Error tipos.");
 											}
 										   else if ((simbolo.GetType() == identificador) || (simbolo.GetType() == vector))
@@ -1811,7 +1820,6 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 salidadep("Entramos en ValorFinalExp"); .)
 	(ident (. if (!(tabla.EstaRecur(t.val)))
 				{
-				salidadep("cococoococo");
 				SemErr(t.val + " no estaba declarado previamente");
 				}
 			 else
