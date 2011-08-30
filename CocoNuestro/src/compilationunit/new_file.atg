@@ -2048,12 +2048,21 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 	 			if ((pos == (simbolo_funcion.GetNParametros() - 1)))//Unicamente emitimos el codigo de la llamada cuando sea el ultimo parametro
 					{
 					//Primero emitimos el terceto correspondiente a apilar el valor devuelto
-					String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
-					tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
-					colaTercetos.add(tupla);
+					if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
+						{
+						String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+						colaTercetos.add(tupla);
+						}
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))
+						{
+						String terceto_valor_devuelto = new String(tercetos.DirRetornoMetodo(simbolo_objeto.GetNombre(), simbolo_valor_devuelto.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+						colaTercetos.add(tupla);
+						}
 					//Ahora emitimos el terceto de aviso de apilar parametros
 					String terceto = new String(tercetos.Init_parametros());
-					tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+					tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 					colaTercetos.add(tupla);
 					//Ahora emitimos los tercetos de apilamiento de parametros
 	        		for(int i=0; i< colaArgumentos.size(); i++)
@@ -2083,20 +2092,29 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 				else if ((simbolo_funcion.GetNParametros() == 0) && !haysiguienteargumento && !hayargumento && (pos==0))
 					{
 					//Primero emitimos el terceto correspondiente a apilar el valor devuelto
-					String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
-					tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
-					colaTercetos.add(tupla);
+					if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
+						{
+						String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+						colaTercetos.add(tupla);
+						}
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))
+						{
+						String terceto_valor_devuelto = new String(tercetos.DirRetornoMetodo(simbolo_objeto.GetNombre(), simbolo_valor_devuelto.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+						colaTercetos.add(tupla);
+						}
 					//Ahora tenemos que saltar a la etiqueta
 					if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
 						{
 						String terceto = new String (tercetos.llamada_subprograma(simbolo_funcion.GetEtiqueta()));
-						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 						colaTercetos.add(tupla);
 						}
 					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
 						{
 						String terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
-						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 						colaTercetos.add(tupla);
 						}
 					}
