@@ -427,10 +427,9 @@ private void ReturnOp (TablaSimbolos ambito_terceto)  {
 		}
 
 		// Movemos la direccion de Retorno a un Registro
-		bw.write("MOVE #4[.IX], .IY\n");	// IY tiene la dir donde se guardara el valorRetorno
+		bw.write("MOVE #4[.IX], .IY; ReturnFuncion\n");	// IY tiene la dir donde se guardara el valorRetorno
 		
 		if (ambito_terceto.Esta(op1)) {			// op1 Local
-			System.err.println("Dentro de REturnOp.Operando: "+op1);
 			// operando1
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			tamanio = TamSimbolo(ambito_terceto, op1, Atributo1);
@@ -440,10 +439,13 @@ private void ReturnOp (TablaSimbolos ambito_terceto)  {
 			// Tenemos en R9 la direccion a partir de la cual debemos dejar el valor de retorno
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			bw.write("MOVE .IY, .R9\n");
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			tamanio = TamSimbolo(tabla_op_lejano, op1, Atributo1);
 			// Necesitamo, en caso de objeto el simbolo
-			System.err.println("Errorreturn Objeto");
+			CopiaBloqMem(".R9", Despla1, ".IY", 0, tamanio);
+			
 /*			simbolo_op1 = tabla_op_lejano.GetSimbolo(op1);
 						
 			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
@@ -520,29 +522,30 @@ private void PushDirRetorno (TablaSimbolos ambito_terceto) {
 /*
  * PushObjetoDirRetorno
  * Apilamos la direccion del objeto al que se ha llamado para aplicar un metodo
+ * Almacenamos en el temporal la direccion de objeto
+ * op1 = temporal
+ * op2 = objeto
  */
 private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 	try {
-		int Despla1=0;
+		int Despla2=0;
 		TablaSimbolos tabla_op_lejano = null;
-		System.err.println("PushObjetoDIrRetorno");
 		// Buscamos la direccion del objeto y la apilamos
-		if (ambito_terceto.Esta(op1)) {	// Solo puede ser un objeto
+		if (ambito_terceto.Esta(op2)) {	// Solo puede ser un objeto
 			// operando1
-			Despla1 = DesplzSimbolo(ambito_terceto, op1, "");
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, "");
 			// Sumo IX mas el desplazamiento y lo apilo->dir_objeto
-			bw.write("SUB .IX, #"+Despla1+"\n");
+			bw.write("SUB .IX, #"+Despla2+"; Objeto: "+op2+"\n");
 		} else {
 			// Busco el operando 1.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
-			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// operando1
-			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, "");
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, "");
 			// Sumo IY mas el desplazamiento y lo apilo->dir_objeto
-			bw.write("SUB .IY, #"+Despla1+"\n");
+			bw.write("SUB .IY, #"+Despla2+"\n");
 		}
 		// Apilo el resultado .A que contiene la direccion del objeto
-		Parser.salidadep("");
 		bw.write("PUSH .A; Apilando dir del objeto\n");
 		// a partir de aki igual q PushDirRetorno
 		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
@@ -1324,7 +1327,6 @@ private int DesplzSimbolo (TablaSimbolos ambitoSimbolo, String operando, String 
 		if (Atributo.isEmpty()) {	//	Todo menos un atributo de objeto, tambien un atributo dentro de un metodo
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			Desplazamiento = ambitoSimbolo.GetSimbolo(operando).GetDesplazamiento();
-			System.err.println("Desplazamiento para: "+operando+" de un valor de: "+Desplazamiento);
 		} else {	// atributo de clase
 			// Obtengo el desplazamiento
 			Desplazamiento = ambitoSimbolo.GetSimbolo(operando).GetAtributo(ambitoSimbolo.GetSimbolo(operando).GetNombre()+"."+Atributo).GetDesplazamiento();
@@ -1367,6 +1369,11 @@ private void CopiaBloqMem (String dirBase, int DesplBase, String dirDest, int De
 		int despl1=DesplBase, despl2=DesplDest;
 		for (int i=0; i<tamanio;i++) {
 			if (dirDest.equals(".R9")) {
+				bw.write("MOVE #-"+despl1+"["+dirBase+"], ["+dirDest+"]; Moviendo bloque\n");
+				//decremento el valor de .R9
+				bw.write("SUB .R9, #1\n");
+				bw.write("MOVE .A, .R9\n");
+			} else if (dirBase.equals(".R9")) {
 				bw.write("MOVE #-"+despl1+"["+dirBase+"], ["+dirDest+"]; Moviendo bloque\n");
 				//decremento el valor de .R9
 				bw.write("SUB .R9, #1\n");
