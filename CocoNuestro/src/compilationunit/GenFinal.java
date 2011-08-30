@@ -286,80 +286,61 @@ private void EtiquetaIf () {
  */
 private void ObtenerValorVector (TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_vector = ambito_terceto.GetSimbolo(op1);	// op1= vector
+		//Simbolo simbolo_vector = ambito_terceto.GetSimbolo(op1);	// op1= vector
 		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(op2);	// op2= resultado	siempre_local
-		Simbolo simbolo_indice = null;								// op3= indice	(unico caso atributo objeto)
+		//Simbolo simbolo_indice = null;								// op3= indice	(unico caso atributo objeto)
 		TablaSimbolos tabla_op_lejano = null;
-		String Atributo3="";
-		int Despla3=0;
+		String Atributo1="", Atributo3="";
+		int Despla1=0, Despla3=0;
 		
 		if (EsObjeto(op3)) {	// Es objeto op3?
 			Atributo3 = NombreAtributo(op3);	// ahora tenemos el nombre del atributo
 			op3 = NombreObjeto(op3);			// ahora tenemos el nombre del objeto en op1
 		}
-		simbolo_indice = ambito_terceto.GetSimbolo(op3);	// op3= indice	(unico caso atributo objeto)
+		//simbolo_indice = ambito_terceto.GetSimbolo(op3);	// op3= indice	(unico caso atributo objeto)
 		
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op3)) {			// todo local
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			// Objeto3? indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = simbolo_indice.GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			// Obtengo el desplzamiento total hasta el elemento ->.A
-			bw.write("ADD #-"+Despla3+"[.IX], #"+simbolo_vector.GetDesplazamiento()+"\n");
+			bw.write("ADD #-"+Despla3+"[.IX], #"+Despla1+"\n");
 			bw.write("SUB .IX, .A\n");	// Tengo en .A la direccion al elemento del vector
 			bw.write("MOVE [.A], #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op3)) { // op1 no local
-			// Objeto3? indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = simbolo_indice.GetDesplazamiento();
-			}
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_vector = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			// Objeto3? indice
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			// Obtengo el desplzamiento total hasta el elemento ->.A
-			bw.write("ADD #-"+Despla3+"[.IX], #"+despl_vector+"\n");
+			bw.write("ADD #-"+Despla3+"[.IX], #"+Despla1+"\n");
 			bw.write("SUB .IY, .A\n");	// Tengo en .A la direccion al elemento del vector(respecto de IY)
 			bw.write("MOVE [.A], #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op3)) { // op3 no local
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3? indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
 			// Obtengo el desplzamiento total hasta el elemento ->.A
-			bw.write("ADD #-"+Despla3+"[.IY], #"+simbolo_vector.GetDesplazamiento()+"\n");
+			bw.write("ADD #-"+Despla3+"[.IY], #"+Despla1+"\n");
 			bw.write("SUB .IX, .A\n");	// Tengo en .A la direccion al elemento del vector
 			bw.write("MOVE [.A], #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op3)) { // NADA local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_vector = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
 			bw.write("MOVE .IY, .R9\n");
-			bw.write("SUB .R9, #"+despl_vector+"\n");	// R9=direccion base del vector
+			bw.write("SUB .R9, #"+Despla1+"\n");	// R9=direccion base del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3? indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
 			// busco y muevo
 			bw.write("SUB .A, #"+Despla3+"[.IY]\n");	// .A=direccion al elemento del vector
 			bw.write("MOVE [.A], #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else {
-			// TODO hacer el resto de if
 			System.err.println("Error: ObtenerValorVector. Caso no contemplado.");
 		}
 	} catch (Exception e) {
@@ -573,8 +554,8 @@ private void RetornoProg (TablaSimbolos ambito_terceto) {
  */
 private void OpRelacional (TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_op1 = null;	// Simbolo op1
-		Simbolo simbolo_op2 = null;	// Simbolo op2
+		//Simbolo simbolo_op1 = null;	// Simbolo op1
+		//Simbolo simbolo_op2 = null;	// Simbolo op2
 		Simbolo simbolo_res = ambito_terceto.GetSimbolo(op3);	// Simbolo Resultado. Siempre local=temp
 		TablaSimbolos tabla_op_lejano = null;
 		String Atributo1="";
@@ -590,25 +571,16 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			op2 = NombreObjeto(op2);
 		}
 		// En cualquier caso hago esto, he mnodificado op* en caso de Objeto
-		simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
-		simbolo_op2 = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
+		//simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		//simbolo_op2 = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
 
 		// Nemonico en todos los casos: CMP
-		// Recuerda que CMP solo actualiza el SR con op1-op2.
-	// TODO hecho para los poeradores relacionales == y != revisar todo si añades más	
+		// Recuerda que CMP solo actualiza el SR con op1-op2.	
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
-			// Objeto1?
-			if (!Atributo1.isEmpty()) {
-				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
-			} else {
-				Despla1 = simbolo_op1.GetDesplazamiento();
-			}
-			// Objeto2?
-			if (!Atributo2.isEmpty()) {
-				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = simbolo_op2.GetDesplazamiento();
-			}
+			// operando1
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
+			// operando2
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			// Comparo el contenido de memoria de los dos operandos.
 			bw.write(nemonico+" #-"+Despla1+"[.IX], #-"+Despla2+"[.IX]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
@@ -622,20 +594,10 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Busco el operando 1.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// si son objetos
-			if (!Atributo1.isEmpty()) {
-				// Obtengo el desplazamiento
-				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
-			} else {
-				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			}
-			// Objeto2?
-			if (!Atributo2.isEmpty()) {
-				Despla2 = simbolo_op2.GetAtributo(simbolo_op2.GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = simbolo_op2.GetDesplazamiento();
-			}
+			// operando1
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			// operando2
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			// Comparo el contenido de memoria de los dos operandos.
 			bw.write(nemonico+" #-"+Despla1+"[.IY], #-"+Despla2+"[.IX]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
@@ -646,25 +608,14 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Muevo la operacion relacional
 			bw.write("MOVE .A, #-" + simbolo_res.GetDesplazamiento() + "[.IX]\n");
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
-			// Objeto1?
-			if (!Atributo1.isEmpty()) {
-				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
-			} else {
-				Despla1 = simbolo_op1.GetDesplazamiento();
-			}
-			// Busco el operando 2.
+			// operando1
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
-			// si son objetos
-			if (!Atributo2.isEmpty()) {
-				// Obtengo el desplazamiento
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			}
+			// operando2
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			// Comparo el contenido de memoria de los dos operandos.
-			bw.write(nemonico+" #-"+simbolo_op1.GetDesplazamiento()+"[.IY], #-"+Despla2+"[.IX]\n");
+			bw.write(nemonico+" #-"+Despla1+"[.IX], #-"+Despla2+"[.IY]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
 			if (operacion.equals("!=")) {
@@ -676,14 +627,8 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Busco el operando 1.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
-			// si son objetos
-			if (!Atributo1.isEmpty()) {
-				// Obtengo el desplazamiento
-				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetAtributo(tabla_op_lejano.GetSimbolo(op1).GetNombre()+"."+Atributo1).GetDesplazamiento();
-			} else {
-				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-				Despla1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			}
+			// operando1
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
 			// Ya q op2 usara el registro IY muevo este a R9
 			//bw.write("MOVE .IY, .R9\n");
 			bw.write("SUB .IY, #"+Despla1+"\n");
@@ -691,14 +636,8 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 			// Busco el operando 2.
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
-			// si son objetos
-			if (!Atributo2.isEmpty()) {
-				// Obtengo el desplazamiento
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			}
+			// operando2
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			bw.write(nemonico+" [.R9], #-"+Despla2+"[.IY]\n");
 			// Necesito saber el resultado del CMP dejado en SR, e concreto si es cero o no
 			bw.write("AND .SR, #1\n");	// Solo si esta activo el bit Z son iguales o no
@@ -723,15 +662,16 @@ private void OpRelacional (TablaSimbolos ambito_terceto) {
 private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 	try {
 		Simbolo simbolo_vector = null;	// Simbolo del Vector.
-		Simbolo simbolo_valor = null;	// Simbolo del valor a meter en el vector
-		Simbolo simbolo_indice = null;	// Simbolo del indice del vector
+//		Simbolo simbolo_valor = null;	// Simbolo del valor a meter en el vector
+//		Simbolo simbolo_indice = null;	// Simbolo del indice del vector
 		TablaSimbolos tabla_op_lejano = null;
+		String Atributo1="";
 		String Atributo2="";
 		String Atributo3="";
-		int Despla2=0, Despla3=0;
+		int Despla1=0, Despla2=0, Despla3=0;
 		
 		// Son objetos?
-		// solo podran serlo valor(op2) e indice(op3). NBo tiene sentido un tipo vector como atributo de objeto!
+		// solo podran serlo valor(op2) e indice(op3). NBo tiene sentido un tipo vector como atributo de objeto! o eso creo...
 		if (EsObjeto(op2)) {	// Es objeto?
 			Atributo2 = NombreAtributo(op2);	// ahora tenemos el nombre del atributo
 			op2 = NombreObjeto(op2);			// ahora tenemos el nombre del objeto en op1
@@ -742,23 +682,15 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 		}
 		// En cualquier caso hago esto, he mnodificado op* en caso de Objeto
 		simbolo_vector = ambito_terceto.GetSimbolo(op1);	// Simbolo del Vector
-		simbolo_valor = ambito_terceto.GetSimbolo(op2);		// Simbolo del valor a meter en el vector
-		simbolo_indice= ambito_terceto.GetSimbolo(op3);		// Simbolo del indice del vector
+//		simbolo_valor = ambito_terceto.GetSimbolo(op2);		// Simbolo del valor a meter en el vector
+//		simbolo_indice= ambito_terceto.GetSimbolo(op3);		// Simbolo del indice del vector
 		
 		// Tenemos tres simbolos a dos posibilidades cada uno de estar o no en el ambito local -> 2 * 2 * 2 = 8 posibilidades
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2) && ambito_terceto.Esta(op3)) {	// todo local!
-			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = simbolo_valor.GetAtributo(simbolo_valor.GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = simbolo_valor.GetDesplazamiento();
-			}
-			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = simbolo_indice.GetDesplazamiento();
-			}
+			// operando2
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
+			// operando3
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			// BUscamos el valor del indice y asignamos el valor a dicha posicion
 			bw.write("MOVE #-"+Despla3+"[.IX],.R9\n");	// R9=valor del indice
 			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
@@ -767,79 +699,57 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 			bw.write("MOVE #-"+Despla2+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
 		} else if ((!ambito_terceto.Esta(op1)) && ambito_terceto.Esta(op2) && ambito_terceto.Esta(op3))	{	//solo op1 No local
 			// No cambia nada, en este caso solo el simbolo vector esta fuera
-			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = simbolo_valor.GetAtributo(simbolo_valor.GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = simbolo_valor.GetDesplazamiento();
-			}
-			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = simbolo_indice.GetDesplazamiento();
-			}
+			// operando2
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
+			// operando3
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			bw.write("MOVE #-"+Despla3+"[.IX],.R9\n");	// R9=valor del indice
 			// Busco el desplazamiento del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			bw.write("ADD #"+despl_op1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write("ADD #"+Despla1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IY, .A\n");	// BuscaMarcoDir ha dejado en IY la direccion del marco del vector
 			bw.write("MOVE .A, .IY\n");	// IY = Desplzamiento total hasta elemento del vector
 			bw.write("MOVE #-"+Despla2+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
 		} else if (ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && ambito_terceto.Esta(op3))	{	//solo op2 No local
-			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = simbolo_indice.GetDesplazamiento();
-			}
+			// operando3
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
+			// operando1
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			bw.write("MOVE #-"+Despla3+"[.IX],.R9\n");	// R9=valor del indice
-			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("ADD #"+Despla1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IX, .A\n");
 			bw.write("MOVE .A, .R8\n");	// R8 = Desplzamiento total hasta elemento del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			}
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			bw.write("MOVE #-"+Despla2+"[.IY], [.R8]\n");	// Muevo el valor del elemento al vector
 		} else if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2) && (!ambito_terceto.Esta(op3)))	{	//solo op3 No local
-			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = simbolo_valor.GetAtributo(simbolo_valor.GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = simbolo_valor.GetDesplazamiento();
-			}
+			// operando1
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
+			// operando2
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 =  tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
 			bw.write("MOVE #-"+Despla3+"[.IY],.R9\n");	// R9=valor del indice
-			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("ADD #"+Despla1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IX, .A\n");
 			bw.write("MOVE .A, .IY\n");	// IY = Desplzamiento total hasta elemento del vector
 			bw.write("MOVE #-"+Despla2+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
 		} else if ((!ambito_terceto.Esta(op1)) && (!ambito_terceto.Esta(op2)) && ambito_terceto.Esta(op3))	{	//op1 y op2 No local
 			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = simbolo_indice.GetAtributo(simbolo_indice.GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = simbolo_indice.GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			bw.write("MOVE #-"+Despla3+"[.IX],.R9\n");	// R9=valor del indice
 			// Busco el desplazamiento del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write("ADD #"+Despla1+", .R9\n");	// desplazamiento del ector mas indice
 			bw.write("MOVE .IY, .R8\n");	// contenido que deja la función a R7
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			// int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
@@ -849,34 +759,22 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			}
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			bw.write("MOVE #-"+Despla2+"[.IY], [.R8]\n");	// Muevo el valor del elemento al vector
 		} else if ((!ambito_terceto.Esta(op1)) && ambito_terceto.Esta(op2) && (!ambito_terceto.Esta(op3)))	{	//op1 y op3 No local
 			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = simbolo_valor.GetAtributo(simbolo_valor.GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = simbolo_valor.GetDesplazamiento();
-			}
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
 			bw.write("MOVE #-"+Despla3+"[.IY],.R9\n");	// R9=valor del indice
 			// Busco el desplazamiento del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			bw.write("ADD #"+despl_op1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write("ADD #"+Despla1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IY, .A\n");
 			bw.write("MOVE .A, .IY\n");	// R8 = Desplzamiento total hasta elemento del vector
 			bw.write("MOVE #-"+Despla2+"[.IX], [.IY]\n");	// Muevo el valor del elemento al vector
@@ -884,50 +782,36 @@ private void AsignaValorVector (TablaSimbolos ambito_terceto) {
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
+			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			bw.write("MOVE #-"+Despla3+"[.IY],.R9\n");	// R9=valor del indice
-			bw.write("ADD #"+simbolo_vector.GetDesplazamiento()+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			bw.write("ADD #"+Despla1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IX, .A\n");
 			bw.write("MOVE .A, .R8\n");	// R8 = Desplzamiento total hasta elemento del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			}
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			bw.write("MOVE #-"+Despla2+"[.IY], [.R8]\n");	// Muevo el valor del elemento al vector
 		} else if (!ambito_terceto.Esta(op1) && (!ambito_terceto.Esta(op2)) && (!ambito_terceto.Esta(op3))) {	// NADA LOCAL!
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
 			// Objeto3?	indice
-			if (!Atributo3.isEmpty()) {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetAtributo(tabla_op_lejano.GetSimbolo(op3).GetNombre()+"."+Atributo3).GetDesplazamiento();
-			} else {
-				Despla3 = tabla_op_lejano.GetSimbolo(op3).GetDesplazamiento();
-			}
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
 			bw.write("MOVE #-"+Despla3+"[.IY],.R9\n");	// R9=valor del indice
 			// Busco el desplazamiento del vector
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			bw.write("ADD #"+despl_op1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write("ADD #"+Despla1+", .R9\n");	// .A=deplazamiento resp IX del elem vector
 			bw.write("SUB .IY, .A\n");
 			bw.write("MOVE .A, .R8\n");	// R8 = Desplzamiento total hasta elemento del vector			
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// Objeto2? valor
-			if (!Atributo2.isEmpty()) {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetAtributo(tabla_op_lejano.GetSimbolo(op2).GetNombre()+"."+Atributo2).GetDesplazamiento();
-			} else {
-				Despla2 = tabla_op_lejano.GetSimbolo(op2).GetDesplazamiento();
-			}
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			bw.write("MOVE #-"+Despla2+"[.IY], [.R8]\n");	// Muevo el valor del elemento al vector
 		} else {
 			System.err.println("Ejecutar Asigna. Caso no contemplado");
@@ -1335,7 +1219,6 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
         System.err.println("Error: Ejecutar Asigna.");		
     }
 }
-
 
 /*
  * Obtener desplazamiento
