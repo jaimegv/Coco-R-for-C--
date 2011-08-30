@@ -1019,6 +1019,8 @@ private void OpUnaria (TablaSimbolos ambito_terceto) {
 /*
  * Operacion Binaria
  * OpMUL(Operancion, op1, op2, resultado, ambitoterceto); a temporal!
+ * Correccion, en caso de ser una operacion normal se cumple lo de arribe,
+ * en caso de ser op= (Operacion con asignacion) el simbolo resultado puede no ser local
  */
 private void OpBinaria (TablaSimbolos ambito_terceto) {
 	try {
@@ -1027,7 +1029,8 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 		TablaSimbolos tabla_op_lejano = null;
 		String Atributo1="";
 		String Atributo2="";
-		int Despla1=0, Despla2=0;
+		String Atributo3="";
+		int Despla1=0, Despla2=0, Despla3=0;
 		
 		if (EsObjeto(op1)) {	// Es objeto op1?
 			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
@@ -1037,10 +1040,14 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 			Atributo2 = NombreAtributo(op2);	// ahora tenemos el nombre del atributo
 			op2 = NombreObjeto(op2);
 		}
+		if (EsObjeto(op3)) {	// Es objeto op3?
+			Atributo3 = NombreAtributo(op3);	// ahora tenemos el nombre del atributo
+			op3 = NombreObjeto(op3);
+		}
 		// En cualquier caso hago esto, he mnodificado op* en caso de Objeto
 		//simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		//simbolo_op2 = ambito_terceto.GetSimbolo(op2);
-		Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(op3);	// siempre local (temp)
+		//Simbolo simbolo_resultado = ambito_terceto.GetSimbolo(op3);	// siempre local (temp)
 		// Recuerda q "nemonico" fue ya asignado en la llamada a esta funcion
 		
 		if (ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {			// todo local!
@@ -1048,8 +1055,10 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			// operando2
 			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
+			// operando3
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			bw.write(nemonico+" #-"+Despla1+"[.IX], #-"+Despla2+"[.IX]\n");
-			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+Despla3+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) { 	//op1 No local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
@@ -1059,7 +1068,11 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
 			bw.write(nemonico+" #-"+Despla1+"[.IY], #-"+Despla2+"[.IX]\n");
-			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
+			// operando1
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
+			bw.write("MOVE .A, #-"+Despla3+"[.IY]\n");
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//op2 No local
 			// operando1
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
@@ -1067,9 +1080,11 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// operando2
 			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
+			// operando3
+			Despla3 = DesplzSimbolo(ambito_terceto, op3, Atributo3);
 			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
 			bw.write(nemonico+" #-"+Despla1+"[.IX], #-"+Despla2+"[.IY]\n");
-			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+			bw.write("MOVE .A, #-"+Despla3+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { 	//NADA local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
@@ -1085,7 +1100,11 @@ private void OpBinaria (TablaSimbolos ambito_terceto) {
 			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			// La suma se queda en el Acumulador, luego lo muevo al simbolo_resultado
 			bw.write(nemonico+" [.R9], #-"+Despla2+"[.IY]\n");
-			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
+			// Dejará en IY el marco de pila para acceder al simbolo op.
+			tabla_op_lejano = BuscaMarcoDir(op3, ambito_terceto);
+			// operando1
+			Despla3 = DesplzSimbolo(tabla_op_lejano, op3, Atributo3);
+			bw.write("MOVE .A, #-"+Despla3+"[.IY]\n");
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
 		}
