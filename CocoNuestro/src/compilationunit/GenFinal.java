@@ -425,11 +425,9 @@ private void ReturnOp (TablaSimbolos ambito_terceto)  {
 			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
 			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
 		}
-
-		// Movemos la direccion de Retorno a un Registro
-		bw.write("MOVE #4[.IX], .IY; ReturnFuncion\n");	// IY tiene la dir donde se guardara el valorRetorno
-		
 		if (ambito_terceto.Esta(op1)) {			// op1 Local
+			// Movemos la direccion de Retorno a un Registro
+			bw.write("MOVE #4[.IX], .IY; ReturnFuncion\n");	// IY tiene la dir donde se guardara el valorRetorno
 			// operando1
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			tamanio = TamSimbolo(ambito_terceto, op1, Atributo1);
@@ -442,21 +440,13 @@ private void ReturnOp (TablaSimbolos ambito_terceto)  {
 			bw.write("MOVE .IY, .R9\n");
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write("SUB .R9, #"+Despla1+"\n");
+			bw.write("MOVE .A, .R9\n");
 			tamanio = TamSimbolo(tabla_op_lejano, op1, Atributo1);
+			// Movemos la direccion de Retorno a un Registro
+			bw.write("MOVE #4[.IX], .IY; ReturnFuncion\n");	// IY tiene la dir donde se guardara el valorRetorno
 			// Necesitamo, en caso de objeto el simbolo
-			CopiaBloqMem(".R9", Despla1, ".IY", 0, tamanio);
-			
-/*			simbolo_op1 = tabla_op_lejano.GetSimbolo(op1);
-						
-			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
-			indice2= simbolo_op1.Actualiza_Tamano()-1;	// indice para el destino
-			indice = indice + simbolo_op1.GetDesplazamiento() - 1;	// desplazamiento hasta el elem
-			while (indice2 >= 0) {	// Muevo los valores del ambito local a la dir IY
-				bw.write("MOVE #-"+indice+"[.IX], #-"+indice2+"[.IY]\n");
-				indice--;
-				indice2--;
-			}
-		*/
+			CopiaBloqMem(".R9", 0, ".IY", 0, tamanio);
 		} else {
 			System.err.println("Error: ReturnOp. Caso no contemplado.");
 		}
@@ -1334,7 +1324,7 @@ private int DesplzSimbolo (TablaSimbolos ambitoSimbolo, String operando, String 
 			Desplazamiento  = Desplazamiento  + ambitoSimbolo.GetSimbolo(operando).GetDesplazamiento();
 		}
 	} catch (Exception e) {
-		System.err.println("Error: DesplzSimbolo.Operando vale:"+operando);
+		System.err.println("Error: DesplzSimbolo.Operando vale:"+operando+" terceto:"+operacion);
 	}
 	
 	return Desplazamiento;
@@ -1364,6 +1354,7 @@ private int TamSimbolo (TablaSimbolos ambitoSimbolo, String operando, String Atr
  * Asigna un bloque de memoria a otro
  * Copiamos a partir de la direccion Base con desplazamiento base en la direccion edstino con desplzamiento destino
  * tantas posiciones como tamanio diga
+ * Si llega con R9 el desplazamiento tiene que haberse aplicado antes, es decir, sera cero!
  */
 private void CopiaBloqMem (String dirBase, int DesplBase, String dirDest, int DesplDest, int tamanio) {
 	try {
@@ -1510,7 +1501,7 @@ private String NombreObjeto (String operando) {
 		return operando.substring(0, operando.indexOf("."));
 	} catch (Exception e) {
 		System.err.println("Error: NombreObjeto.");
-		return "Error: NombreObjeto.";
+		return null;
 	}
 }
 
@@ -1519,7 +1510,7 @@ private String NombreAtributo (String operando) {
 	    return operando.substring(operando.indexOf(".")+1, operando.length());
 	} catch (Exception e) {
 		System.err.println("Error: NombreAtributo.");
-		return "Error: NombreAtributo.";
+		return null;
 	}
 }
 
