@@ -19,7 +19,7 @@ import java.util.*;
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 
-	static public boolean modo_depuracion = false;
+	static public boolean modo_depuracion = true;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -757,8 +757,8 @@ corchete_ab enteros	(.	if (simbolo.GetType() != entera)
 Llamada <Simbolo simbolo_objeto> //Cuando llegamos aquí, simbolo_objeto debería contener la información del identificador anterior
 = (. TablaSimbolos ambito_clase = null; //Atención!! Llamada solo sirve para llamar a un método.
 	 Simbolo simbolo_metodoargumento = null;
-	 salidadep("Entramos en Llamada");
-	 simboloObjetoGlob = simbolo_objeto; .) 
+	 salidadep("Entramos en Llamada"); 
+	 simboloObjetoGlob = null;.) 
 punto ident (. if (simbolo_objeto != null)
 				 	{
 				 	Simbolo simbolo_clase =  simbolo_objeto.GetClase();
@@ -807,7 +807,8 @@ punto ident (. if (simbolo_objeto != null)
 	(.if (simbolo_metodoargumento.GetEtiqueta() == null)
 	  		SemErr("El metodo " + simbolo_metodoargumento.GetNombre() + " no ha sido declarado");.)
  VArgumentos<simbolo_metodoargumento, 0, simbolo_valor_devuelto, null, simbolo_objeto> parent_ce puntoComa)
- | InstExpresion<simbolo_metodoargumento> (.simboloObjetoGlob = null;.))
+ | (.simboloObjetoGlob = simbolo_objeto;.)
+ InstExpresion<simbolo_metodoargumento> (.simboloObjetoGlob = null;.))
 .
 
 //**************************************************************//
@@ -956,8 +957,9 @@ InstExpresion <Simbolo simbolo>
 												 			    colaTercetos.add(tupla_temp);
 												 			    }
 			   												}
-			   											else if (simboloObjetoGlob != null) //En este caso sera en el que estemos ante un atributo de un objeto
+			   											else if (simboloObjetoGlob != null) //&& (simbolo_resultado) //En este caso sera en el que estemos ante un atributo de un objeto
 			   												{//Esto es una chapuza evidentemente mejorable. Si lo que hay a la izquierda de la asignacion es objeto.atributo, en "Llamada", la variable global simboloObjetoGlob contendra el nombre del objeto.
+			   												salidadep("---------------> "+ simboloObjetoGlob.GetNombre() + "." + simbolo.GetNombre() + simbolo_resultado.GetNombre());
 															String terceto = new String(tercetos.asignacion(simboloObjetoGlob.GetNombre() + "." + simbolo.GetNombre(), simbolo_resultado.GetNombre()));
 															tupla_Tercetos tupla_temp = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 											 			    colaTercetos.add(tupla_temp);			   												
@@ -1007,7 +1009,7 @@ InstExpresion <Simbolo simbolo>
 														}
 															
 														.)
-														puntoComa)
+														puntoComa) (. simboloObjetoGlob = null;.)
 .
 
 InstReturn <out Simbolo simbolo_devuelto>
