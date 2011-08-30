@@ -243,19 +243,25 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
  */
 private void OpCondicional(TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_condicion = ambito_terceto.GetSimbolo(op1);	// op1= Condicion
+		int Despla1=0;
+		String Atributo1= "";
 		TablaSimbolos tabla_op_lejano=null;
-		// op2= etiqueta
+
+		if (EsObjeto(op1)) {	// Es objeto op1?
+			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
+			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
+		}
 		
 		if (ambito_terceto.Esta(op1)) {	// op1 local
-			bw.write("CMP #-"+simbolo_condicion.GetDesplazamiento()+"[.IX], /v_cierto \n");
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
+			bw.write("CMP #-"+Despla1+"[.IX], /v_cierto \n");
 			bw.write("BNZ /"+op2+"\n");	// salto si el resultado no es cierto
 		} else if (ambito_terceto.Esta(op1)) {	// op1 no local	
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
-			int despl_cond = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
-			bw.write("CMP #-"+despl_cond+"[.IY], /v_cierto \n");
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write("CMP #-"+Despla1+"[.IY], /v_cierto \n");
 			bw.write("BNZ /"+op2+"\n");	// salto si el resultado no es cierto
 		} else {
 			System.err.println("Error: OpCondicional. Caso no contemplado.");
@@ -536,7 +542,8 @@ private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 			bw.write("SUB .IY, #"+Despla1+"\n");
 		}
 		// Apilo el resultado .A que contiene la direccion del objeto
-		bw.write("PUSH .A\n");
+		Parser.salidadep("");
+		bw.write("PUSH .A; Apilando dir del objeto\n");
 		// a partir de aki igual q PushDirRetorno
 		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
 		// Resto a IX el desplazamiento para llegar al temporal
@@ -1257,7 +1264,6 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			tamanio = TamSimbolo(ambito_terceto, op2, Atributo2);
 			// Caso todo en LOCAL - MOVE #-op2.desp[.IX], #-op1.desp[.IX]
 			CopiaBloqMem(".IX", Despla2, ".IX", Despla1, tamanio);
-			//bw.write("MOVE #-" + Despla2 + "[.IX], #-"+Despla1+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1) && ambito_terceto.Esta(op2)) {	//op1 No local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
@@ -1268,7 +1274,6 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			tamanio = TamSimbolo(ambito_terceto, op2, Atributo2);
 			// Pongo el valor local en el hueco ajeno
-			//bw.write("MOVE #-"+ Despla2 +"[.IX], #-"+ Despla1+"[.IY]\n");
 			CopiaBloqMem(".IX", Despla2, ".IY", Despla1, tamanio);
 		} else if (ambito_terceto.Esta(op1) && !ambito_terceto.Esta(op2)) { //op2 No local	
 			// operando1
