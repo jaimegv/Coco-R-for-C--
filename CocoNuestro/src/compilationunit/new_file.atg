@@ -1110,7 +1110,9 @@ InstCout
 (. Simbolo simbolo = null;.)
 =
 	cout {menor_menor VExpresion<out simbolo>
-									(.if (simbolo.GetType()==undef) 
+								(.try
+									 {
+									  if (simbolo.GetType()==undef) 
 											{
 											salidadep(simbolo.GetNombre());
 											SemErr("InstCout: Error tipos.");
@@ -1138,6 +1140,14 @@ InstCout
 											    	colaTercetos.add(tupla);
 										    		}
 									    		}
+									 		}
+									 catch (NullPointerException e)
+									 		{
+									 		salidadep("Cuidado!!! Simbolo nulo!");
+									 		}
+									 	
+									
+
 									   .)
 		} 
 			
