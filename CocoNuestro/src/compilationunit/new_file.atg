@@ -19,7 +19,7 @@ import java.util.*;
 // Set the name of your grammar here (and at the end of this grammar):
 COMPILER CEMASMAS1
 
-	static public boolean modo_depuracion = true;
+	static public boolean modo_depuracion = false;
 	static public void salidadep (String salida)
 		{
 		if (modo_depuracion)
@@ -47,8 +47,6 @@ COMPILER CEMASMAS1
 	// En realidad es una solucion un poco chapuza, pero es necesario tenerlo aqui
 	public Simbolo simboloClaseObjeto = null;
 	
-	//Utilizaremos este simbolo para ir anadiendo los valores temporales a la tabla de simbolos
-	public Simbolo simboloNuevoTemporal = null;
 	
 	// Esta variable indicará si se ha producido un return en una funcion/metodo que devuelva
 	// algo distinto de void
@@ -56,24 +54,22 @@ COMPILER CEMASMAS1
 	
 	
 	
-	Simbolo indice_vector = null; //Aqui almacenaremos el indice de un vector (creo que al final no se utiliza)
+	Simbolo indice_vector = null; //Aqui almacenaremos el indice de un vector
 	
-	//Otra chapuza mas
+	//Esto es una chapuza que se utiliza en la regla Llamada para guardar el simbolo del objeto
+	//sobre el que se hace la llamada a metodo.
 	Simbolo simboloObjetoGlob = null;
 
-	// Clase tercetos.
+	// Clase tercetos. Tercetos es un objeto con memoria que nos dara segun le pidamos
+	// los tercetos que necesitemos para encolarlo en colaTercetos. En su estado almacenara
+	// cuantos temporales y cuantas etiquetas hemos pedido para poder asi darnos nuevas.
 	Tercetos tercetos = new Tercetos();
 	String terceto_actual;
 	LinkedList<tupla_Tercetos> colaTercetos = new LinkedList<tupla_Tercetos> ();
-    //LinkedList<tupla_Tercetos> colaGlobal = new LinkedList<tupla_Tercetos> ();
 	
 	GenFinal codigo_final;
 	// Fichero de salida para el codigo Ensamblador
 	String fichero = new String();
-	//String fichero = new String("/tmp/CodigoObjeto");
-// If you want your generated compiler case insensitive add the
-// keyword IGNORECASE here.
-
 
 CHARACTERS
   tab           = '\u0009'. /*  9 = tabulator */
@@ -170,32 +166,9 @@ IGNORE lf + cr + tab
 
 
 
-//PRAGMAS
-// Add pragma declarations here.
-// Example:
-//   switch = '$' { digit | letter }. (. Optional semantic action .)
-
-
-// Add comments here.
-// Example for a multi-line block comment:
-//   COMMENTS FROM "/*" TO "*/" NESTED
-// Example for a single line comment:
-//   COMMENTS FROM "//" TO lf
-
-
-// Set the ignored characters (whitespaces) here, the blank character is
-// ignored by default.
-// Example, add line breaks to the ignore set.
-//   IGNORE cr + lf
-
-
 PRODUCTIONS
 
-// Add your productions here, one must have the same name as the grammar,
-// it will be the start symbol (entry point of your compiler).
-// Example:
-//   Empty = "BEGIN" { Statement } "END".
-//   Statement = ident "=" number { "+" number } .
+//El objetivo de esta regla que parece inutil es inicializar los tercetos y las tablas.
 CEMASMAS1 (.	tabla = new Tablas();	.)  //Se crea el ámbito global
 = CEMASMAS (. int desplazamiento; 
 			  desplazamiento = tabla.GetAmbitoGlobal().ActualizarDesplazamiento();
@@ -1663,7 +1636,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  [ (.haymas = true;.)
  	(
    (.
-   //**************RESTAMOS EL NUMERO ANTERIOR MENOS TODO EL PARENTESIS****
+   //**************RESTAMOS EL NUMERO ANTERIOR MENOS TODO EL PARENTESIS*********************
    simbolo_temp1 = new Simbolo (tercetos.darTemporal(), entera, var);
    tabla.InsertarEnActual(simbolo_temp1);
    String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(),"RESTA", simbolo_temp1.GetNombre()));
@@ -1677,9 +1650,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  
  )
  
- 
- 
- 
+
  
  | 
  
@@ -1711,11 +1682,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  
  
  (.haymas = true;.)]
- 
- 
- 
- 
- 
+  
  
  	(.
  	if (!haymas)
@@ -1745,11 +1712,6 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  
  ).
 //***********************************************************************************************************************************
-    
-    
-    
-    
-    
     
     
  VExpMul <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
@@ -1812,13 +1774,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
 	VExpSuma<out simbolo_def, simbolo> | VExpMul<out simbolo_def, simbolo> | VExpResta <out simbolo_def, simbolo>)
 	(.simbolo = simbolo_def;.)	
 	]
-	        
-       		
-    
-    
-  //  [VExpMul | ]
-    
-    
+	
     )
     ).
     
@@ -2150,9 +2106,15 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						}
 					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))
 						{
-						String terceto_valor_devuelto = new String(tercetos.DirRetornoMetodo(simbolo_objeto.GetNombre(), simbolo_valor_devuelto.GetNombre()));
-						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
-						colaTercetos.add(tupla);
+						if (simbolo_funcion.GetEtiqueta() == null)
+							SemErr("El metodo " + simbolo_funcion.GetNombre() + " no fue declarado");
+						else
+							{
+							String terceto_valor_devuelto = new String(tercetos.DirRetornoMetodo(simbolo_objeto.GetNombre(), simbolo_valor_devuelto.GetNombre()));
+							tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+							colaTercetos.add(tupla);
+							}
+						
 						}
 					//Ahora emitimos el terceto de aviso de apilar parametros
 					String terceto = new String(tercetos.Init_parametros());
@@ -2178,6 +2140,7 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						}
 					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
 						{
+						
 						terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
 						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 						colaTercetos.add(tupla);
@@ -2207,9 +2170,15 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						}
 					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
 						{
-						String terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
-						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-						colaTercetos.add(tupla);
+						if (simbolo_funcion.GetEtiqueta() == null)
+							SemErr("El metodo " + simbolo_funcion.GetNombre() + " no fue declarado");
+						else
+							{
+							String terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+							tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+							colaTercetos.add(tupla);
+							}
+						
 						}
 					}
 				else if ((simbolo_funcion.GetNParametros() == 0) && (haysiguienteargumento || hayargumento))
