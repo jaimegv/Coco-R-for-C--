@@ -369,8 +369,7 @@ Cuerpo_Clase <int visible, Simbolo simClase>
 								DecCabMet<sim>
 						)
 		)
-							  | voidd ident (.		salidadep("AQUIIIIIIIIIIIIIIII "+t.val);
-							  						Simbolo simbol = new Simbolo(t.val, 0, metodo);
+							  | voidd ident (.		Simbolo simbol = new Simbolo(t.val, 0, metodo);
 											  		simbol.SetKind(metodo);
 											  		simbol.SetTipoRetorno(vacio);
 													simbol.SetClase(simClase);		// a q clase pertenece le metodo
@@ -1274,6 +1273,13 @@ VExpresion <out Simbolo simbolo> //Simbolo será el temporal donde se almacenara
 													 					}
 															 			
 															 		.)
+									| VExpResta <out simbolo_temp2, simbolo_temp1>
+					 											(. if ((simbolo_temp2 != null) && (simbolo_temp1 != null))
+					 													{
+						 												if ((simbolo_temp1.GetType() != entera) || (simbolo_temp2.GetType() != entera))
+																 			SemErr("Error de tipos en la expresion");
+															 			}
+																.)															 		
 					 				| VExpMul <out simbolo_temp2, simbolo_temp1>
 					 											(. if ((simbolo_temp2 != null) && (simbolo_temp1 != null))
 					 													{
@@ -1352,7 +1358,9 @@ VCambio_Signo <out Simbolo simbolo_resultado>
  			  
  			   [ (.Simbolo simbolo_temp4 = null;.)( //En t4 estara el resultado de ExpSuma
  			   	VExpSuma <out simbolo_temp4, simbolo_temp3> 
- 			   | VExpMul <out simbolo_temp4, simbolo_temp3>)
+ 			   | VExpMul <out simbolo_temp4, simbolo_temp3>
+ 			   | VExpResta <out simbolo_temp4, simbolo_temp3>
+ 			   )
  			   (.simbolo_resultado = simbolo_temp4;.)
  			   
  			    (. if ((simbolo_temp3.GetType() != entera) || (simbolo_temp4.GetType() != entera))
@@ -1440,11 +1448,9 @@ VNegacion <out Simbolo simbolo>
   	  Simbolo simbolo_resultado = null;.)
   	  
   	  
-    (op_mas (.operacion = new String("SUMA");.)
-     | op_menos (.operacion = new String("RESTA");.)
-     
-     
-     ) VExpresion<out simbolo_resultado> (.		if ((simbolo_resultado !=null) &&(simbolo_exp_anterior != null))
+    op_mas (.operacion = new String("SUMA");.)
+
+      VExpresion<out simbolo_resultado> (.		if ((simbolo_resultado !=null) &&(simbolo_exp_anterior != null))
      												{
 	     											if ((simbolo_resultado.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
 	    											 		SemErr("VExpSuma: Error de tipos en la expresion");
@@ -1466,12 +1472,177 @@ VNegacion <out Simbolo simbolo>
 	        }.)
     .
     
+VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior> 
+=	(.salidadep("Entramos VExpResta");
+  	  String operacion = null;
+  	  simbolo = null;
+  	  Simbolo simbolo_resultado = null;
+  	  Simbolo simbolo_temp1 = null;
+  	  Simbolo simbolo_temp2 = null;
+  	  boolean haymas = false;.)
+
+(.	simbolo_temp2 = new Simbolo(tercetos.darTemporal(), entera, var);
+ 	tabla.InsertarEnActual(simbolo_temp2);
+ 	.)
+ 	
+ op_menos (ValorFinalExp <out simbolo_resultado>
+ 
+  
+ [ (. haymas = true;.)
+ ((. if ((simbolo_exp_anterior != null) && (simbolo_resultado != null))
+ 		{
+ 		if ((simbolo_resultado.GetType () != entera) || (simbolo_exp_anterior.GetType() != entera))
+ 			SemErr("Error de tipos en la expresion");
+ 		else
+ 			{
+			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(), "RESTA", simbolo_temp2.GetNombre()));
+		 	tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+		 	colaTercetos.add(tupla);
+	 		} 		
+ 		}
+ 	
+ .)
+ 
+ 		VExpResta<out simbolo_temp1, simbolo_temp2>
+ (.if (simbolo_temp1 != null)
+ 		{
+ 		if (simbolo_temp1.GetType() != entera)
+ 			SemErr("Error de tipos en la expresion");
+ 		else
+ 			simbolo = simbolo_temp1;	
+ 		}
+ .)
+ | 
+  (. if ((simbolo_exp_anterior != null) && (simbolo_resultado != null))
+ 		{
+ 		if ((simbolo_resultado.GetType () != entera) || (simbolo_exp_anterior.GetType() != entera))
+ 			SemErr("Error de tipos en la expresion");
+ 		else
+ 			{
+ 			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(), "RESTA", simbolo_temp2.GetNombre()));
+ 			tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+ 			colaTercetos.add(tupla);
+  			}
+  		}
+   .)
+ 
+ 		VExpSuma <out simbolo_temp1, simbolo_temp2> 
+ (.if (simbolo_temp1 != null)
+ 		{
+ 		if (simbolo_temp1.GetType() != entera)
+ 			SemErr("Error de tipos en la expresion");
+ 		else
+ 			simbolo = simbolo_temp1;	
+ 		}.)
+ 
+ 
+ |  //Hay que cambiar simbolo_resultado de signo
+ 			(. Simbolo simbolo_cambio_signo = null;
+ 			   Simbolo simbolo_menos_uno = null;
+ 			if (simbolo_resultado != null)
+ 				{
+ 				simbolo_menos_uno = new Simbolo(tercetos.darTemporal(), entera, var);
+ 				tabla.InsertarEnActual(simbolo_menos_uno);
+ 				simbolo_cambio_signo = new Simbolo(tercetos.darTemporal(), entera, var);
+ 				tabla.InsertarEnActual(simbolo_cambio_signo);
+
+ 				String terceto = new String(tercetos.asignacion_valor(simbolo_menos_uno.GetNombre(), -1));
+ 				tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+ 				colaTercetos.add(tupla);
+ 				simbolo = simbolo_temp2; 				
+ 				
+ 				
+ 				terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(),simbolo_menos_uno.GetNombre(), "MUL", simbolo_cambio_signo.GetNombre()));
+ 				tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+ 				colaTercetos.add(tupla);
+ 				simbolo = simbolo_temp2;
+ 				
+ 				//En teoria tenemos lo que ha venido cambiado de signo en simbolo_cambio_signo
+ 				}
+ 			.)
+ 	
+  		  VExpMul<out simbolo_temp1, simbolo_cambio_signo>
+ 	(.
+ 	if ((simbolo_resultado != null) && (simbolo_temp1 != null) && (simbolo_exp_anterior != null))
+ 		{
+ 		if ((simbolo_resultado.GetType() != entera) || (simbolo_temp1.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+			SemErr("Error de tipos en la expresion");
+ 		else
+ 		 	{
+ 			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_temp1.GetNombre(), "SUMA", simbolo_temp2.GetNombre()));
+ 			tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+ 			colaTercetos.add(tupla);
+ 			simbolo = simbolo_temp2;
+ 			}
+ 			
+ 		} 
+
+ 	.)
+ 
+ 
+ 
+ 
+ )] (.
+ 	if (!haymas)
+ 		{
+	 	if ((simbolo_exp_anterior != null) && (simbolo_resultado != null))
+	 		{
+	 		if ((simbolo_resultado.GetType () != entera) || (simbolo_exp_anterior.GetType() != entera))
+	 			SemErr("Error de tipos en la expresion");
+	 		else
+	 			{
+	 			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(), "RESTA", simbolo_temp2.GetNombre()));
+	 			tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+	 			colaTercetos.add(tupla);
+	 			simbolo = simbolo_temp2;
+	  			}
+	  		}
+ 		}
+ 	.)
+ 
+ 
+ 
+ 
+ | 
+ 
+ parent_ab VExpresion <out simbolo_resultado> parent_ce
+ 
+ 	(.
+ 	if ((simbolo_resultado != null) && (simbolo_exp_anterior != null))
+ 		{
+ 		if ((simbolo_resultado.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+ 			SemErr("Error de tipos en la expresion");
+ 		else
+ 			{
+ 			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(), "RESTA", simbolo_temp2.GetNombre()));
+ 			tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+ 			colaTercetos.add(tupla);
+ 			simbolo = simbolo_temp2;
+ 			}
+ 		}
+ 	.)
+ 	
+ 	
+ 
+ 
+ 
+ 
+ ).
+    
+    
+    
+    
+    
+    
+    
+    
  VExpMul <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   = (. salidadep("Entramos VExpMul");
   	   Simbolo simbolo_temp1 = null;
   	   String operador = null;
   	   simbolo = null;
-  	   Simbolo simbolo_temp2 = null;.)
+  	   Simbolo simbolo_temp2 = null;
+  	   Simbolo simbolo_def = null;.)
   	(   
     (op_producto (.operador = new String("MUL");.) | op_division (.operador = new String ("DIV");.))  
     
@@ -1497,6 +1668,7 @@ VNegacion <out Simbolo simbolo>
     
     [VExpSuma <out simbolo, simbolo_temp2> 
     | VExpMul <out simbolo, simbolo_temp2>
+    | VExpResta <out simbolo, simbolo_temp2>
     
     ]
     )					   		 
@@ -1512,17 +1684,26 @@ VNegacion <out Simbolo simbolo>
 	    		SemErr("Error de tipos en la expresion");
 	        else
 	       		{
-	       		simbolo = new Simbolo(tercetos.darEtiqueta(),entera,var);
+	       		simbolo = new Simbolo(tercetos.darTemporal(),entera,var);
 	  	        tabla.InsertarEnActual(simbolo);
 		        String terceto = new String(tercetos.operacionBinaria(simbolo_temp1.GetNombre(), simbolo_exp_anterior.GetNombre(), operador, simbolo.GetNombre()));
 		        tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
 		        colaTercetos.add(tupla);
 		        }
     		}
-
+    .)
+	[(
+	VExpSuma<out simbolo_def, simbolo> | VExpMul<out simbolo_def, simbolo> | VExpResta <out simbolo_def, simbolo>)
+	(.simbolo = simbolo_def;.)	
+	]
 	        
        		
-    .))
+    
+    
+  //  [VExpMul | ]
+    
+    
+    )
     ).
     
     
