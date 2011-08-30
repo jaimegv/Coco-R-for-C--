@@ -807,7 +807,7 @@ punto ident (. if (simbolo_objeto != null)
 				 				if ((simbolo_metodoargumento.GetVisibilidad() == privado) && (tabla.GetAmbitoActual().Ambito_Padre() != simbolo_metodoargumento.GetClase().GetAmbitoAsociado()))
 				 					{
 				 					salidadep(simbolo_metodoargumento.GetNombre() + " tiene visibilidad " + simbolo_metodoargumento.GetVisibilidad());
-				 					SemErr(simbolo_metodoargumento.GetNombre() + " no es publico.");
+				 					SemErr(simbolo_metodoargumento.GetNombre() + " es de tipo privado.");
 				 					}
 				 				}
 				 			}
@@ -832,6 +832,8 @@ punto ident (. if (simbolo_objeto != null)
 	 	tabla.InsertarEnActual(simbolo_valor_devuelto);
 	 	}
 	.)
+	(.if (simbolo_metodoargumento.GetEtiqueta() == null)
+	  		SemErr("El metodo " + simbolo_metodoargumento.GetNombre() + " no ha sido declarado");.)
  VArgumentos<simbolo_metodoargumento, 0, simbolo_valor_devuelto, null, simbolo_objeto> parent_ce puntoComa)
  | InstExpresion<simbolo_metodoargumento> (.simboloObjetoGlob = null;.))
 .
