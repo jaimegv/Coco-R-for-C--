@@ -409,48 +409,36 @@ private void PushParam (TablaSimbolos ambito_terceto) {
  */
 private void ReturnOp (TablaSimbolos ambito_terceto)  {
 	try {
-		Simbolo simbolo_op1 = null;
+		// TODO
 		TablaSimbolos tabla_op_lejano = null;
 		String Atributo1="";
 		int Despla1=0;
-		int indice=0,indice2=0; 	// para devolver objetos necesito indices
+		int tamanio=1;
 		
 		if (EsObjeto(op1)) {	// Es objeto op1?
 			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
 			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
 		}
-		
-		simbolo_op1 = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+
 		// Movemos la direccion de Retorno a un Registro
-		bw.write("MOVE #4[.IX], .R9\n");	// R9 tiene la dirRetorno
+		bw.write("MOVE #4[.IX], .IY\n");	// IY tiene la dir donde se guardara el valorRetorno
 		
 		if (ambito_terceto.Esta(op1)) {			// op1 Local
-			bw.write("MOVE .R9, .IY\n");	// R9 tiene la dirRetorno
-/*			// Objeto1?
-			if (!Atributo1.isEmpty()) {
-				Despla1 = simbolo_op1.GetAtributo(simbolo_op1.GetNombre()+"."+Atributo1).GetDesplazamiento();
-			} else {
-				Despla1 = simbolo_op1.GetDesplazamiento();
-			}
-*/
-			
-			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
-			indice2= simbolo_op1.Actualiza_Tamano()-1;	// indice para el destino
-			indice = indice + simbolo_op1.GetDesplazamiento() - 1;	// desplazamiento hasta el elem
-			while (indice2 >= 0) {	// Muevo los valores del ambito local a la dir IY
-				bw.write("MOVE #-"+indice+"[.IX], #-"+indice2+"[.IY]\n");
-				indice--;
-				indice2--;
-			}
+			System.err.println("Dentro de REturnOp.Operando: "+op1);
+			// operando1
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
+			tamanio = TamSimbolo(ambito_terceto, op1, Atributo1);
+			CopiaBloqMem(".IX", Despla1, ".IY", 0, tamanio);
 		} else if (!ambito_terceto.Esta(op1)) {	// op1 no local
-			// TODO revisar funcionalidad
+			// TODO NO FUNCIONA
 			// Tenemos en R9 la direccion a partir de la cual debemos dejar el valor de retorno
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			int despl_op1 = tabla_op_lejano.GetSimbolo(op1).GetDesplazamiento();
 			// Necesitamo, en caso de objeto el simbolo
-			simbolo_op1 = tabla_op_lejano.GetSimbolo(op1);
+			System.err.println("Errorreturn Objeto");
+/*			simbolo_op1 = tabla_op_lejano.GetSimbolo(op1);
 						
 			indice = simbolo_op1.Actualiza_Tamano();	// tamano del simbolo
 			indice2= simbolo_op1.Actualiza_Tamano()-1;	// indice para el destino
@@ -460,6 +448,7 @@ private void ReturnOp (TablaSimbolos ambito_terceto)  {
 				indice--;
 				indice2--;
 			}
+		*/
 		} else {
 			System.err.println("Error: ReturnOp. Caso no contemplado.");
 		}
@@ -530,6 +519,7 @@ private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 	try {
 		int Despla1=0;
 		TablaSimbolos tabla_op_lejano = null;
+		System.err.println("PushObjetoDIrRetorno");
 		// Buscamos la direccion del objeto y la apilamos
 		if (ambito_terceto.Esta(op1)) {	// Solo puede ser un objeto
 			// operando1
@@ -546,9 +536,7 @@ private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 			bw.write("SUB .IY, #"+Despla1+"\n");
 		}
 		// Apilo el resultado .A que contiene la direccion del objeto
-		bw.write("PUSH .A");
-		System.err.println("Valor de op1, objeto: "+op1);
-		
+		bw.write("PUSH .A\n");
 		// a partir de aki igual q PushDirRetorno
 		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
 		// Resto a IX el desplazamiento para llegar al temporal
@@ -584,6 +572,8 @@ private void LlamadaProg (TablaSimbolos ambito_terceto) {
 
 /*
  * LlamadaMetodo
+ * op1= contiene el nombre del objeto
+ * op2= contiene la etiqueta a saltar
  */
 private void LlamadaMetodo (TablaSimbolos ambito_terceto) {
 	try {
@@ -591,7 +581,7 @@ private void LlamadaMetodo (TablaSimbolos ambito_terceto) {
 		bw.write("PUSH .SR\n");
 		bw.write("PUSH .IX\n");
 		// Salto a etiqueta
-		bw.write("CALL /"+op1+"; SALTO A METODO\n");
+		bw.write("CALL /"+op2+"; SALTO A METODO\n");
 		// Desapilamos lo mismo que apilamos
 		bw.write("POP .IX\n");
 		bw.write("POP .SR\n");
@@ -987,7 +977,7 @@ private void PutCadena (TablaSimbolos ambito_terceto) {
 		}
 		// recuperamos el simbolo a imprimir
 		//simbolo_op1 = ambito_terceto.GetSimbolo(op1);
-
+		
 		if (ambito_terceto.Esta(op1)) {			// todo local!
 			// operando1
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
@@ -1078,7 +1068,6 @@ private void OpUnaria (TablaSimbolos ambito_terceto) {
 		if (ambito_terceto.Esta(op1)) {			// todo local!
 			// operando1
 			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
-			System.err.println("el terceto es:"+op1+", "+Atributo1+". y el nemonico:"+nemonico);
 			bw.write(nemonico+" #-"+Despla1+"[.IX], #"+op2+"\n");
 			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
@@ -1086,7 +1075,6 @@ private void OpUnaria (TablaSimbolos ambito_terceto) {
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// operando1
 			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
-			System.err.println("el terceto es:"+op1+", "+Atributo1+". y el nemonico:"+nemonico);
 			// La operacion unaria se queda en el acumulador, luego la llevamos a la dir de mem
 			bw.write(nemonico+" #-"+Despla1+"[.IY], #"+op2+"\n");
 			bw.write("MOVE .A, #-"+simbolo_resultado.GetDesplazamiento()+"[.IX]\n");
@@ -1328,19 +1316,17 @@ private void EjecutarAsigna (TablaSimbolos ambito_terceto) {
 private int DesplzSimbolo (TablaSimbolos ambitoSimbolo, String operando, String Atributo) {
 	int Desplazamiento=0;
 	try {
-		if (Atributo.isEmpty()) {	//	Todo menos un atributo de objeto 
+		if (Atributo.isEmpty()) {	//	Todo menos un atributo de objeto, tambien un atributo dentro de un metodo
 			// obtenemos el desplazamiento del simbolo introducido en dicho ambito
 			Desplazamiento = ambitoSimbolo.GetSimbolo(operando).GetDesplazamiento();
+			System.err.println("Desplazamiento para: "+operando+" de un valor de: "+Desplazamiento);
 		} else {	// atributo de clase
 			// Obtengo el desplazamiento
 			Desplazamiento = ambitoSimbolo.GetSimbolo(operando).GetAtributo(ambitoSimbolo.GetSimbolo(operando).GetNombre()+"."+Atributo).GetDesplazamiento();
 			Desplazamiento  = Desplazamiento  + ambitoSimbolo.GetSimbolo(operando).GetDesplazamiento();
-			if (ambitoSimbolo==null) {
-				System.err.println("DesplzSimbolo: Estas en casos de atributos de objetos declarados en metodos.");
-			}
 		}
 	} catch (Exception e) {
-		System.err.println("Error: DesplzSimbolo.");
+		System.err.println("Error: DesplzSimbolo.Operando vale:"+operando);
 	}
 	
 	return Desplazamiento;
@@ -1361,7 +1347,7 @@ private int TamSimbolo (TablaSimbolos ambitoSimbolo, String operando, String Atr
 			Tamano = ambitoSimbolo.GetSimbolo(operando).GetAtributo(ambitoSimbolo.GetSimbolo(operando).GetNombre()+"."+Atributo).Actualiza_Tamano();
 		}
 	} catch (Exception e) {
-		System.err.println("Error: DesplzSimbolo.");
+		System.err.println("Error: TamSimbolo.");
 	}
 	return Tamano;
 }
@@ -1448,8 +1434,10 @@ private TablaSimbolos BuscaMarcoDir (String Nombre, TablaSimbolos ambito_terceto
 			} else { // No esta en local ni en global!, atributo de clase
 				// TODO simbolo que no esta en local ni global es atributo de objeto
 				// bw.write("MOVE #"+dirGlobal+",.IY\n");
-				System.err.println("Error: BuscaMarcoDir. Atributo de clase. tadavia no hecho.");
-				return null;
+				// Sacamos de la pila con desplazamiendo positivola direcion base del objeto
+				bw.write("MOVE #5[.IX], .IY; AtributoDentroMetodo, dir a Objeto\n");
+				// Obtenemos el ambito padre del metodo, esto nos dara el desplzamiento en ese ambito
+				return ambito_terceto.Ambito_Padre();
 			}
 		} else {
 			System.err.println("Error: BuscaMarcoDir caso no contemplado.");
