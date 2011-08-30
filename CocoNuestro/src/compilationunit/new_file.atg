@@ -1521,6 +1521,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
   	  Simbolo simbolo_resultado = null;
   	  Simbolo simbolo_temp1 = null;
   	  Simbolo simbolo_temp2 = null;
+  	  Simbolo simbolo_temp3 = null;
   	  boolean haymas = false;.)
 
 (.	simbolo_temp2 = new Simbolo(tercetos.darTemporal(), entera, var);
@@ -1649,19 +1650,84 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  //**********************************************************************************************************************************
  parent_ab VExpresion <out simbolo_resultado> parent_ce
  
+ 
+ [ (.haymas = true;.)
+ 	(
+   (.
+   //**************RESTAMOS EL NUMERO ANTERIOR MENOS TODO EL PARENTESIS****
+   simbolo_temp1 = new Simbolo (tercetos.darTemporal(), entera, var);
+   tabla.InsertarEnActual(simbolo_temp1);
+   String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(),"RESTA", simbolo_temp1.GetNombre()));
+   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+   colaTercetos.add(tupla);
+   
+   .)
+ (VExpSuma<out simbolo_temp2, simbolo_temp1> | VExpResta<out simbolo_temp2, simbolo_temp1>  (.haymas = true;.)
+  ) (.simbolo = simbolo_temp2;.)
+ 
+ 
+ )
+ 
+ 
+ 
+ 
+ 
+ | 
+ 
+ (.
+   //**************simbolo_temp1 = -1************************
+   simbolo_temp1 = new Simbolo (tercetos.darTemporal(), entera, var);
+   tabla.InsertarEnActual(simbolo_temp1);
+   String terceto = new String(tercetos.asignacion_valor(simbolo_temp1.GetNombre(), -1));
+   tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+   colaTercetos.add(tupla);
+   //**************simbolo_temp2 = -simbolo_resultado************************
+   simbolo_temp2 = new Simbolo (tercetos.darTemporal(), entera, var);
+   tabla.InsertarEnActual(simbolo_temp2);
+   terceto = new String(tercetos.operacionBinaria(simbolo_resultado.GetNombre(), simbolo_temp1.GetNombre(), "MUL", simbolo_temp2.GetNombre()));
+   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+   colaTercetos.add(tupla);
+   
+ 
+ .)
+ VExpMul<out simbolo_temp3, simbolo_temp2>
+ (.
+    //**************simbolo_temp2 = -simbolo_resultado************************
+   simbolo = new Simbolo (tercetos.darTemporal(), entera, var);
+   tabla.InsertarEnActual(simbolo);
+   terceto = new String(tercetos.operacionBinaria(simbolo_temp3.GetNombre(), simbolo_exp_anterior.GetNombre(), "SUMA", simbolo.GetNombre()));
+   tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+   colaTercetos.add(tupla);
+ .)
+ 
+ 
+ (.haymas = true;.)]
+ 
+ 
+ 
+ 
+ 
+ 
  	(.
- 	if ((simbolo_resultado != null) && (simbolo_exp_anterior != null))
+ 	if (!haymas)
  		{
- 		if ((simbolo_resultado.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
- 			SemErr("Error de tipos en la expresion");
- 		else
- 			{
- 			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(), "RESTA", simbolo_temp2.GetNombre()));
- 			tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
- 			colaTercetos.add(tupla);
- 			simbolo = simbolo_temp2;
- 			}
+ 		salidadep("-------------------------------------->");
+ 		if ((simbolo_resultado != null) && (simbolo_exp_anterior != null))
+		 		{
+		 		if ((simbolo_resultado.GetType() != entera) || (simbolo_exp_anterior.GetType() != entera))
+		 			SemErr("Error de tipos en la expresion");
+		 		else
+		 			{
+		 			simbolo_temp2 = new Simbolo(tercetos.darTemporal(), entera, var);
+		 			tabla.InsertarEnActual(simbolo_temp2);
+		 			String terceto = new String(tercetos.operacionBinaria(simbolo_exp_anterior.GetNombre(),simbolo_resultado.GetNombre(), "RESTA", simbolo_temp2.GetNombre()));
+		 			tupla_Tercetos tupla = new tupla_Tercetos (tabla.GetAmbitoActual(), terceto);
+		 			colaTercetos.add(tupla);
+		 			simbolo = simbolo_temp2;
+		 			}
+		 		}
  		}
+ 
  	.)
  	
  	
