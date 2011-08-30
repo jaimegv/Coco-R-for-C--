@@ -1230,14 +1230,21 @@ DarPosVector <out Simbolo simbolo_dentro_vector, Simbolo sim> (.int tipoDev; .)
 			 			.)
  						VExpresion<out simbolo_ind_vector> 
  								(. 
- 								  if (simbolo_ind_vector.GetType() != entera)
- 								  		SemErr("El indice de un vector debe ser una expresion entera");
+ 								  try
+	 								  	{
+	 								  	if (simbolo_ind_vector.GetType() != entera)
+ 								  			SemErr("El indice de un vector debe ser una expresion entera");
+	 								  	simbolo_dentro_vector = new Simbolo(tercetos.darTemporal(), entera, var);
+	 								  	tabla.InsertarEnActual(simbolo_dentro_vector);
+	 								  	String terceto = new String(tercetos.sacaDeArray(sim.GetNombre(), simbolo_dentro_vector.GetNombre(), simbolo_ind_vector.GetNombre()));
+	 								  	tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+	 								  	colaTercetos.add(tupla);
+	 								  	}
+ 								  catch (NullPointerException e)
+						 				{
+						 				salidadep("Se le ha pasado un simbolo nulo a DarPosVector");
+										}
  								  
- 								  simbolo_dentro_vector = new Simbolo(tercetos.darTemporal(), entera, var);
- 								  tabla.InsertarEnActual(simbolo_dentro_vector);
- 								  String terceto = new String(tercetos.sacaDeArray(sim.GetNombre(), simbolo_dentro_vector.GetNombre(), simbolo_ind_vector.GetNombre()));
- 								  tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
- 								  colaTercetos.add(tupla);
 								.)	 
  		corchete_ce
 .
