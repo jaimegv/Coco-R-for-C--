@@ -129,6 +129,11 @@ public class Tercetos{
     	return "DIR_RETORNO,"+ temporal + ",,\n";
     	}
     
+    public String DirRetornoMetodo (String objeto, String temporal)
+    	{
+    	return "DIR_RETORNO_METODO," + temporal +  "," + objeto + ",\n";
+    	}
+    
     public String ApilarParam (String parametro)
     	{
     	return "APILAR_PARAM,"+parametro+",,\n";
