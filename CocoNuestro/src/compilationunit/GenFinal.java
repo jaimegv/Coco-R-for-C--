@@ -373,33 +373,31 @@ private void ObtenerValorVector (TablaSimbolos ambito_terceto) {
  */
 private void PushParam (TablaSimbolos ambito_terceto) {
 	try {
-		Simbolo simbolo_param = null;
 		TablaSimbolos tabla_op_lejano = null;
 		String Atributo1="";
 		int total=0;
-		int Despla1=0;
-		int indice=0,indice2=0; 	// para devolver objetos necesito indices
+		int Despla1=0, tamanio=0;
 		
 		if (EsObjeto(op1)) {	// Es objeto op1?
 			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
 			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
 		}
-		simbolo_param = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
 		
 		if (ambito_terceto.Esta(op1)) {	// op1 Local
-			if (!Atributo1.isEmpty()) {
-				Despla1 = simbolo_param.GetAtributo(simbolo_param.GetNombre()+"."+Atributo1).GetDesplazamiento()+simbolo_param.GetDesplazamiento();
-				total = Despla1 + simbolo_param.GetAtributo(simbolo_param.GetNombre()+"."+Atributo1).Actualiza_Tamano();
-			} else {
-				Despla1 = simbolo_param.GetDesplazamiento();
-				total = simbolo_param.GetDesplazamiento()+simbolo_param.Actualiza_Tamano();
-			}
+			// obtenemos el desplazamiento de op1
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
+			tamanio = TamSimbolo(ambito_terceto, op1, Atributo1);
+			total = Despla1 + tamanio;
 			for (int i=Despla1; i<total; i++) {
 				bw.write("PUSH #-"+i+"[.IX]\n");	//apilo valores
 			}
 		} else {
-			// TODO hacer el resto de if
-			System.err.println("Error: PushParam. Caso no contemplado.");
+			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			tamanio = TamSimbolo(tabla_op_lejano, op1, Atributo1);
+			for (int i=Despla1; i<total; i++) {
+				bw.write("PUSH #-"+i+"[.IY]\n");	//apilo valores
+			}
 		}
 	} catch (Exception e) {
 		System.err.println("Error: Ejecutar PushParam.");
@@ -904,17 +902,24 @@ private void GetEntero (TablaSimbolos ambito_terceto) {
 		//Simbolo simbolo_op1 = ambito_terceto.GetSimbolo(op1);
 		TablaSimbolos tabla_op_lejano = null;	// En caso de ser variable local.
 		int Despla1=0;
+		String Atributo1="";
 
+		if (EsObjeto(op1)) {	// Es objeto op1?
+			Atributo1 = NombreAtributo(op1);	// ahora tenemos el nombre del atributo
+			op1 = NombreObjeto(op1);			// ahora tenemos el nombre del objeto en op1
+		}
+		
 		if (ambito_terceto.Esta(op1)) {			// todo local!
+			System.err.println("Estas aki para recoger un valor en local: "+op1+" "+Atributo1);
 			// operando1
-			Despla1 = DesplzSimbolo(ambito_terceto, op1, "");
+			Despla1 = DesplzSimbolo(ambito_terceto, op1, Atributo1);
 			bw.write(nemonico+" #-"+Despla1 + "[.IX]\n");
 		} else if (!ambito_terceto.Esta(op1)) { 	//op1 No local
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			// operando1
-			Despla1 = DesplzSimbolo(ambito_terceto, op1, "");
-			bw.write(nemonico + " #-"+tabla_op_lejano+"[.IY]\n");	
+			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
+			bw.write(nemonico + " #-"+Despla1+"[.IY]\n");	
 		} else {
 			System.err.println("Op "+nemonico+". Caso no contemplado");			
 		}
@@ -1324,7 +1329,7 @@ private int DesplzSimbolo (TablaSimbolos ambitoSimbolo, String operando, String 
 			Desplazamiento  = Desplazamiento  + ambitoSimbolo.GetSimbolo(operando).GetDesplazamiento();
 		}
 	} catch (Exception e) {
-		System.err.println("Error: DesplzSimbolo.Operando vale:"+operando+" terceto:"+operacion);
+		System.err.println("Error: DesplzSimbolo.Operando vale:"+operando+", terceto:"+operacion);
 	}
 	
 	return Desplazamiento;
