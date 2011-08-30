@@ -946,7 +946,11 @@ InstExpresion <Simbolo simbolo>
 													(. try
 															{
 															if ((simbolo.GetType() != simbolo_resultado.GetType()) && (simbolo.GetType() != vector))
-														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+																{
+																salidadep(simbolo.GetNombre() + " es de tipo " + simbolo.GetType() + simbolo_resultado.GetNombre() + simbolo_resultado.GetType());
+																SemErr("El tipo del identificador no coincide con el tipo de la expresion");
+																}
+														   		
 														   	else if ((simbolo.GetType() == vector) && (simbolo_resultado.GetType() != entera))
 														   		SemErr("El tipo del identificador no coincide con el tipo de la expresion.Nombre");
 															else if (simbolo_resultado.GetType() == identificador)
@@ -1946,7 +1950,11 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 	 		  			  		tabla.InsertarEnActual(simbolo_valor_devuelto);
 	 		  			  		}
 	 		  			  .)
-	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, simbolo> parent_ce])
+	 		   VArgumentos <simbolo_metodoatributo, 0, simbolo_valor_devuelto, null, simbolo> parent_ce
+	 		   
+	 		   (.simbolo_resultado = simbolo_valor_devuelto;.)
+	 		   
+	 		   ])
 	 		  //CASO DE QUE SEA UN VECTOR
 	 							   |(DarPosVector<out simbolo_resultado, simbolo>))]
   
