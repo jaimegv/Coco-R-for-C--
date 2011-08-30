@@ -1189,13 +1189,13 @@ InstCin
 					
 					| 
 					punto ident
-					(. 	
+					(. 	salidadep("---------------------------> LLEGAMOS AQUI");
 					Simbolo simboloatributo = null;
 					if (simbolo != null)
 						{
 						if (simbolo.GetType() != identificador)
 							{
-							SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + "y columna " + simbolo.GetColumn() + " no fue declarado como una clase");
+							SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + "y columna " + simbolo.GetColumn() + " no fue declarado como un objeto de una clase");
 							}
 						else
 							{
@@ -1216,6 +1216,12 @@ InstCin
 										{
 										if (simboloatributo.GetType() != entera)
 											SemErr("El atributo " + simboloatributo.GetNombre() + " de la clase " + simbolo.GetClase().GetNombre() + " no es de tipo entero");
+										else //Si llegamos aqui es que es todo correcto, con lo que enviamos el codigo intermedio.
+											{
+											String terceto = new String(tercetos.readExpresion(simbolo.GetNombre()+"."+simboloatributo.GetNombre()));
+											tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(), terceto);
+											colaTercetos.add(tupla);
+											}
 										}
 									}
 								}
