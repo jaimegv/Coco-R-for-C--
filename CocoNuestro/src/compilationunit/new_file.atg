@@ -743,12 +743,20 @@ Parametros <Simbolo simbolo_nombre_funcion>
 												}
 											 .) 
 					[Vector <simbolo_parametro>]
-				}] 
+				}] (.if ((simbolo_nombre_funcion.GetKind() == metodo) && (simbolo_nombre_funcion.GetNParametros() != 0) && (contador != simbolo_nombre_funcion.GetNParametros()))
+						{
+						salidadep(contador);
+						salidadep(simbolo_nombre_funcion.GetNParametros());
+						SemErr("Numero de parametros no concordante con la declaracion en la cabecera en la linea " + simbolo_nombre_funcion.GetLine());
+						}
+						.)
+						
 				| voidd (.	salidadep("Estas en caso decMetodo PARAMETROS.");
 							if (simbolo_nombre_funcion.GetKind() == metodo) {
 								if (simbolo_nombre_funcion.GetNParametros() != 0)
 									SemErr("Error tipos declaracion Metodo.");
 							}
+						
 						.)
 .
 
