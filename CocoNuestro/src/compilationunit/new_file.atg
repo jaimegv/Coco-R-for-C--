@@ -1604,7 +1604,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  
  
  | 
- 
+ //**********************************************************************************************************************************
  parent_ab VExpresion <out simbolo_resultado> parent_ce
  
  	(.
@@ -1628,7 +1628,7 @@ VExpResta <out Simbolo simbolo, Simbolo simbolo_exp_anterior>
  
  
  ).
-    
+//***********************************************************************************************************************************
     
     
     
@@ -1995,8 +1995,12 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 												{
 												if (simbolo_nuevo.GetType() != simbolo_temp.GetType())
 													SemErr("Tipo de los parametros no coincidente");
-												else if (simbolo_nuevo.GetClase() != simbolo_temp.GetClase())
+												else if ((simbolo_nuevo.GetType() == identificador) && (simbolo_nuevo.GetClase() != simbolo_temp.GetClase()))
+													{
+													//salidadep(simbolo_nuevo.GetNombre() + )
 													SemErr("Clase de los parametros no coincidente");
+													}
+													
 												else
 													{
 													String terceto_argumento = new String(tercetos.ApilarParam(simbolo_temp.GetNombre()));
