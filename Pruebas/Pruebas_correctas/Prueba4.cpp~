@@ -1,0 +1,18 @@
+class Persona
+	{
+	public:
+		int edad;
+		int DNI;
+		char* nombre;
+	private:
+		int sexo;
+	};
+
+void main ()
+	{
+	Persona juan;
+	juan.edad = 3;
+	juan.DNI = 32443;
+	juan.nombre = "Juan";
+	cout << juan.nombre << "tiene una edad de " << " anios y su DNI es " << juan.DNI;
+	}
