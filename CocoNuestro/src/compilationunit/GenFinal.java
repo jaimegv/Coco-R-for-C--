@@ -529,11 +529,12 @@ private void PushDirRetorno (TablaSimbolos ambito_terceto) {
 private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 	try {
 		int Despla2=0;
+		String Atributo2="";
 		TablaSimbolos tabla_op_lejano = null;
 		// Buscamos la direccion del objeto y la apilamos
 		if (ambito_terceto.Esta(op2)) {	// Solo puede ser un objeto
 			// operando1
-			Despla2 = DesplzSimbolo(ambito_terceto, op2, "");
+			Despla2 = DesplzSimbolo(ambito_terceto, op2, Atributo2);
 			// Sumo IX mas el desplazamiento y lo apilo->dir_objeto
 			bw.write("SUB .IX, #"+Despla2+"; Objeto: "+op2+"\n");
 		} else {
@@ -541,20 +542,20 @@ private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 			// Dejará en IY el marco de pila para acceder al simbolo op.
 			tabla_op_lejano = BuscaMarcoDir(op2, ambito_terceto);
 			// operando1
-			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, "");
+			Despla2 = DesplzSimbolo(tabla_op_lejano, op2, Atributo2);
 			// Sumo IY mas el desplazamiento y lo apilo->dir_objeto
 			bw.write("SUB .IY, #"+Despla2+"\n");
 		}
 		// Apilo el resultado .A que contiene la direccion del objeto
 		bw.write("PUSH .A; Apilando dir del objeto\n");
 		// a partir de aki igual q PushDirRetorno
-		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op2);	// Simbolo op2
+		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
 		// Resto a IX el desplazamiento para llegar al temporal
 		bw.write("SUB .IX,#"+simbolo_return.GetDesplazamiento()+"\n");
 		// Apilo dicha direccion en la cima
 		bw.write("PUSH .A; Apilando donde se guardara el retorno funcion\n");
 	} catch (Exception e) {
-		System.err.println("Error: Ejecutar PushDirRetorno.");
+		System.err.println("Error: Ejecutar ObjetoPushDirRetorno.");
 	}
 }
 
