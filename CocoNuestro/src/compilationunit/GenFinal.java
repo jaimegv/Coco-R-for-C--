@@ -395,6 +395,7 @@ private void PushParam (TablaSimbolos ambito_terceto) {
 			tabla_op_lejano = BuscaMarcoDir(op1, ambito_terceto);
 			Despla1 = DesplzSimbolo(tabla_op_lejano, op1, Atributo1);
 			tamanio = TamSimbolo(tabla_op_lejano, op1, Atributo1);
+			total = Despla1 + tamanio;
 			for (int i=Despla1; i<total; i++) {
 				bw.write("PUSH #-"+i+"[.IY]\n");	//apilo valores
 			}
