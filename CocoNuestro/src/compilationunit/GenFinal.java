@@ -1375,7 +1375,7 @@ private void CopiaBloqMem (String dirBase, int DesplBase, String dirDest, int De
 				bw.write("SUB .R9, #1\n");
 				bw.write("MOVE .A, .R9\n");
 			} else if (dirBase.equals(".R9")) {
-				bw.write("MOVE #-"+despl1+"["+dirBase+"], ["+dirDest+"]; Moviendo bloque\n");
+				bw.write("MOVE ["+dirBase+"], ["+dirDest+"]; Moviendo bloque\n");
 				//decremento el valor de .R9
 				bw.write("SUB .R9, #1\n");
 				bw.write("MOVE .A, .R9\n");
