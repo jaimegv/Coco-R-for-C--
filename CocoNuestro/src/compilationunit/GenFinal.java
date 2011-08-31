@@ -558,12 +558,11 @@ private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
  */
 private void PushDirRetornoPrivado (TablaSimbolos ambito_terceto) {
 	try {
-		TablaSimbolos tabla_op_lejano = null;
 		// Buscamos la direccion del objeto y la apilamos
 			// Sumo IX mas el desplazamiento y lo apilo->dir_objeto
-			bw.write("SUB .IX, #5; Metodo Privado\n");
+			bw.write("PUSH #5[.IX]; Metodo Privado\n");
 			// Apilo el resultado .A que contiene la direccion del objeto
-			bw.write("PUSH .A; Apilando dir del objeto\n");
+			//bw.write("PUSH .A; Apilando dir del objeto\n");
 		// a partir de aki igual q PushDirRetorno
 		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
 		// Resto a IX el desplazamiento para llegar al temporal
