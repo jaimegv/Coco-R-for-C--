@@ -2199,6 +2199,8 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 					{
 					SemErr("Numero de parametros no coincidente");
 					}
+				else if ((pos < (simbolo_funcion.GetNParametros() - 1)) && !haysiguienteargumento)
+					SemErr("Numero de parametros no coincidente");
 				}
 	
 
