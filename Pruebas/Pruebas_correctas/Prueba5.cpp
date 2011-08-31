@@ -38,7 +38,7 @@ void Persona::setEdad (int numero, int medida) {
 	return;	// no devuelve nada
 }
 
-int Persona::getEdad () {
+int Persona::getEdad (void) {
 	cout << "Edad con valor: " << Edad;
 	return Edad;
 }
@@ -77,10 +77,9 @@ void main (void) {
 	esmoreno (Juan.Moreno);	// Llamar a una funcion con atributo, local
 	Juan.setEdad(caracola, Juan.Altura+1);	// emitira un error y no modifica la edad
 						// operacion como argumento de metodo
-	Juan.setEdad(caracola, Juan.Altura);	// Metodo que recibe como parametro un argumento global
+	Juan.setEdad(caracola);	// Metodo que recibe como parametro un argumento global
 	variable = Juan.getEdad();		// esto imprime la Edad por pantalla
 						// y obtengo cosas por pantalla.
-// Juan.getEdad(void);
 	cout << "Valor de Edad de Juan: "  << variable;
 
 
