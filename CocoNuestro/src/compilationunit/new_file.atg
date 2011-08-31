@@ -2154,10 +2154,15 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						}
 					else if ((simbolo_funcion.GetKind() == metodo))//Caso de que sea un metodo
 						{
+						if (simbolo_funcion.GetEtiqueta() == null)
+							SemErr("El metodo " + simbolo_funcion.GetNombre() + " no fue declarado");
+						else
+							{
+							terceto = new String (tercetos.llamada_metodo(simbolo_funcion.GetEtiqueta()));
+							tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
+							colaTercetos.add(tupla);
+							}
 						
-						terceto = new String (tercetos.llamada_metodo(simbolo_funcion.GetEtiqueta()));
-						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
-						colaTercetos.add(tupla);
 						}
 					}
 				else if ((simbolo_funcion.GetNParametros() == 0) && !haysiguienteargumento && !hayargumento && (pos==0))
