@@ -1,4 +1,4 @@
-package bin.compilationunit;
+package compilationunit;
 
 import java.io.InputStream;
 import java.io.IOException;

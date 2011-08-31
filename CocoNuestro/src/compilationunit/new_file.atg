@@ -908,8 +908,8 @@ InstExpresion <Simbolo simbolo>
 				 ((.Simbolo simbolo_valor_devuelto = null;
 				 	if (simbolo != null)
 				 		{
-				 		if (simbolo.GetKind() != funcion)
-				 			SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + " no corresponde a una funcion");
+				 		if ((simbolo.GetKind() != funcion) && (simbolo.GetKind() != metodo))
+				 			SemErr("El identificador " + simbolo.GetNombre() + " declarado en la linea " + simbolo.GetLine() + " no corresponde a una funcion o metodo");
 				 		else
 				 			{
 				 			simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
@@ -1897,14 +1897,14 @@ ValorFinalExp <out Simbolo simbolo_resultado>
 				}
 
 			.)
-	//**********************Es lo que devuelve un subprograma***********************+
+	//**********************Es lo que devuelve un subprograma, o metodo PRIVADO***********************+
 	[((parent_ab (. Simbolo simbolo_valor_devuelto = null;
 					
 					if  (simbolo != null)			// Esto es la llamada a una funcion
 				  		{
-					  	if (simbolo.GetKind() != funcion)
+					  	if ((simbolo.GetKind() != funcion) && (simbolo.GetKind() != metodo))
 						 	SemErr("'" + simbolo.GetNombre() + "' declarado en la linea " + simbolo.GetLine() + " no es una funcion");
-						else
+						else if ((simbolo.GetKind() == funcion) || (simbolo.GetKind() == metodo))
 							{
 							simbolo_valor_devuelto = new Simbolo(tercetos.darTemporal(),simbolo.GetTipoRetorno(),var);
 							simbolo_valor_devuelto.SetClase(simbolo.GetClaseDevuelta());
@@ -2112,7 +2112,13 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
 						colaTercetos.add(tupla);
 						}
-					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_funcion.GetVisibilidad() == privado))
+						{ //Caso de que sea un metodo privado. Muy parecido a saltar a una funcion.
+						String terceto_valor_devuelto = new String(tercetos.DirRetornoMetodoPrivado(simbolo_valor_devuelto.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+						colaTercetos.add(tupla);
+						}
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo PUBLICO
 						{
 						if (simbolo_funcion.GetEtiqueta() == null)
 							SemErr("El metodo " + simbolo_funcion.GetNombre() + " no fue declarado");
@@ -2146,10 +2152,10 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 						colaTercetos.add(tupla);
 						}
-					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
+					else if ((simbolo_funcion.GetKind() == metodo))//Caso de que sea un metodo
 						{
 						
-						terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+						terceto = new String (tercetos.llamada_metodo(simbolo_funcion.GetEtiqueta()));
 						tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 						colaTercetos.add(tupla);
 						}
@@ -2160,6 +2166,12 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 					if (simbolo_funcion.GetKind() == funcion)//Caso de que sea una funcion
 						{
 						String terceto_valor_devuelto = new String(tercetos.DirRetornoFuncion(simbolo_valor_devuelto.GetNombre()));
+						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
+						colaTercetos.add(tupla);
+						}
+					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_funcion.GetVisibilidad() == privado))
+						{ //Caso de que sea un metodo privado. Muy parecido a saltar a una funcion.
+						String terceto_valor_devuelto = new String(tercetos.DirRetornoMetodoPrivado(simbolo_valor_devuelto.GetNombre()));
 						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto_valor_devuelto);
 						colaTercetos.add(tupla);
 						}
@@ -2176,13 +2188,13 @@ VArgumentos <Simbolo simbolo_funcion, int pos, Simbolo simbolo_valor_devuelto, V
 						tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 						colaTercetos.add(tupla);
 						}
-					else if ((simbolo_funcion.GetKind() == metodo) && (simbolo_objeto != null))//Caso de que sea un metodo
+					else if (simbolo_funcion.GetKind() == metodo)//Caso de que sea un metodo
 						{
 						if (simbolo_funcion.GetEtiqueta() == null)
 							SemErr("El metodo " + simbolo_funcion.GetNombre() + " no fue declarado");
 						else
 							{
-							String terceto = new String (tercetos.llamada_metodo(simbolo_objeto.GetNombre(), simbolo_funcion.GetEtiqueta()));
+							String terceto = new String (tercetos.llamada_metodo(simbolo_funcion.GetEtiqueta()));
 							tupla_Tercetos tupla = new tupla_Tercetos(tabla.GetAmbitoActual(),terceto);
 							colaTercetos.add(tupla);
 							}

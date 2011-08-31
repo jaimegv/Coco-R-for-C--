@@ -46,7 +46,7 @@ public class Simbolo {
 
 public Simbolo(String nombre, int type, int kind){
 	   this.nombre = nombre;
-	   Parser.salidadep("Nuevo simbolo con nombre: " + this.nombre);
+	   //Parser.salidadep("Nuevo simbolo con nombre: " + this.nombre);
 	   this.type = type;
 	   this.kind = kind;
 	   this.nparametros = 0;
@@ -124,6 +124,7 @@ public void SetClase(Simbolo simbolo)
 	clase_perteneciente = simbolo;
 	if ((this.GetType() == identificador) && (this.GetKind() == var))
 		{
+		Parser.salidadep("Creando los simbolos atributos:");
 		Simbolo simbolito;
 		this.atributos = new Vector();
 		for(int i=0; i< this.clase_perteneciente.GetAmbitoAsociado().GetVectorSimbolos().size(); i++)
@@ -134,6 +135,7 @@ public void SetClase(Simbolo simbolo)
 				Simbolo simbolo_atributo = new Simbolo(this.nombre + "."+ simbolito.GetNombre(),simbolito.GetType(),var);
 				simbolo_atributo.SetVisibilidad(simbolito.GetVisibilidad());
 				simbolo_atributo.SetDesplazamiento(simbolito.GetDesplazamiento());
+				Parser.salidadep(simbolo_atributo.GetNombre() + "desplazamiento: " + simbolo_atributo.GetDesplazamiento());
 				simbolo_atributo.objeto_perteneciente = this;
 				this.atributos.addElement(simbolo_atributo);
 				}
@@ -264,7 +266,16 @@ public Vector GetParametros()
 public Simbolo GetParametros(int pos)
 	{
 	if (this != null)
-		return (Simbolo)this.parametros.elementAt(pos);
+		try
+			{
+			return (Simbolo)this.parametros.elementAt(pos);
+			}
+		catch (Exception e)
+			{
+			Parser.salidadep("Consulta de paramtro inexistente!!!");
+			return null;
+			}
+		
 	else
 		return null;
 	}
@@ -358,8 +369,15 @@ public int Actualiza_Tamano ()
 			return tamano;
 		else if (type == identificador)
 			{
-			this.tamano = this.clase_perteneciente.GetAmbitoAsociado().GetDesplazamiento();
-			return this.tamano;
+			if (this.clase_perteneciente != null)
+				{
+				this.tamano = this.clase_perteneciente.GetAmbitoAsociado().GetDesplazamiento();
+				return this.tamano;
+				}
+			else
+				{
+				return this.tamano;
+				}
 			}
 		else if (type == cadena)
 			{

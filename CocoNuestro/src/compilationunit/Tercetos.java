@@ -136,7 +136,7 @@ public class Tercetos{
     	return "DIR_RETORNO_METODO," + temporal +  "," + objeto + ",\n";
     	}
     
-    public String DirRetornoMetodoPrivado (String objeto, String temporal)
+    public String DirRetornoMetodoPrivado (String temporal)
 	{	// solo se puede llamar desde dentro de un metodo publico
     	// ademas apila la direccion de comienzo del objeto.
     	// temporal=se guarda la direccion del temporal donde se guarda el valor de retorno
@@ -156,10 +156,10 @@ public class Tercetos{
                 return "CALL,"+nombre+",,\n";
     }
     
-    public String llamada_metodo (String objeto, String etiqueta_metodo){
+    public String llamada_metodo (String etiqueta_metodo){
         
 
-        return "CALL_METODO," + objeto + "," + etiqueta_metodo + ",\n";
+        return "CALL_METODO,," + etiqueta_metodo + ",\n";
     }
     
     public String retorno_subprograma (){
