@@ -113,7 +113,9 @@ public class Tercetos{
         return "CALL,"+nombre + "," + num_par+",\n";
     }
     
-    // Avisa de que va a comenzar el apilado de parametros para llamar a una funcion
+    /*
+     *  Avisa de que va a comenzar el apilado de parametros para llamar a una funcion
+     */
     public String Init_parametros (){
         return "INIT_PARAM,,,\n";
     }
@@ -134,6 +136,13 @@ public class Tercetos{
     	return "DIR_RETORNO_METODO," + temporal +  "," + objeto + ",\n";
     	}
     
+    public String DirRetornoMetodoPrivado (String objeto, String temporal)
+	{	// solo se puede llamar desde dentro de un metodo publico
+    	// ademas apila la direccion de comienzo del objeto.
+    	// temporal=se guarda la direccion del temporal donde se guarda el valor de retorno
+	return "DIR_RETORNO_METODO_PRIVADO," + temporal +  ",,\n";
+	}
+    
     public String ApilarParam (String parametro)
     	{
     	return "APILAR_PARAM,"+parametro+",,\n";
@@ -151,7 +160,7 @@ public class Tercetos{
         
 
         return "CALL_METODO," + objeto + "," + etiqueta_metodo + ",\n";
-}
+    }
     
     public String retorno_subprograma (){
         
