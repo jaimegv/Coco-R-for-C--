@@ -185,6 +185,8 @@ private void ProcesarTerceto (tupla_Tercetos tupla_actual, Tablas tabla) {
 		PushDirRetorno(ambitoterceto);
 	} else if (operacion.equals("DIR_RETORNO_METODO")) {	// Apilamos la dir del objeto
 		PushObjetoDirRetorno(ambitoterceto);				// Push DirRetorno donde dev el valor Retornado
+	} else if (operacion.equals("DIR_RETORNO_METODO_PRIVADO")) {	// Llamada a metodo privado.Dentro depublico
+		PushDirRetornoPrivado(ambitoterceto);
 	} else if (operacion.equals("SUMA")) {		// Suma
 		nemonico = "ADD";
 		OpBinaria(ambitoterceto);
@@ -549,6 +551,31 @@ private void PushObjetoDirRetorno (TablaSimbolos ambito_terceto) {
 }
 
 /*
+ * PushDirRetornoPrivado
+ * Solo se puede llamar a esta funcion estando dentro de un metodo publico.
+ * La direccion del objeto ya esta apilada
+ * op1 = temporal
+ */
+private void PushDirRetornoPrivado (TablaSimbolos ambito_terceto) {
+	try {
+		TablaSimbolos tabla_op_lejano = null;
+		// Buscamos la direccion del objeto y la apilamos
+			// Sumo IX mas el desplazamiento y lo apilo->dir_objeto
+			bw.write("SUB .IX, #5; Metodo Privado\n");
+			// Apilo el resultado .A que contiene la direccion del objeto
+			bw.write("PUSH .A; Apilando dir del objeto\n");
+		// a partir de aki igual q PushDirRetorno
+		Simbolo simbolo_return = ambito_terceto.GetSimbolo(op1);	// Simbolo op1
+		// Resto a IX el desplazamiento para llegar al temporal
+		bw.write("SUB .IX,#"+simbolo_return.GetDesplazamiento()+"\n");
+		// Apilo dicha direccion en la cima
+		bw.write("PUSH .A; Apilando donde se guardara el retorno funcion\n");
+	} catch (Exception e) {
+		System.err.println("Error: Ejecutar ObjetoPushDirRetorno.");
+	}
+}
+
+/*
  * LlamadaProg
  * Realizamos la llamada a una funcion. Hay q tener mucho cuidado con lo que apilamos. Luego hay 
  * q desapilar lo mismo
@@ -572,8 +599,8 @@ private void LlamadaProg (TablaSimbolos ambito_terceto) {
 
 /*
  * LlamadaMetodo
- * op1= contiene el nombre del objeto
- * op2= contiene la etiqueta a saltar
+ * op1 = basura
+ * op2 = contiene la etiqueta a saltar
  */
 private void LlamadaMetodo (TablaSimbolos ambito_terceto) {
 	try {
