@@ -21,15 +21,16 @@ class Persona {
 */
 void Persona::setEdad (int numero, int medida) {
 	int variable_;
+	variable_ =0;
 	variable_ += numero;	// operacion con asignacion
 	if (variable_ == numero) {
 		if (Altura != medida) { // no deberia entrar aqui
+			cout << "Ha habido un error en setEdad.";
+			cout << "setEdad con segundo argumento incorrecto.y no se modifica Edad, valor: " << Edad;
+		} else {
 			Edad = variable_;
 			cout << "setEdad a: " << variable_;
 			cout << "Actualizado Edad a: " << Edad;
-			cout << "Ha habido un error en setEdad.";
-		} else {
-			cout << "setEdad con segundo argumento incorrecto.y no se modifica Edad, valor: " << Edad;
 		}
 	} else {
 		cout << "Ha habido un error en setEdad. y no se modifica Edad, valor: " << Edad;
@@ -77,8 +78,9 @@ void main (void) {
 	Juan.setEdad(caracola, Juan.Altura+1);	// emitira un error y no modifica la edad
 						// operacion como argumento de metodo
 	Juan.setEdad(caracola, Juan.Altura);	// Metodo que recibe como parametro un argumento global
-	variable = Juan.getEdad(void);		// esto imprime la Edad por pantalla
-		// Juan.getEdad();	// tambien valido
+	variable = Juan.getEdad();		// esto imprime la Edad por pantalla
+						// y obtengo cosas por pantalla.
+// Juan.getEdad(void);
 	cout << "Valor de Edad de Juan: "  << variable;
 
 
