@@ -1,4 +1,4 @@
-Coco Compitor for C++
+Coco Compilador para C++
 =====================
 
 Proyecto compilador de la Facultad de Informática de la Politécnica de Madridi.
